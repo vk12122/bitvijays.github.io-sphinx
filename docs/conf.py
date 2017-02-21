@@ -344,5 +344,5 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # -- Options for GitHub - Vijay Kumar
-edit_on_github_project = 'username/reponame'
+edit_on_github_project = 'bitvijays/bitvijays.github.io-sphinx'
 edit_on_github_branch = 'master'
