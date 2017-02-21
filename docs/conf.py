@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'edit_on_github',
+    'sphinxcontrib.googleanalytics',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -125,7 +126,7 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'classic'
+html_theme = 'sphinxdoc'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -346,3 +347,5 @@ texinfo_documents = [
 # -- Options for GitHub - Vijay Kumar
 edit_on_github_project = 'bitvijays/bitvijays.github.io-sphinx'
 edit_on_github_branch = 'master'
+
+googleanalytics_id= 'UA-92365403-1'
