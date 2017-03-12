@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'edit_on_github',
     'sphinxcontrib.googleanalytics',
+    'disqus',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -349,3 +350,4 @@ edit_on_github_project = 'bitvijays/bitvijays.github.io-sphinx'
 edit_on_github_branch = 'master'
 
 googleanalytics_id= 'UA-92365403-1'
+disqus_shortname = 'techbitvijays' 
