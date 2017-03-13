@@ -45,8 +45,8 @@ class DisqusNode(nodes.General, nodes.Element):
         """Append opening tags to document body list."""
         html_attrs = {
             'ids': ['disqus_thread'],
-            'data-disqus-shortname': node.disqus_shortname,
-            'data-disqus-identifier': node.disqus_identifier,
+            'disqus-shortname': node.disqus_shortname,
+            'disqus-identifier': node.disqus_identifier,
         }
         print (html_attrs)
         spht.body.append(spht.starttag(node, 'div', '', **html_attrs))
