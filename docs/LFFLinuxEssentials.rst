@@ -210,12 +210,20 @@ System Administration
     hal-device : list all the Hardware Abstraction layer devices
 
 
- * Debian GNU provides a convenient tool to manage runlevels (to control when services are started and shut down); it's called update-rc.d and there are two commonly used invocation methods:
+ * Debian GNU provides a convenient tool to manage runlevels (to control when services are started and shut down); 
+   
+  * update-rc.d and there are two commonly used invocation methods:
 
-  :: 
+   :: 
 
-    update-rc.d -f <service name> remove : Disabling a service
-    update-rc.d <service name> defaults  : Insert links using defaults, start in runlevel 2-5 and stop in runlevels 0,1 and 6.
+     update-rc.d -f <service name> remove : Disabling a service
+     update-rc.d <service name> defaults  : Insert links using defaults, start in runlevel 2-5 and stop in runlevels 0,1 and 6.
+ 
+  * Systemctl : Control the systemd system and service manager. systemctl may be used to introspect and control the state of the "systemd" system and service manager.
+
+   :: 
+
+     systemctl : Present a detailed output about the different services running
 
 Programming
 **************************************
@@ -299,7 +307,7 @@ Useful Utilites/Commands
 
   ::
 
-    \>        : direct normal output.
+    >        : direct normal output.
     2>        : direct error output.
     &>        : direct all output.
 
