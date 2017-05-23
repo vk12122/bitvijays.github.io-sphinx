@@ -16,6 +16,32 @@ Vi : Powerful Editor :
 
   Two modes                   - Command and Insert Mode. All commands below are in command mode.
 
+  h,l,j,k                     - Move left, right, down, up
+  w                           - Move to the start of the next word.
+  e                           - Move to the end of the word.
+  b                           - Move to the beginning of the word.
+  3w                          - 3w is similar to pressing w 3 times, moves to the start of the third word.
+  30i-'EscKey'                - 30<insert>-<EscapeKey> : Inserts 30 - at once.
+  f                           - find and move to the next ( or previous ) occurence of a character. fo find next o.
+  3fo                         - find third occurence of o
+  %                           - In text that is structured with parentheses or brackets, ( or { or [, use % to jump to the matching parenthesis or bracket.
+  0 (Zero)                    - Reach beginning of the line
+  $                           - Reach end of the line.
+  *                           - Find the next occurence of the word under cursor
+  #                           - Find the previous occurence of the word under cursor
+  gg                          - Reach beginning of the file
+  G                           - Reach end of the file
+  30G                         - Reach the 30th line in the file
+  /<text>                     - Search for the text. Utilize n, N for next and previous occurences.
+  o                           - Insert a new line below the cursor
+  O                           - Insert a new line above the cursor
+  x                           - Delete the character
+  r                           - replace the character with the next key pressed.
+  dw			      - Delete the current word.
+  dd                          - Delete the current line. 
+  d$                          - Delete the text from where your cursor is to the end of the line.
+  dnd                         - Delete n lines.
+  . 			      - Repeat the last command
   :q                          - Quit.
   :wq                         - Save and close.
   :syntax on                  - Turn on Syntax highlighting for C programming and other languages.
@@ -26,9 +52,6 @@ Vi : Powerful Editor :
   :set list                   - If 'list' is on, whitespace characters are made visible. The default displays "^I" for each tab, and "$" at each EOL (end of line, so trailing whitespace can be seen)
   :u                          - Undo one change.
   z=                          - If the cursor is on the word ( which is highlighted with spell check), Vim will suggest a list of alternatives thatit thinks may be correct.
-  dd                          - Delete current line. 
-  d$                          - Delete the text from where your cursor is to the end of the line.
-  dnd                         - Delete n lines.
   yy                          - Yank or copy current line.
   y$, yny                     - Similar to delete lines.
   p                           - Paste the line in the buffer in to text after the currentline.
