@@ -1415,16 +1415,16 @@ Nmap has
 
  ::
 
-  nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='VF-ROOT'" 10.74.251.24
+  nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='XX-XXXT'" 10.74.251.24
   
   Starting Nmap 7.01 ( https://nmap.org ) at 2016-05-23 12:13 IST
-  Nmap scan report for ecindc312vw.internal.vodafone.com (10.74.251.24)
+  Nmap scan report for ecindxxxxx.internal.vxxxxx.com (10.74.251.24)
   Host is up (0.0015s latency).
   PORT   STATE SERVICE
   88/tcp open  kerberos-sec
   | krb5-enum-users: 
   | Discovered Kerberos principals
-  |_    root@VF-ROOT
+  |_    root@XX-XXXT
   
   Nmap done: 1 IP address (1 host up) scanned in 0.44 seconds
 
