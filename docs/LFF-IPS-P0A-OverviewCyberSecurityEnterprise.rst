@@ -1,15 +1,23 @@
 ==============================================
-Overview of IT EcoSystem with Security:
+Overview of Cybersecurity in an Enterprise:
 ==============================================
 
-This blog is about the IT Ecosystem and how do we secure it? We would start with a simple concept of two people ( Alice and Bob ) starting a new company and building it to Micro ( < 10 employees ), Small ( < 50 employees ), Medium-sized ( < 250 employees ), larger with security breachs, vulnerablitiy assessments happening. We would mention a story, what all devices are required with what security etc. Hopefully this will provide a general lifecycle of what happens and how things/ security evolves at companies.
+This blog is about the cybersecurity in an Enterprise? We would start with a simple concept of two people ( Alice and Bob ) starting a new company and building it to Micro ( < 10 employees ), Small ( < 50 employees ), Medium-sized ( < 250 employees ), larger with security breachs, vulnerablitiy assessments happening. We would mention a story, what all devices are required with what security etc. Hopefully this will provide a general lifecycle of what happens and how things/ security evolves at companies.
+
+There are few terms which would come across:
+
+* Current Users: This represents the number of people working in that company.
+* Current Setup : This represents the current IT Infrastructure the company has.
+* Security Additions: How we can improve the security of the current infrastructure.
+* Operations Issues: Any challenges for the IT Team managing the IT Infrastructure.
+* Operations Additions: How we can improve the management of IT Infrastructure. 
 
 New Company
 ^^^^^^^^^^^
 
 Two friends Alice and Bob met up and decided to open a company called Fantastics Solutions. Alice loves Linux (Debian) and Bob loves Windows. So, let's see what they require at this current point of time?
 
-**Current Strength**: 2 People
+**Current Users**: 2 People
 
 **Current Setup**:
 
@@ -35,7 +43,7 @@ Micro Enterprise
 
 The company started well and hired 8 more people ( Let's say two who loves Linux, two who loves Mac and two who loves Windows )
 
-**Current Strength**: 10 People
+**Current Users**: 10 People
 
 **Current Setup**:
 
@@ -56,7 +64,7 @@ The company started well and hired 8 more people ( Let's say two who loves Linux
 Small Enterprise
 ^^^^^^^^^^^^^^^^
 
-**Current Strength**: 45 People
+**Current Users**: 45 People
 
 **Current Setup**:
 
@@ -81,7 +89,7 @@ Small Enterprise
  STIG: A Security Technical Implementation Guide (STIG) is a cybersecurity methodology for standardizing security protocols within networks, servers, computers, and logical designs to enhance overall security. These guides, when implemented, enhance security for software, hardware, physical and logical architectures to further reduce vulnerabilities.
  CIS: CIS Benchmarks help you safeguard systems, software, and networks against today's evolving cyber threats. Developed by an international community of cybersecurity experts, the CIS Benchmarks are configuration guidelines for over 100 technologies and platforms.
 
-**Operations Addition**:
+**Operations Additions**:
 
 * Infrastructure Automation Tools
 
