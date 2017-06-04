@@ -13,17 +13,16 @@ The Magic of Learning
    :maxdepth: 1
    :caption: Blog Archive:
 
-   LFFPostExploitation
-   LFFRemoteCodeExec
-   LFFSecuringDebian
-   LFFBasicNetworkHygiene
-   LFFInformationGathering
-   LFFWirelessPentesting
+   LFF-IPS-P4-PostExploitation
+   LFF-IPS-P3-Exploitation
+   LFF-IPS-P2-VulnerabilityAnalysis
+   LFF-IPS-P1-IntelligenceGathering
+   LFF-ESS-P0B-LinuxEssentials
+   LFF-ESS-P0A-OverviewCyberSecurityEnterprise
    LFCReverseEngineering
    LFCBinaryExploitation
    LFCForensics
    LFCCryptography
    LFCWebExploitation
    LFFVulnhub
-   LFFLinuxEssentials
    aboutme

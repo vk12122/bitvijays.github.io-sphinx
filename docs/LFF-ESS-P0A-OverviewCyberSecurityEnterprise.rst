@@ -1,6 +1,6 @@
-==============================================
-Overview of Cybersecurity in an Enterprise:
-==============================================
+====================================================================
+The Essentials : Overview of Cybersecurity in an Enterprise
+====================================================================
 
 This blog is about the cybersecurity in an Enterprise? We would start with a simple concept of two people ( Alice and Bob ) starting a new company and building it to Micro ( < 10 employees ), Small ( < 50 employees ), Medium-sized ( < 250 employees ), larger with security breachs, vulnerablitiy assessments happening. We would mention a story, what all devices are required with what security etc. Hopefully this will provide a general lifecycle of what happens and how things/ security evolves at companies.
 
@@ -74,11 +74,7 @@ Small Enterprise
 * Windows Server Update Services (WSUS) Server : Windows Server Update Services (WSUS) enables information technology administrators to deploy the latest Microsoft product updates. A WSUS server can be the update source for other WSUS servers within the organization. Refer `Deploy Windows Server Update Services in Your Organization <https://technet.microsoft.com/en-us/library/hh852340(v=ws.11).aspx>`_ 
 * DHCP Server : Dynamic Host Configuration Protocol (DHCP) servers on your network automatically provide client computers and other TCP/IP based network devices with valid IP addresses.
 * Company decided to take 8 Linux Servers ( Debian, CentOS, Arch-Linux and Red-Hat ).
-* Added two servers hosting three web-application running on `IIS-WebServer <https://technet.microsoft.com/en-us/library/cc770634(v=ws.11).aspx>`, `Apache Tomcat <http://tomcat.apache.org/>`_ and `Nginx <https://www.nginx.com/resources/wiki/>`_.
-
-**Security Additions**:
-
-* `Security Compliance Manager <https://technet.microsoft.com/en-us/solutionaccelerators/cc835245.aspx>`_ : SCM enables you to quickly configure and manage computers and your private cloud using Group Policy and Microsoft System Center Configuration Manager. SCM 4.0 provides ready-to-deploy policies based on Microsoft Security Guide recommendations and industry best practices, allowing you to easily manage configuration drift, and address compliance requirements for Windows operating systems and Microsoft applications.
+* Added two servers hosting three web-application running on `IIS-WebServer <https://technet.microsoft.com/en-us/library/cc770634(v=ws.11).aspx>`_, `Apache Tomcat <http://tomcat.apache.org/>`_ and `Nginx <https://www.nginx.com/resources/wiki/>`_.
 
 **Operations Issues**:
 
@@ -89,6 +85,10 @@ Small Enterprise
  STIG: A Security Technical Implementation Guide (STIG) is a cybersecurity methodology for standardizing security protocols within networks, servers, computers, and logical designs to enhance overall security. These guides, when implemented, enhance security for software, hardware, physical and logical architectures to further reduce vulnerabilities.
  CIS: CIS Benchmarks help you safeguard systems, software, and networks against today's evolving cyber threats. Developed by an international community of cybersecurity experts, the CIS Benchmarks are configuration guidelines for over 100 technologies and platforms.
 
+**Security Additions**:
+
+* `Security Compliance Manager <https://technet.microsoft.com/en-us/solutionaccelerators/cc835245.aspx>`_ : SCM enables you to quickly configure and manage computers and your private cloud using Group Policy and Microsoft System Center Configuration Manager. SCM 4.0 provides ready-to-deploy policies based on Microsoft Security Guide recommendations and industry best practices, allowing you to easily manage configuration drift, and address compliance requirements for Windows operating systems and Microsoft applications.
+
 **Operations Additions**:
 
 * Infrastructure Automation Tools
@@ -98,7 +98,19 @@ Small Enterprise
  * `Salt <https://www.ansible.com/>`_ : Salt (sometimes referred to as the SaltStack Platform) is a Python-based open-source configuration management software and remote execution engine. Supporting the "Infrastructure as Code" approach to deployment and cloud management.
  * `Chef <https://www.chef.io/>`_ : Chef lets you manage them all by turning infrastructure into code. Infrastructure described as code is flexible, versionable, human-readable, and testable.
 
-Security Breach 1:
+**Automation Tools Addition**
+
+If we are utilizing Automation Tools above, there are few other tools which should be known such as 
+
+ * `Inspec <https://www.chef.io/inspec/>`_ : InSpec is an open-source testing framework for infrastructure with a human-readable language for specifying compliance, security and other policy requirements. When compliance is code, you can integrate automated tests that check for adherence to policy into any stage of your deployment pipeline.
+
+ * `Rubocop <http://rubocop.readthedocs.io/en/latest/>`_ : RuboCop is a Ruby static code analyzer. Out of the box it will enforce many of the guidelines outlined in the community `Ruby Style Guide <https://github.com/bbatsov/ruby-style-guide>`_ . If we are writing code in ruby, rubocop makes sure that it is written according to the Ruby style guide.
+
+ * `Puppet-Linter <http://puppet-lint.com/>`_ : Puppet Lint tests Puppet code against the recommended Puppet language style guide. Puppet Lint validates only code style; it does not validate syntax.
+
+ * `Kitchen <http://kitchen.ci/>`_ : Kitchen provides a test harness to execute your infrastructure code on one or more platforms in isolation. A driver plugin architecture is used which lets you run your code on various cloud providers and virtualization technologies such as Amazon EC2, Google GCE, Azure, Blue Box, CloudStack, Digital Ocean, Rackspace, OpenStack, Vagrant, Docker, LXC containers, and more. In short, whatever code we wrote for one platform or operating system ( example: Debian 8 ), utilizing Kitchen, we can test it on multiple platforms.
+
+Security Breach 1
 ^^^^^^^^^^^^^^^^^^
 
 Let's assume a security breach happened at this point of time.
@@ -126,7 +138,9 @@ Let's assume a security breach happened at this point of time.
   * `OWASP Secure Coding Practices <https://www.owasp.org/index.php/OWASP_Secure_Coding_Practices_-_Quick_Reference_Guide>`_
   * `SEI CERT Coding Standards <https://www.securecoding.cert.org/confluence/display/seccode/SEI+CERT+Coding+Standards>`_
 
-Medium Enterprise:
+* Deploy a Web Application Firewall (WAF): WAF is an application firewall for HTTP applications. It applies a set of rules to an HTTP conversation. Generally, these rules cover common attacks such as cross-site scripting (XSS) and SQL injection. One of the open source WAF is `Modsecurity <https://modsecurity.org/>`_
+
+Medium Enterprise
 ^^^^^^^^^^^^^^^^^^^
 
 **Current Users** : 700-1000

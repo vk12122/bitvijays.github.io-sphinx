@@ -1,5 +1,5 @@
 ========================================================================================
-Learning from the field : Infrastruture PenTest Series : Part 1 - Intelligence Gathering
+Infrastruture PenTest Series : Part 1 - Intelligence Gathering
 ========================================================================================
 
 

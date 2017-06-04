@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Learning from the field : Infrastruture PenTest Series : Part 0 - Linux Essentials
+The Essentials : Linux Basics
 ==================================================================================
 
 This post lists essential commands and concepts which would be helpful to a Linux user. We would cover tools required for programming ( Vi, git ), system administration ( Bash configuration files, Updating Debian Linux System, Adding/Deleting/Modifying Users/Groups, Changing Group/Owner/Permission, Mounting/Unmounting, Linux Directories, Runlevels and Kernel Configurations ). Also, provide some useful tips, tricks and TODO which would help you learn and practice.
