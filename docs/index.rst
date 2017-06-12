@@ -13,6 +13,7 @@ The Magic of Learning
    :maxdepth: 1
    :caption: Blog Archive:
 
+   LFF-IPS-P5-Reporting
    LFF-IPS-P4-PostExploitation
    LFF-IPS-P3-Exploitation
    LFF-IPS-P2-VulnerabilityAnalysis

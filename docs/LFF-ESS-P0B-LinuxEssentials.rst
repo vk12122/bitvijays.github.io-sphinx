@@ -45,6 +45,7 @@ Vi : Powerful Editor :
   :q                          - Quit.
   :wq                         - Save and close.
   :syntax on                  - Turn on Syntax highlighting for C programming and other languages.
+  :history                    - Shows the history of the commands executed
   :set number                 - Turn on the line numbers.
   :set nonumber               - Turn off the line numbers.
   :set spell spelllang=en_us  - Turn spell checking on with spell language as "en_us"

