@@ -1,16 +1,68 @@
-========================================================================================
+**************************************************************
 Infrastruture PenTest Series : Part 1 - Intelligence Gathering
-========================================================================================
-
+**************************************************************
 
 This post (always Work in Progress) would list the technical steps which might be important while doing the information gathering of an organization and we only know the company name or it’s domain name such as example.com.
 
 **Thanks to Vulnhub-ctf team, bonsaiviking, recrudesce, Rajesh and Tanoy**
 
-Suppose, we have to do a external/ internal pentest of a big organization with DMZ, Data centers, Telecom network etc. We can either do **Passive fingerprinting** (method to learn more about the enemy, without them knowing it ) or **Active fingerprinting** ( process of transmitting packets to a remote host and analysing corresponding replies ). **Passive fingerprinting** and **Active fingerprinting** can be done by using various methods such as
+Suppose, we have to do a external/ internal pentest of a big organization with DMZ, Data centers, Telecom network etc.
+
+Scenarios
+=========
+
+Mostly, there are only two scenarios either we are outside / inside the organization.
+
+Outside - External
+------------------
+
+If we are outside or doing external pentest. Probably, we need to figure out the attack surface area first
+
+Example:
+
+What are the
+
+* Different domain/ subdomains present? ( like example.com -- domain; ftp.example.com -- subdomain )
+* Different IP Address/ Network ranges / ASN Number assigned ?
+* Different Services/ Ports running on those IP Addresses ?
+* Email addresses or People working in the organization?
+* What are the different Operating Systems/ Software used ?
+* Any breaches which happened in the organization? 
+
+Possibly, we would be able to compromise a user credential or vulnerable service running and get inside the internal network of the organization.
+
+Inside - Internal
+-----------------
+
+When we are inside the organization (Let's say physically), probably, posing as internal employee ( already have access to the internal network ) or external consultant ( with no internal network access as of now ). Let's explore what are the options we have as external consultant sitting in a conference room.
+
+Wired LAN
+^^^^^^^^^
+
+If there's a LAN cable around and we plug it in our computer, there might be few possibilities
+
+* DHCP ( Dynamic Host Configuration Protocol ) is enabled and your machine is provided with an IP Address.
+* DHCP is disabled, however, LAN cable is working. In this case, probably, we could sniff the network and figure out the near-by IP Address, netmask and default gateway.
+* Network Access Control is enabled, then probably we would need to search for a Printer attached to network ( clone it's MAC address and try ) or IP Phones or any Hub.
+* LAN port is disabled ( Here you can't much! Can you? ).
+
+Wireless LAN
+^^^^^^^^^^^^
+
+* Check for Open / Guest Wi-Fi - If you are connected somehow, probably try to internal network ranges. Most probably, the organization would have segregated the network well. However, sometimes DNS Name can be resolved.
+* Check if any WEP/ WPA2 networks are present. If so, probably, can try to crack them.
+
+Once you are inside, we need to find answer to the above questions ( Outside - External section ).
+
+.. Note:: We can do fingerprinting from both Internal / External of the organization
+
+Fingerprinting
+==============
+
+We can either do **Passive fingerprinting** (method to learn more about the enemy, without them knowing it ) or **Active fingerprinting** ( process of transmitting packets to a remote host and analysing corresponding replies ). **Passive fingerprinting** and **Active fingerprinting** can be done by using various methods such as
 
 +------------------------------------------------+------------------------------+
-| Passive Fingerprinting                         | Active Fingerprintering      |
+| Passive Fingerprinting                         | Active Fingerprinting        |
 +================================================+==============================+
 | - whois                                        | - Finding DNS, MX, AAAA, A   |
 +------------------------------------------------+------------------------------+
@@ -64,35 +116,6 @@ Hurricane Electric Internet Services also provide a website `BGPToolkit <http://
 
 .. Todo ::  Commandline checking of subnet and making whois query efficient.
 
-Enumeration with Domain Name (e.g example.com) using external websites
-----------------------------------------------------------------------
-
-If you have domain name you could use
-
-DNS Dumpster API
-^^^^^^^^^^^^^^^^
-We can utilize DNS Dumpster API to know the various sub-domain related to that domain.
-:: 
-       
-  #Script connects to the API and convert the required output to a CSV ready format.                       
-  #!/bin/bash 
-  #$1 is the first argument to script 
-  curl -s http://api.hackertarget.com/hostsearch/?q=$1 > hostsearch    
-  cat hostsearch | awk -F , '{print "\""$1"\""",""\""$2"\""}' > temp.csv
-
-and the various dns queries by
-
-:: 
-
-  #Script connects to the API and greps only the Name Servers.                                          
-  #!/bin/bash                      
-  #$1 is the first argument to the script                              
-  curl -s http://api.hackertarget.com/dnslookup/?q=$1 > dnslookup      
-  cat dnslookup | grep -v RRSIG | grep -v DNSKEY | grep -v SOA | grep NS > temp                            
-  cat -T temp > temp2 
-  cat temp2 | cut -d "I" -f7 | rev | cut -c 2- | rev
-  #rm temp temp2        
-
 Recon-ng
 ^^^^^^^^^^^
 
@@ -129,6 +152,37 @@ The harvester provides a email address, virtual hosts, different domains, shodan
 
 .. Todo :: Combine these results with recon-ng and DNS Dumpsters and create one csv with all results.
 
+
+Enumeration with Domain Name (e.g example.com) using external websites
+----------------------------------------------------------------------
+
+If you have domain name you could use
+
+DNS Dumpster API
+^^^^^^^^^^^^^^^^
+
+We can utilize DNS Dumpster API to know the various sub-domain related to that domain.
+:: 
+       
+  #Script connects to the API and convert the required output to a CSV ready format.                       
+  #!/bin/bash 
+  #$1 is the first argument to script 
+  curl -s http://api.hackertarget.com/hostsearch/?q=$1 > hostsearch    
+  cat hostsearch | awk -F , '{print "\""$1"\""",""\""$2"\""}' > temp.csv
+
+and the various dns queries by
+
+:: 
+
+  #Script connects to the API and greps only the Name Servers.                                          
+  #!/bin/bash                      
+  #$1 is the first argument to the script                              
+  curl -s http://api.hackertarget.com/dnslookup/?q=$1 > dnslookup      
+  cat dnslookup | grep -v RRSIG | grep -v DNSKEY | grep -v SOA | grep NS > temp                            
+  cat -T temp > temp2 
+  cat temp2 | cut -d "I" -f7 | rev | cut -c 2- | rev
+  #rm temp temp2        
+
 Google search operators
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -139,16 +193,18 @@ Google search operators
 
 Three good places to refer are `Search Operators <https://support.google.com/websearch/answer/2466433>`__, `Advanced Operators <https://sites.google.com/site/gwebsearcheducation/advanced-operators>`__ and `Google Hacking Database <https://www.exploit-db.com/google-hacking-database/>`__.
 
-Another two important tools are
+Other Tools
+^^^^^^^^^^^
 
 * `Mcafee Site Digger <http://www.mcafee.com/in/downloads/free-tools/sitedigger.aspx>`__ which searches Google’s cache to look for vulnerabilities, errors, configuration issues,proprietary information, and interesting security nuggets on web sites.
 * `SearchDiggityv3 <http://www.bishopfox.com/resources/tools/google-hacking-diggity/attack-tools/>`__ It is Bishop Fox’s MS Windows GUI application that serves as a front-end to the most recent versions of our Diggity tools: GoogleDiggity, BingDiggity, Bing, LinkFromDomainDiggity, CodeSearchDiggity, DLPDiggity, FlashDiggity, MalwareDiggity, PortScanDiggity, SHODANDiggity, BingBinaryMalwareSearch, and NotInMyBackYard Diggity.
+
 
 Publicly available scans of IP Addresses
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * `Exfiltrated <https://exfiltrated.com/>`__  It provides the scans from the 2012 Internet Census. It would provide the IP address and the port number running at the time of scan in the year 2012.
-* `Shodan <https://www.shodan.io/>`__: Shodan provides the same results may be with recent scans. You need to be logined. Shodan CLI is available at `Shodan Command-Line Interface <https://cli.shodan.io/>`__
+* `Shodan <https://www.shodan.io/>`__: Shodan provides the same results may be with recent scans. You need to be logged-in. Shodan CLI is available at `Shodan Command-Line Interface <https://cli.shodan.io/>`__
 
 Shodan Queries 
 
@@ -180,11 +236,23 @@ Reverse DNS Lookup using External Websites
 ------------------------------------------
 
 Even after doing the above, sometimes we miss few of the domain name. Example: Recently, In  one of our engagement, the domain name was example.com and the asn netblock was 192.168.0.0/24. We did recon-ng, theharvester, DNS reverse-lookup via nmap. Still, we missed few of the websites hosted on same netblock but with different domain such as exam.in. We can find such entries by using ReverseIP lookup by
-  
-* `Reverse IP Lookup by Domaintools <http://reverseip.domaintools.com>`__: Domain name search tool that allows a wildcard search, monitoring of WHOIS record changes and history caching, as well as Reverse IP queries.
-* `Passive Total <https://www.passivetotal.org/>`__ : A threat-analysis platform created for analysts, by analysts.
-* `Server Sniff <http://serversniff.net.ipaddress.com/>`__ : A website providing IP Lookup,Reverse IP services.
-* `Robtex <https://www.robtex.com/>`__ : Robtex is one of the world's largest network tools. At robtex.com, you will find everything you need to know about domains, DNS, IP, Routes, Autonomous Systems, etc. There's a nmap nse `http-robtex-reverse-ip <https://nmap.org/nsedoc/scripts/http-robtex-reverse-ip.html>`__ which can be used to find the domain/website hosted on that ip.
+
+DomainTools Reverse IP Lookup
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Reverse IP Lookup by Domaintools <http://reverseip.domaintools.com>`__: Domain name search tool that allows a wildcard search, monitoring of WHOIS record changes and history caching, as well as Reverse IP queries.
+
+PassiveTotal
+^^^^^^^^^^^^
+`Passive Total <https://www.passivetotal.org/>`__ : A threat-analysis platform created for analysts, by analysts.
+
+Server-Sniff
+^^^^^^^^^^^^
+
+`Server Sniff <http://serversniff.net.ipaddress.com/>`__ : A website providing IP Lookup,Reverse IP services.
+
+Robtex
+^^^^^^
+`Robtex <https://www.robtex.com/>`__ : Robtex is one of the world's largest network tools. At robtex.com, you will find everything you need to know about domains, DNS, IP, Routes, Autonomous Systems, etc. There's a nmap nse `http-robtex-reverse-ip <https://nmap.org/nsedoc/scripts/http-robtex-reverse-ip.html>`__ which can be used to find the domain/website hosted on that ip.
 
 ::
  
@@ -196,9 +264,8 @@ Even after doing the above, sometimes we miss few of the domain name. Example: R
   |_  www.xxxxxindian.com
 
          
-
 Active Fingerprinting
-===============================
+=====================
 
 Most probably by now we have gathered all the public available information without interacting with client infrastructure. Next, we can use **DNS enumeration** to  gather more information about the client. The below information could gather externally as well as internally. However, amount of information gathered from internal network would definitely be more than when done externally.
 
@@ -231,9 +298,9 @@ nslookup
 
 ::
 
-     nslookup - <optional_name_server>
-     set type=mx
-     set type=ns
+  nslookup - <optional_name_server>
+  set type=mx
+  set type=ns
 
 DNS Zone Transfer: Using
 --------------------------
@@ -323,6 +390,7 @@ Service record (SRV record) is a specification of data in the Domain Name System
 
  Checkout the brute\_srv function in the dnsrecon tool script to get familar with the different SRV names and services.
 
+
 Internal Infrastructure Mapping
 ================================
 
@@ -369,7 +437,17 @@ It can also be used with the below options:
 ::
  
   --randomize-hosts  : make the scans less obvious to various network monitoring systems
-  --dns-servers server1,server2 : By default, it would use the dns servers which are listed in resolve.conf (if you haven't used --system-dns option). We can also list  	     custom servers using these options.
+  --dns-servers server1,server2 : By default, it would use the dns servers which are listed in resolve.conf (if you haven't used --system-dns option). We can also list custom servers using these options.
+
+Ping Gateway IP Addresses
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say internally, we got an IP address 192.168.56.101 netmask 255.255.255.0 with a default gateway of 192.168.56.1. It is a high probability that rest of network rangers would have been defined as /24 CIDR. In that case, a ping scan to 192.168.*.1 with a watch on the TTL would possibly reveal what are the other network ranges.
+
+::
+
+ nmap -sn -v -PE 192.168.*.1
+
 
 Identifying Alive IP Addresses
 ------------------------------
@@ -449,7 +527,7 @@ Please note that you should use this options only on ICMP Echo Request for IDS E
   -PE -PA -PS 21,22,23,25,80,113,31339 -PA 80,113,443,10042
    Adding --source-port 53 might also help
 
-The above combination would find more hosts than just the ping scan, however it also gonna cost a decent amount of time. NormalTime vs Accuracy trade off.
+The above combination would find more hosts than just the ping scan, however it also gonna cost a decent amount of time. Normal Time vs Accuracy trade off.
 
 Port Scanning
 --------------
@@ -509,7 +587,7 @@ For a UDP Port Scan, we need to add -u flag which makes the format
 Identifying service versions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ideally, we can use -sV to probe the ports to find the version running. When performing a version scan (-sV), Nmap sends a series of probes, each of which is assigned a rarity value correctly identified. However, high intensity scans takelonger. The intensity must be between 0 and 9. The default is 7.
+Ideally, we can use -sV to probe the ports to find the version running. When performing a version scan (-sV), Nmap sends a series of probes, each of which is assigned a rarity value correctly identified. However, high intensity scans takes longer. The intensity must be between 0 and 9. The default is 7.
       
 Ideally, to avoid the IDS Detection, we should avoid using -sV option. However, we can keep the noise less by using --version intensity by which we can control the number of probes sent to determine the service. Setting this option to 0 will send only the Null probe (connect and wait for banner) and any probes that have been specifically listed as pertaining to the scanned port in nmap-service-probes. The other options available are below:
 
@@ -596,7 +674,7 @@ There are four ways (in my knowledge to do this)
 Information Gathering for http* Services
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* `WhatWeb <http://www.morningstarsecurity.com/research/whatweb>`__ recognises web technologies including content managementsystems (CMS), blogging platforms, statistic/analytics packages, JavaScript libraries, web servers, and embedded device. `Tellmeweb <https://www.aldeid.com/wiki/Tellmeweb>`__ is a ruby script to read Nmap Gnmap file and run whatweb on all of them. A `WhatWeb Result Parser <https://github.com/stevecoward/whatweb-parser>`__ also has been written which converts the results to CSV format. More information about advance usage can be found `here <https://github.com/urbanadventurer/WhatWeb/wiki/Advanced-Usage>`__.
+* `WhatWeb <http://www.morningstarsecurity.com/research/whatweb>`__ recognises web technologies including content management systems (CMS), blogging platforms, statistic/analytics packages, JavaScript libraries, web servers, and embedded device. `Tellmeweb <https://www.aldeid.com/wiki/Tellmeweb>`__ is a ruby script to read Nmap Gnmap file and run whatweb on all of them. A `WhatWeb Result Parser <https://github.com/stevecoward/whatweb-parser>`__ also has been written which converts the results to CSV format. More information about advance usage can be found `here <https://github.com/urbanadventurer/WhatWeb/wiki/Advanced-Usage>`__.
       
 * Wapplyzer <http://wappalyzer.com>`__ is a Firefox plug-in. There are four ways (in my knowledge to do this)be loaded on browser. It works completely at the browser level and gives results in the form of icons.
 * `W3Tech <http://w3techs.com/>`__ is another Chrome plug-in which provides information about the usage of various types technologies on the web. It tells the web technologies based on the crawling it has done. So example.com, x1.example.com, x2.example.com will show the same technologies as the domain is same (which is not correct).
@@ -664,4 +742,34 @@ It also allows us to interact with the SNMP version 3. It also allows to extract
 
 onesixtyone allows you to brute force the community strings, you could onesixty one tool
 
-         
+Attack Surface Area - Reconnaisnce Tools
+========================================
+
+Aquatone: A tool for domain flyovers
+------------------------------------
+
+`Aquatone <https://github.com/michenriksen/aquatone>`_ is a set of tools for performing reconnaissance on domain names. It can discover subdomains on a given domain by using open sources as well as the more common subdomain dictionary brute force approach. After subdomain discovery, AQUATONE can then scan the hosts for common web ports and HTTP headers, HTML bodies and screenshots can be gathered and consolidated into a report for easy analysis of the attack surface. Detailed blog at `AQUATONE: A tool for domain flyovers <http://michenriksen.com/blog/aquatone-tool-for-domain-flyovers/>`_
+
+DataSploit
+----------
+
+`Datasploit <https://github.com/DataSploit/datasploit>`_ Tool to perform various OSINT techniques, aggregate all the raw data, and give data in multiple formats.
+
+Overview:
+
+* Performs OSINT on a domain / email / username / phone and find out information from different sources.
+* Correlates and collaborate the results, show them in a consolidated manner.
+* Tries to find out credentials, api-keys, tokens, subdomains, domain history, legacy portals, etc. related to the target.
+* Use specific script / launch automated OSINT for consolidated data.
+* Performs Active Scans on collected data.
+* Generates HTML, JSON reports along with text files.
+
+Spiderfoot
+----------
+
+`SpiderFoot <http://www.spiderfoot.net/>`_ SpiderFoot is an open source intelligence automation tool. Its goal is to automate the process of gathering intelligence about a given target, which may be an IP address, domain name, hostname or network subnet. SpiderFoot can be used offensively, i.e. as part of a black-box penetration test to gather information about the target or defensively to identify what information your organisation is freely providing for attackers to use against you.
+
+Intrigue.io
+-----------
+
+`Intrigue <https://github.com/intrigueio/intrigue-core>`_ makes it easy to discover information about attack surface connected to the Internet. Intrigue utilizes common sources of OSINT via “tasks” to create “entities”. Each discovered entity can be used to discover more information, either automatically or manually.
