@@ -773,3 +773,5 @@ Intrigue.io
 -----------
 
 `Intrigue <https://github.com/intrigueio/intrigue-core>`_ makes it easy to discover information about attack surface connected to the Internet. Intrigue utilizes common sources of OSINT via “tasks” to create “entities”. Each discovered entity can be used to discover more information, either automatically or manually.
+
+.. disqus::

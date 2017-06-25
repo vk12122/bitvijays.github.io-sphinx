@@ -316,3 +316,5 @@ Privilged Identity Mangement ( PIM )
 PIM is the monitoring and protection of superuser accounts in an organization's IT environments. Oversight is necessary so that the greater access abilities of super control accounts are not misused or abused.
 
 We hope that the above chain of events helped you to understand the IT Eco-system, Operations issues and the various security options available. If we have missed anything, please feel free to contribute.
+
+.. disqus::

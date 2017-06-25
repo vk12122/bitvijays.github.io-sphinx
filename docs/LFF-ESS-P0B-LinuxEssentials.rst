@@ -916,3 +916,4 @@ Objective to get few IP addresses of Microsoft.com Domains.
 * Every link in html is referred by href. Filter all the href (which would contain the link to different domains for Microsoft)
 * Sort and find unique list. Get their ip addresses
 * HINT: Tools such as cut, grep, wget, sort, uniq, host and little bit of bash scripting would be used.
+.. disqus::
