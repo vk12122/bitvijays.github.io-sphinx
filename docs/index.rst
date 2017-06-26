@@ -6,7 +6,7 @@
 The Magic of Learning			
 =====================
 
-**Hey there!** Two years back, when we started our journey in Infosec, we didn't had proper guidance. At that point of time, we decided to share the knowledge with the community. These blogs can be the reading materials for anyone starting in the InfoSec Community or even a one-stop-reference material for a seasoned InfoSec person. Currently, there are **three series** published:
+**Hey there!** Two years back, when we started our journey in Infosec, we didn't had proper guidance. At that point of time, we decided to share the knowledge learned with the community. These blogs can be the reading materials for anyone starting in the InfoSec Community or even a one-stop-reference material for a seasoned InfoSec person. Currently, there are **three series** published:
 
 - **The Essentials**
 - **Infrastructure Pentest**

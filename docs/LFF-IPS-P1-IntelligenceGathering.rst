@@ -56,24 +56,49 @@ Once you are inside, we need to find answer to the above questions ( Outside - E
 
 .. Note:: We can do fingerprinting from both Internal / External of the organization
 
+Responder/ Inveigh
+^^^^^^^^^^^^^^^^^^
+
+Once, you are inside, probably the first thing would be utilize Responder or Inveigh in the Analyze mode.
+
+* `Responder <https://github.com/SpiderLabs/Responder>`_ : Responder is a LLMNR, NBT-NS and MDNS poisoner, with built-in HTTP/SMB/MSSQL/FTP/LDAP rogue authentication server supporting NTLMv1/NTLMv2/LMv2, Extended Security NTLMSSP and Basic HTTP authentication. It is very important to understand LLMNR, NBT-NS. Understand the basics by reading the `Local Network Attacks: LLMNR and NBT-NS Poisoning <https://www.sternsecurity.com/blog/local-network-attacks-llmnr-and-nbt-ns-poisoning>`_, `What is LLMNR & WPAD and How to Abuse Them During Pentest ? <https://pentest.blog/what-is-llmnr-wpad-and-how-to-abuse-them-during-pentest/>`_  and `How to get Windows to give you credentials through LLMNR <https://www.pentestpartners.com/security-blog/how-to-get-windows-to-give-you-credentials-through-llmnr/>`_
+
+ Basically it's like this
+
+ * Let's say a user wants to access a file server named "NAS001" by \\NAS001, however, mistakenly types in \\NAS01.  
+ * The query goes to the DNS server to resolve the IP of NAS01. However, as it's not a valid hostname, DNS Server responds to the user saying that it doesn’t know that host.
+ * The user then broadcasts on the local network if anyone knows who is \\NAS01
+ * The attacker ( if on the same network ) seeing the opportunity says "I am NAS01 here is my IP Address"
+ * The user believes the attacker and sends its own username and NTMLv2 hash to the attacker.
+ * The attacker gathers all the hashes and then crack the hash to discover the password offline.
+
+ Recently, the Responder also have the functionality of Multi-relay, which allows you to relay the NTLMv1/2 authentication to a specific target and possibly execute the code (during a successful attack) on the target node. NoSoSecure has written a detailed blog on `Pwning with Responder – A Pentester’s Guide <https://www.notsosecure.com/pwning-with-responder-a-pentesters-guide/>`_ 
+
+ Similar to Python Responder, there's inveigh
+
+* `Inveigh <https://github.com/Kevin-Robertson/Inveigh>`_ is a PowerShell LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool designed to assist penetration testers/red teamers that find themselves limited to a Windows system.
+
+
+
+
 Fingerprinting
 ==============
 
 We can either do **Passive fingerprinting** (method to learn more about the enemy, without them knowing it ) or **Active fingerprinting** ( process of transmitting packets to a remote host and analysing corresponding replies ). **Passive fingerprinting** and **Active fingerprinting** can be done by using various methods such as
 
-+------------------------------------------------+------------------------------+
-| Passive Fingerprinting                         | Active Fingerprinting        |
-+================================================+==============================+
-| - whois                                        | - Finding DNS, MX, AAAA, A   |
-+------------------------------------------------+------------------------------+
-| - ASN Number                                   | - DNS Zone Transfer          |
-+------------------------------------------------+------------------------------+
-| - Enumeration with Domain Name                 | - SRV Records                |
-+------------------------------------------------+------------------------------+
-| - Publicly available scans of IP Addresses     | - Port Scanning              |
-+------------------------------------------------+------------------------------+
-| - Reverse DNS Lookup using External Websites   |                              |
-+------------------------------------------------+------------------------------+
++------------------------------------------------+--------------------------------------+
+|         Passive Fingerprinting                 |       Active Fingerprinting          |
++================================================+======================================+
+| - whois                                        | - Finding DNS, MX, AAAA, A           |
++------------------------------------------------+--------------------------------------+
+| - ASN Number                                   | - DNS Zone Transfer                  |
++------------------------------------------------+--------------------------------------+
+| - Enumeration with Domain Name                 | - SRV Records                        |
++------------------------------------------------+--------------------------------------+
+| - Publicly available scans of IP Addresses     | - Port Scanning                      |
++------------------------------------------------+--------------------------------------+
+| - Reverse DNS Lookup using External Websites   |                                      |
++------------------------------------------------+--------------------------------------+
 
 Passive Fingerprinting:
 =======================
