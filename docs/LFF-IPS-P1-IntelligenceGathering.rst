@@ -59,7 +59,7 @@ Once you are inside, we need to find answer to the above questions ( Outside - E
 Responder/ Inveigh
 ^^^^^^^^^^^^^^^^^^
 
-Once, you are inside, probably the first thing would be utilize Responder or Inveigh in the Analyze mode.
+Once, you are inside, probably the first thing would be utilize **Responder** or **Inveigh** in the **Analyze mode**.
 
 * `Responder <https://github.com/SpiderLabs/Responder>`_ : Responder is a LLMNR, NBT-NS and MDNS poisoner, with built-in HTTP/SMB/MSSQL/FTP/LDAP rogue authentication server supporting NTLMv1/NTLMv2/LMv2, Extended Security NTLMSSP and Basic HTTP authentication. It is very important to understand LLMNR, NBT-NS. Understand the basics by reading the `Local Network Attacks: LLMNR and NBT-NS Poisoning <https://www.sternsecurity.com/blog/local-network-attacks-llmnr-and-nbt-ns-poisoning>`_, `What is LLMNR & WPAD and How to Abuse Them During Pentest ? <https://pentest.blog/what-is-llmnr-wpad-and-how-to-abuse-them-during-pentest/>`_  and `How to get Windows to give you credentials through LLMNR <https://www.pentestpartners.com/security-blog/how-to-get-windows-to-give-you-credentials-through-llmnr/>`_
 
@@ -78,7 +78,31 @@ Once, you are inside, probably the first thing would be utilize Responder or Inv
 
 * `Inveigh <https://github.com/Kevin-Robertson/Inveigh>`_ is a PowerShell LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool designed to assist penetration testers/red teamers that find themselves limited to a Windows system.
 
+NTLM/ NTLMv1/v2 / Net-NTLMv1/v2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+*Probably, We should cover this in Exploitation. However as we have mentioned Responder/ Inveigh here, it makes sense to include this*
+
+* NTLM : NTLM hashes are stored in the Security Account Manager (SAM) database and in Domain Controller's NTDS.dit database. 
+
+ ::
+
+  aad3b435b51404eeaad3b435b51404ee:e19ccf75ee54e06b06a5907af13cef42
+
+ The LM hash is the one before the semicolon and the NT hash is the one after the semicolon. Starting with Windows Vista and Windows Server 2008, by default, only the NT hash is stored.
+
+* NTLMv1/v2 / Net-NTLMv1/v2 : Net-NTLM hashes are used for network authentication (they are derived from a challenge/response algorithm and are based on the user's NT hash). Here's an example of a Net-NTLMv2 (a.k.a NTLMv2) hash 
+
+ ::
+
+  admin::N46iSNekpT:08ca45b7d7ea58ee:88dcbe4446168966a153a0064958dac6:5c7830315c7830310000000000000b45c67103d07d7b95acd12ffa11230e0000000052920b85f78d013c31cdb3b92f5d765c783030 
+
+From a pentesting perspective:
+
+* You CAN perform Pass-The-Hash attacks with NTLM hashes.
+* You CANNOT perform Pass-The-Hash attacks with Net-NTLM hashes
+
+The above has been taken from `Practical guide to NTLM Relaying in 2017 (A.K.A getting a foothold in under 5 minutes) <https://byt3bl33d3r.github.io/practical-guide-to-ntlm-relaying-in-2017-aka-getting-a-foothold-in-under-5-minutes.html>`_ He has explained it very well and also showed how to own the network using relaying the hashes from Responder to get a system shell. Another good blog to understand this is `SMB Relay Demystified and NTLMv2 Pwnage with Python <https://pen-testing.sans.org/blog/pen-testing/2013/04/25/smb-relay-demystified-and-ntlmv2-pwnage-with-python>`_
 
 
 Fingerprinting
@@ -798,5 +822,17 @@ Intrigue.io
 -----------
 
 `Intrigue <https://github.com/intrigueio/intrigue-core>`_ makes it easy to discover information about attack surface connected to the Internet. Intrigue utilizes common sources of OSINT via “tasks” to create “entities”. Each discovered entity can be used to discover more information, either automatically or manually.
+
+Appendix-I : Interesting Stories
+================================
+
+Initial Compromise
+-----------------
+
+* `Apache and Java Information Disclosures Lead to Shells <http://threat.tevora.com/apache-and-java-information-disclosures-lead-to-shells/>`_ : Richard De La Cruz talks about a recent Red-Team engagement, where they discovered a series of information disclosures on a site allowing the team to go from zero access to full compromise in a matter of hours.
+
+ * Information disclosures in Apache HTTP servers with mod_status enabled allowed our team to discover.jar files, hosted on the site.
+ * Static values within exposed .jar files allowed our team to extract the client’s code signing certificate and sign malicious Java executables as the client.
+ * These malicious .jar files were used in a successful social engineering campaign against the client.
 
 .. disqus::

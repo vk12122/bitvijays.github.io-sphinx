@@ -76,16 +76,18 @@ Two configurations files which are important:
 ^^^^^^
 Contains optional runtime configuration settings to initialize Vim when it starts. Example: If you want Vim to have syntax on and line numbers on, whenever you open vi, enter syntax on and set number in this file.
 
-.viminfo
-^^^^^^^^
-Viminfo file stores command-line, search string, input-line history and other stuff.Useful if you want to find out what user has been doing in vi.
- 
 ::
   
  ##Sample contents of .vimrc
 
  syntax on
  set number
+
+A good details about various options which can be set in vimrc can be found at `A Good Vimrc <https://dougblack.io/words/a-good-vimrc.html>`_
+
+.viminfo
+^^^^^^^^
+Viminfo file stores command-line, search string, input-line history and other stuff.Useful if you want to find out what user has been doing in vi.
 
 .. Tip:: Both files are present in user home directory.
 

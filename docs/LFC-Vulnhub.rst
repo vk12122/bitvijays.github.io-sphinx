@@ -1027,6 +1027,23 @@ where
    This behavior can also be enabled by default at compile time.
 
 
+find
+^^^^
+
+If find is suid, we can use
+
+::
+
+ touch foo
+ find foo -exec whoami \;
+
+Here, the foo file ( a blank file ) is created using the touch command as the -exec parameter of the find command will execute the given command for every file that it finds, so by using “find foo” it is ensured they only execute once. The above command will be executed as root.
+
+HollyGrace has mentioned this in `Linux PrivEsc: Abusing SUID <https://www.gracefulsecurity.com/linux-privesc-abusing-suid/>`_
+
+
+
+
 More can be learn `How-I-got-root-with-sudo <https://www.securusglobal.com/community/2014/03/17/how-i-got-root-with-sudo/>`_.
 
 
@@ -1945,5 +1962,12 @@ Knockd
 ------
 
 `Knockd - Port-knocking server <http://www.zeroflux.org/projects/knock>`_ : knockd is a port-knock server. It listens to all traffic on an ethernet (or PPP) interface, looking for special "knock" sequences of port-hits. A client makes these port-hits by sending a TCP (or UDP) packet to a port on the server. This port need not be open -- since knockd listens at the link-layer level, it sees all traffic even if it's destined for a closed port. When the server detects a specific sequence of port-hits, it runs a command defined in its configuration file. This can be used to open up holes in a firewall for quick access.
+
+Useful Tools
+============
+
+* `exe2hex <https://github.com/g0tmi1k/exe2hex>`_ : Inline file transfer using in-built Windows tools (DEBUG.exe or PowerShell). 
+
+* `Powercat <https://github.com/secabstraction/PowerCat>`_ : A PowerShell TCP/IP swiss army knife that works with Netcat & Ncat
 
 .. disqus::
