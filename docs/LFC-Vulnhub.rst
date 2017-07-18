@@ -4,7 +4,7 @@ CTF Series : Vulnerable Machines
 
 This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the VulnHub and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
 
-We would like to **thank g0tm1lk** for maintaining Vulhub and **shout-out** to each and every **author of the Vulnerable Machine / write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
+We would like to **thank g0tm1lk** for maintaining Vulnhub and **shout-out** to each and every **author of the Vulnerable Machine / write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
 
 Finding the IP address
 ======================
@@ -103,7 +103,8 @@ By using **amap**, we can identify if any SSL server is running on port 3445 or 
 
 ::
 
-  amap -A 192.168.1.2 12380 amap v5.4 (www.thc.org/thc-amap) started at 2016-08-10 05:48:09 - APPLICATION MAPPING mode
+  amap -A 192.168.1.2 12380 
+  amap v5.4 (www.thc.org/thc-amap) started at 2016-08-10 05:48:09 - APPLICATION MAPPING mode
   Protocol on 192.168.1.2:12380/tcp matches http 
   Protocol on 192.168.1.2:12380/tcp matches http-apache-2 
   Protocol on 192.168.1.2:12380/tcp matches ntp 
@@ -127,7 +128,7 @@ We should always listen to the local interface on which the VM is hosted such as
   18:02:04.100773 ARP, Request who-has 192.168.56.3 tell 192.168.56.101, length 28
   18:02:04.096292 IP 192.168.56.101.36327 > 192.168.56.1.4444: Flags [S],
 
-On listening on the port 4444, we might receive a something like a base64 encoded string or some message.
+While listening on port 4444, we might receive a something like a base64 encoded string or some message.
 
 ::
 
@@ -281,7 +282,7 @@ Wordpress configuration is stored in wp-config.php. If you are able to download 
 Names? Possible Usernames? Possible Passwords?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    
-Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/https webserver), you would found possible  names of the employees working in the company. Now, it is common practise to have username based on your first/last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
+Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/https webserver), you would find possible  names of the employees working in the company. Now, it is common practise to have username based on your first/last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
 
 * Using metasploit smtp\_enum module: Once msfconsole is running, use auxiliary/scanner/smtp/smtp\_enum, enter the RHOSTS (target address) and USER FILE containing the list of probable user accounts.
 * Using VRFY command:
@@ -973,7 +974,7 @@ If tee is suid: tee is used to read input and then write it to output and files.
 :: 
 
   temp.sh
-  echo “milton ALL=(ALL) ALL” > /etc/sudoers” 
+  echo "milton ALL=(ALL) ALL" > /etc/sudoers 
 
 or 
 
