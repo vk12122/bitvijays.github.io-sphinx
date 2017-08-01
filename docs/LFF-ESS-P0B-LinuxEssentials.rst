@@ -918,4 +918,12 @@ Objective to get few IP addresses of Microsoft.com Domains.
 * Every link in html is referred by href. Filter all the href (which would contain the link to different domains for Microsoft)
 * Sort and find unique list. Get their ip addresses
 * HINT: Tools such as cut, grep, wget, sort, uniq, host and little bit of bash scripting would be used.
+
+Interesting Stuff
+=================
+
+* Linux Monitoring Tools : server density has written most comprehensive list of `80 Linux Monitoring Tools <https://www.serverdensity.com/monitor/linux/how-to/>`_
+
+* Windows Monitoring Tools : Server density has written similar list for Windows too `60+ Windows Monitoring Tools <https://www.serverdensity.com/monitor/windows/how-to/>`_
+
 .. disqus::

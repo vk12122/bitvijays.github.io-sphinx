@@ -735,7 +735,25 @@ Operating System
 ^^^^^^^^^^^^^^^
 ::
 
-  /proc/version     -- Kernel Versions
+ proc/sched_debug	This is usually enabled on newer systems, such as RHEL 6.  It provides information as to what process is running on which cpu.  This can be handy to get a list of processes and their PID number.
+ /proc/mounts		Provides a list of mounted file systems.  Can be used to determine where other interesting files might be located
+ /proc/net/arp		Shows the ARP table.  This is one way to find out IP addresses for other internal servers.
+ /proc/net/route	Shows the routing table information.
+ /proc/net/tcp 
+ /proc/net/udp  	Provides a list of active connections.  Can be used to determine what ports are listening on the server
+ /proc/net/fib_trie	This is used for route caching.  This can also be used to determine local IPs, as well as gain a better understanding of the target's networking structure
+ /proc/version	        Shows the kernel version.  This can be used to help determine the OS running and the last time it's been fully updated.
+
+Each process also has its own set of attributes.  If we have the PID number and access to that process, then we can obtain some useful information about it, such as its environmental variables and any command line options that were run.  Sometimes these include passwords.  Linux also has a special proc directory called self which can be used to query information about the current process without having to know it's PID.
+
+::
+
+ /proc/[PID]/cmdline	Lists everything that was used to invoke the process. This sometimes contains useful paths to configuration files as well as usernames and passwords.
+ /proc/[PID]/environ	Lists all the environment variables that were set when the process was invoked.  This also sometimes contains useful paths to configuration files as well as usernames and passwords.
+ /proc/[PID]/cwd	Points to the current working directory of the process.  This may be useful if you don't know the absolute path to a configuration file.
+ /proc/[PID]/fd/[#]	Provides access to the file descriptors being used.  In some cases this can be used to read files that are opened by a process.
+
+The information about Proc variables has been taken from `Directory Traversal, File Inclusion, and The Proc File System <https://blog.netspi.com/directory-traversal-file-inclusion-proc-file-system/>`_
 
 Environment Variables
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1839,6 +1857,8 @@ Others
    Paste the clipboard 
    base64 -d flair > flair.jpg
 
+* Have a web-accessible git ? utilize `dvcs-ripper <https://github.com/kost/dvcs-ripper>`_ to rip web accessible (distributed) version control systems: SVN, GIT, Mercurial/hg, bzr. It can rip repositories even when directory browsing is turned off. Eric Gruber has written a blog on `Dumping Git Data from Misconfigured Web Servers <https://blog.netspi.com/dumping-git-data-from-misconfigured-web-servers/>`_ providing good walkthru.
+
 * It's always important to find, what's installed on the box:
 
  :: 
@@ -1962,6 +1982,11 @@ Knockd
 ------
 
 `Knockd - Port-knocking server <http://www.zeroflux.org/projects/knock>`_ : knockd is a port-knock server. It listens to all traffic on an ethernet (or PPP) interface, looking for special "knock" sequences of port-hits. A client makes these port-hits by sending a TCP (or UDP) packet to a port on the server. This port need not be open -- since knockd listens at the link-layer level, it sees all traffic even if it's destined for a closed port. When the server detects a specific sequence of port-hits, it runs a command defined in its configuration file. This can be used to open up holes in a firewall for quick access.
+
+DCEPT
+-----
+
+SecureWorks researchers have created a solution known as `DCEPT (Domain Controller Enticing Password Tripwire) <https://www.secureworks.com/blog/dcept>`_ to detect network intrusions. Github is `here <https://github.com/secureworks/dcept>`_ 
 
 Useful Tools
 ============

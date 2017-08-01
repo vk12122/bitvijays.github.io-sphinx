@@ -144,12 +144,19 @@ If we are utilizing Automation Tools above, there are few other tools which shou
 
 * `Inspec <https://www.chef.io/inspec/>`_ : InSpec is an open-source testing framework for infrastructure with a human-readable language for specifying compliance, security and other policy requirements. When compliance is code, you can integrate automated tests that check for adherence to policy into any stage of your deployment pipeline.
 
+* `Kitchen <http://kitchen.ci/>`_ : Kitchen provides a test harness to execute your infrastructure code on one or more platforms in isolation. A driver plugin architecture is used which lets you run your code on various cloud providers and virtualization technologies such as Amazon EC2, Google GCE, Azure, Blue Box, CloudStack, Digital Ocean, Rackspace, OpenStack, Vagrant, Docker, LXC containers, and more. In short, whatever code we wrote for one platform or operating system ( example: Debian 8 ), utilizing Kitchen, we can test it on multiple platforms.
+
+Linters
+^^^^^^^
+
 * `Rubocop <http://rubocop.readthedocs.io/en/latest/>`_ : RuboCop is a Ruby static code analyzer. Out of the box it will enforce many of the guidelines outlined in the community `Ruby Style Guide <https://github.com/bbatsov/ruby-style-guide>`_ . If we are writing code in ruby, rubocop makes sure that it is written according to the Ruby style guide.
 
 * `Puppet-Linter <http://puppet-lint.com/>`_ : Puppet Lint tests Puppet code against the recommended Puppet language style guide. Puppet Lint validates only code style; it does not validate syntax.
 
-* `Kitchen <http://kitchen.ci/>`_ : Kitchen provides a test harness to execute your infrastructure code on one or more platforms in isolation. A driver plugin architecture is used which lets you run your code on various cloud providers and virtualization technologies such as Amazon EC2, Google GCE, Azure, Blue Box, CloudStack, Digital Ocean, Rackspace, OpenStack, Vagrant, Docker, LXC containers, and more. In short, whatever code we wrote for one platform or operating system ( example: Debian 8 ), utilizing Kitchen, we can test it on multiple platforms.
+* `Pylint <https://www.pylint.org/>`_ : Pylint is a tool that checks for errors in Python code, tries to enforce a coding standard and looks for code smells. It can also look for certain type errors, it can recommend suggestions about how particular blocks can be refactored and can offer you details about the code’s complexity.
 
+* `rst-lint <https://github.com/twolfson/restructuredtext-lint>`_ : Restructured Text Linter
+  
 Security Breach 1
 =================
 

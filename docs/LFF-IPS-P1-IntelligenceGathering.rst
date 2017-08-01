@@ -445,8 +445,8 @@ Internal Infrastructure Mapping
 
 All the steps in 2.a which are DNS related recon could also be performed in the internal penetration testing provided we have the access to the internal DNS Server. After, we have gathered all the information from DNS enumeration, still we haven't enumerated internal infrastructure. We apply the below methods to enumerate further.
 
-Internal range identification
------------------------------
+Internal Network Range Identification
+-------------------------------------
 
 In many instances, we are provided or expected to find vulnerabilities in a 10.0.0.0/8 network which would contain around 16 million IP Addresses. Scanning 16 million IP address in a considerable time is difficult. In which case, we need faster and targeted result. So, how do we find out the ranges?
 
@@ -631,6 +631,9 @@ For a UDP Port Scan, we need to add -u flag which makes the format
 :: 
    
   nc -vvn -u -z xxx.xxx.xxx.xxx startport-endport
+
+
+If we have windows machine without nmap, we can use `PSnmap <https://www.powershellgallery.com/packages/PSnmap/>`_
 
 
 Identifying service versions
