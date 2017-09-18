@@ -2,9 +2,19 @@
 CTF Series : Vulnerable Machines
 ********************************
 
-This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the VulnHub and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
+This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the VulnHub, Hack the Box and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
 
 We would like to **thank g0tm1lk** for maintaining Vulnhub and **shout-out** to each and every **author of the Vulnerable Machine / write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
+
+In solving any vulnerable machine, there are few stages:
+
+* Finding the IP Address
+* Port Scanning the machine
+* Listening to the interface
+* From Nothing (No-access) to Unprivileged Shell
+* From Unprivileged shell to Privileged Shell
+
+In this blog, we have mentioned, what can be done in each stages. Have also provided Tips and Tricks for solving the VMs. Vulnerability Analysis Blog in Infrastructure Pentest Series could also be referred for exploitation of any particular services (As, it provides information such as "If you have found service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"
 
 Finding the IP address
 ======================
@@ -12,7 +22,7 @@ Finding the IP address
 Netdiscover
 -----------
 
-An active/passive arp reconnaissance tool
+An active/ passive arp reconnaissance tool
 
 ::
 
@@ -31,7 +41,7 @@ Interface name for Virtualization Software
 Nmap
 ----
 
-Network exploration tool and security / port scanner 
+Network exploration tool and security/ port scanner 
 
 ::
 
@@ -48,7 +58,7 @@ Port scanning provides a large amount of information on open services and possib
 Unicornscan
 -----------
 
-A port scanner that utilizes it’s own userland TCP/IP stack, which allows it to run a asynchronous scans. Faster than nmap and can scan 65,535 ports in a relatively shorter time frame. 
+A port scanner that utilizes its own userland TCP/IP stack, which allows it to run a asynchronous scans. Faster than nmap and can scan 65,535 ports in a relatively shorter time frame. 
 
 ::  
 
@@ -63,7 +73,7 @@ A port scanner that utilizes it’s own userland TCP/IP stack, which allows it t
 Nmap
 -----
 
-Network exploration tool and security / port scanner 
+Network exploration tool and security/ port scanner 
 
 ::
 
@@ -142,7 +152,7 @@ While listening on port 4444, we might receive a something like a base64 encoded
 From Nothing to a Unprivileged Shell
 ====================================
 
-At this point, you would have an idea about the different services and service version running on the system. ( aka figure out what webservices such as cms or software's are running on the vulnerable machine )
+At this point, you would have an idea about the different services and service version running on the system. (aka figure out what webservices such as cms or software's are running on the vulnerable machine)
 
 searchsploit
 ------------
@@ -187,7 +197,7 @@ Searchsploit even provide an option to read the nmap XML file and suggest vulner
 SecLists.Org Security Mailing List Archive
 ------------------------------------------
 
-There would be some days, when you won't find vulnerability in searchsploit. We should also check the `seclists.org security mailing list google search <http://seclists.org/>`_ , if someone has reported any bug for that particular software. 
+There would be some days, when you won't find vulnerability in searchsploit. We should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug for that particular software. 
 
 Webservices
 -----------
@@ -277,12 +287,12 @@ Wordpress configuration is stored in wp-config.php. If you are able to download 
 
 ::
 
-  wpscan --url http://192.168.1.2 --wordlist /home/bitvijays/Documents/Walkthru/Mr_Robot_1/test.txt --username elliot
+  wpscan --url http://192.168.1.2 --wordlist wordlist.txt --username example_username
 
 Names? Possible Usernames? Possible Passwords?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    
-Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/https webserver), you would find possible  names of the employees working in the company. Now, it is common practise to have username based on your first/last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
+Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/ https webserver), you would find possible  names of the employees working in the company. Now, it is common practice to have username based on your first/ last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
 
 * Using metasploit smtp\_enum module: Once msfconsole is running, use auxiliary/scanner/smtp/smtp\_enum, enter the RHOSTS (target address) and USER FILE containing the list of probable user accounts.
 * Using VRFY command:
@@ -380,7 +390,7 @@ To test LFI, RFI, we can also use `Uniscan <http://tools.kali.org/web-applicatio
   [5] perl ./uniscan.pl -o "inurl:test"
   [6] perl ./uniscan.pl -u https://www.example.com/ -r
 
-There's another tool called `fimap <https://tools.kali.org/web-applications/fimap>`_. However, it's way better to checkout the source of uniscan for LFI and see what it is trying and try that with curl specially if cookies are required to set ( in case of authenticated LFI ). Personally, I tried Uniscan and for some reason cookie feature was not working and fimap only support POST parameter in cookie no GET.
+There's another tool called `fimap <https://tools.kali.org/web-applications/fimap>`_. However, it is better to check the source of uniscan for LFI and see what it is trying and try that with curl specially if cookies are required to set (in case of authenticated LFI). Personally, I tried Uniscan and for some reason cookie feature was not working and fimap only support POST parameter in cookie no GET.
 
 Also, if we have unprivileged user shell, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
 
@@ -410,7 +420,7 @@ PHP
 
 * **PHP Shell**
 
- We can create a new file say ( shell.php ) on the server containing
+ We can create a new file say (shell.php) on the server containing
 
  :: 
 
@@ -535,7 +545,7 @@ To catch the incoming xterm, start an X-Server (:1 – which listens on TCP port
  
    Xnest :1
 
-You’ll need to authorise the target to connect to you (command also run on your host):
+You’ll need to authorize the target to connect to you (command also run on your host):
 
 ::
 
@@ -812,8 +822,8 @@ Probably, at this point of time, we would have unprivileged shell of user www-da
 If you have become a normal user of which you have a password, it would be a good idea to check sudo -l to check if there are any executables you have permission to run.
 
 
-Privilege esclation from g0tm1lk blog
--------------------------------------
+Privilege escalation from g0tm1lk blog
+--------------------------------------
 
 What "Advanced Linux File Permissions" are used?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -925,8 +935,8 @@ Now, when we try to read example.conf file, we would be able to read the file fo
 
 
 
-MySQL Privilged Escalation
---------------------------
+MySQL Privileged Escalation
+---------------------------
 
 If mysql ( version 4.x, 5.x ) process is running as root and we do have the mysql root password and we are an unprivileged user, we can utilize `User-Defined Function (UDF) Dynamic Library Exploit <http://www.0xdeadbeef.info/exploits/raptor_udf.c>`_ . A blog named `Gaining a root shell using mysql user defined functions and setuid binaries <https://infamoussyn.com/2014/07/11/gaining-a-root-shell-using-mysql-user-defined-functions-and-setuid-binaries/>`_  
 
@@ -935,7 +945,7 @@ More Information
 
 * The MySQL service should really not run as root. The service and all mysql directories should be run and accessible from another account - mysql as an example.
 
-* When MySQL is initialised, it creates a master account (root by default) that has all privileges to all databases on MySQL. This root account differs from the system root account, although it might still have the same password due to default install steps offered by MySQL.
+* When MySQL is initialized, it creates a master account (root by default) that has all privileges to all databases on MySQL. This root account differs from the system root account, although it might still have the same password due to default install steps offered by MySQL.
 
 * Commands can be executed inside MySQL, however, commands are executed as the current logged in user.
 
@@ -992,7 +1002,7 @@ If tee is suid: tee is used to read input and then write it to output and files.
 :: 
 
   temp.sh
-  echo "milton ALL=(ALL) ALL" > /etc/sudoers 
+  echo "example_user ALL=(ALL) ALL" > /etc/sudoers 
 
 or 
 
@@ -1032,7 +1042,7 @@ where
 
   -C file_size : Before  writing a raw packet to a savefile, check whether the file is currently larger than file_size and, if so, close the current savefile and open a new one.  Savefiles after the first savefile will have the name specified with the -w flag, with a number after it, starting at 1 and continuing upward.  The units of file_size are millions of bytes (1,000,000 bytes, not 1,048,576 bytes).
 
-  -W Used  in conjunction with the -C option, this will limit the number of files created to the specified number, and begin overwriting files from the beginning, thus creating a 'rotating' buffer.  In addition,it will name the files with enough leading 0s to support the maximum number of files, allowing them to sort correctly. Used in conjunction with the -G option, this will limit the number of rotated dump files that get created, exiting with status 0 when reaching the limit. If used with -C as well, the behavior will result in cyclical files per timeslice.
+  -W Used  in conjunction with the -C option, this will limit the number of files created to the specified number, and begin overwriting files from the beginning, thus creating a 'rotating' buffer.  In addition, it will name the files with enough leading 0s to support the maximum number of files, allowing them to sort correctly. Used in conjunction with the -G option, this will limit the number of rotated dump files that get created, exiting with status 0 when reaching the limit. If used with -C as well, the behavior will result in cyclical files per timeslice.
 
   -z postrotate-command Used in conjunction with the -C or -G options, this will make tcpdump run " postrotate-command file " where file is the savefile being closed after each rotation. For example, specifying -z gzip or -z bzip will compress each savefile using gzip or bzip2.
 
@@ -1069,7 +1079,7 @@ More can be learn `How-I-got-root-with-sudo <https://www.securusglobal.com/commu
 Unix Wildcards
 --------------
 
-The below text is directly from the `here <https://www.defensecode.com/public/DefenseCode_Unix_WildCards_Gone_Wild.txt>`_.
+The below text is directly from the `DefenseCode Unix WildCards Gone Wild <https://www.defensecode.com/public/DefenseCode_Unix_WildCards_Gone_Wild.txt>`_.
 
 Chown file reference trick (file owner hijacking)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1407,9 +1417,9 @@ If you know the password of the user, however, ssh is not allowing you to login,
    ## Tighten security after security incident 
    ## root never gets to log in remotely PermitRootLogin no 
    ## Eugene & Margo can SSH in, no-one else allowed 
-   AllowUsers eugene margo 
-   ## SSH keys only but margo can use a password 
-   Match user margo 
+   AllowUsers example_user1 example_user2 
+   ## SSH keys only but example_user1 can use a password 
+   Match user example_user1 
    PasswordAuthentication yes 	
    ## End tighten security
 
@@ -1452,7 +1462,7 @@ When you see something like this "Someone's sup3r s3cr3t dr0pb0x - only me and S
    Order Deny,Allow 
    Deny from ALL 
    Allow from env=allowed 
-   ErrorDocument 403 “<H1>Someone's sup3r s3cr3t dr0pb0x - only me and Steve Jobs can see this content</H1><H2>Lol</H2>”
+   ErrorDocument 403 “<H1>Super secret location - only me and Steve Jobs can see this content</H1><H2>Lol</H2>”
 
 CGI-BIN Shellshock
 ^^^^^^^^^^^^^^^^^^
@@ -1469,9 +1479,9 @@ To understand shellshock few blogs can be referred such as `ShellShocked – A q
   echo "Content-type: text/html"
   echo ""
  
-These two lines tell your browser that the rest of the content comming from the program is HTML, and should be treated as such. Leaving these lines out will often cause your browser to download the output of the program to disk as a text file instead of displaying it, since it doesn't understand that it is HTML!
+These two lines tell your browser that the rest of the content coming from the program is HTML, and should be treated as such. Leaving these lines out will often cause your browser to download the output of the program to disk as a text file instead of displaying it, since it doesn't understand that it is HTML!
 
-**Shellshock Local Privilege Esclation**
+**Shellshock Local Privilege Escalation**
 
 Binaries with a setuid bit and calling (directly or indirectly) bash through execve, popen or system are tools which may be used to activate the Shell Shock bug.
 
@@ -1529,7 +1539,7 @@ Delete all lines between tags including tags:
    
   sed '/<tag>/,/<\/tag>/d' input.txt
 
-.. Tip :: Useful when you are accessing the webpage using curl and their's LFI and you want to remove the html/ body tags.
+.. Tip :: Useful when you are accessing the webpage using curl and their LFI and you want to remove the html/ body tags.
 
 HTTP 404 Custom Page
 ^^^^^^^^^^^^^^^^^^^^
@@ -1620,13 +1630,13 @@ This basically changes the command from
 
 ::
 
-  trace: built-in: git 'clone' 'ssh://root@sokar-dev:/root/secret-project' '/mnt/secret-project/'
+  trace: built-in: git 'clone' 'ssh://root@machine-dev:/root/secret-project' '/mnt/secret-project/'
 
 to
 
 ::
 
-  trace: run_command: '/home/apophis/ssh' 'root@sokar-dev' 'git-upload-pack '\''/root/secret-project'\'''
+  trace: run_command: '/home/user/ssh' 'root@machine-dev' 'git-upload-pack '\''/root/secret-project'\'''
 
 GIT_TEMPLATE_DIR
 ^^^^^^^^^^^^^^^^^
@@ -1751,7 +1761,7 @@ Others
    WORKGROUP            RED
 
    -N : If specified, this parameter suppresses the normal password prompt from the client to the user. This is useful when accessing a service that does not require a password. -L\|--list This option allows you to look at what services are available on a server. You use it as smbclient
-   -L host and a list should appear. The -I option may be useful if your NetBIOS names don't match your TCP/IP DNS host names or if you aretrying to reach a host on another network.
+   -L host and a list should appear. The -I option may be useful if your NetBIOS names don't match your TCP/IP DNS host names or if you are trying to reach a host on another network.
 
 
  If you want to access the share you might want to type
@@ -1884,7 +1894,7 @@ Others
 
 * Getting a reverse shell from:
 
- * Drupal: Now that we have access to the Drupal administration panel, we can gain RCE by enabling the PHP filter module. This will allow us to execute arbitrary code on the site by inserting a specifically crafted string into page content. After enabling the module, I proceed to allow code to be executed by all users under the configuration screen for the module.Once enabled we need to give permission to use it so in people -> permissions check "Use the PHP code text for. 
+ * Drupal: Now that we have access to the Drupal administration panel, we can gain RCE by enabling the PHP filter module. This will allow us to execute arbitrary code on the site by inserting a specifically crafted string into page content. After enabling the module, I proceed to allow code to be executed by all users under the configuration screen for the module. Once enabled we need to give permission to use it so in people -> permissions check "Use the PHP code text for. 
    
    Next I create a new block (by going to Blocks, under the Structure menu) with the following content. I make sure to select PHP code from the Text format drop down. Taken from <https://g0blin.co.uk/droopy-vulnhub-writeup/>
    Drupal settings file location: /var/www/html/sites/default/settings.php
@@ -1968,12 +1978,12 @@ FakeSMTP
 
 ::
 
-  java -jar /opt/fakesmtp/target/fakeSMTP-2.1-SNAPSHOT.jar -s -b -p 2525 127.0.0.1 -o /home/WeaselLaugh
+  java -jar /opt/fakesmtp/target/fakeSMTP-2.1-SNAPSHOT.jar -s -b -p 2525 127.0.0.1 -o /home/username
 
 Rubberglue
 ----------
 
-`Rubberglue <https://github.com/adhdproject/adhdproject.github.io/blob/master/Tools/Rubberglue.md>`_ : We can use Rubberglue to listen on a port such that any traffic it recieves on that port it will forward back to the client ( attacker ) on the same port.
+`Rubberglue <https://github.com/adhdproject/adhdproject.github.io/blob/master/Tools/Rubberglue.md>`_ : We can use Rubberglue to listen on a port such that any traffic it receives on that port it will forward back to the client ( attacker ) on the same port.
 
 ::
 
@@ -1987,7 +1997,7 @@ Knockd
 DCEPT
 -----
 
-SecureWorks researchers have created a solution known as `DCEPT (Domain Controller Enticing Password Tripwire) <https://www.secureworks.com/blog/dcept>`_ to detect network intrusions. Github is `here <https://github.com/secureworks/dcept>`_ 
+SecureWorks researchers have created a solution known as `DCEPT (Domain Controller Enticing Password Tripwire) <https://www.secureworks.com/blog/dcept>`_ to detect network intrusions. Github is `dcept <https://github.com/secureworks/dcept>`_ 
 
 Useful Tools
 ============

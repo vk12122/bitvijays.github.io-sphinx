@@ -1,17 +1,17 @@
-**************************************************************
-Infrastruture PenTest Series : Part 1 - Intelligence Gathering
-**************************************************************
+***************************************************************
+Infrastructure PenTest Series : Part 1 - Intelligence Gathering
+***************************************************************
 
-This post (always Work in Progress) would list the technical steps which might be important while doing the information gathering of an organization and we only know the company name or it’s domain name such as example.com.
+This post (always Work in Progress) would list the technical steps which might be important while doing the information gathering of an organization when we only know the company name or it’s domain name such as example.com.
 
 **Thanks to Vulnhub-ctf team, bonsaiviking, recrudesce, Rajesh and Tanoy**
 
-Suppose, we have to do a external/ internal pentest of a big organization with DMZ, Data centers, Telecom network etc.
+Suppose, we have to do a external/ internal penetration test of a big organization with DMZ, Data centers, Telecom network etc.
 
 Scenarios
 =========
 
-Mostly, there are only two scenarios either we are outside / inside the organization.
+Mostly, there are only two scenarios either we are outside/ inside the organization.
 
 Outside - External
 ------------------
@@ -22,11 +22,11 @@ Example:
 
 What are the
 
-* Different domain/ subdomains present? ( like example.com -- domain; ftp.example.com -- subdomain )
-* Different IP Address/ Network ranges / ASN Number assigned ?
-* Different Services/ Ports running on those IP Addresses ?
+* Different domain/ subdomains present? (like example.com -- domain; ftp.example.com -- subdomain)
+* Different IP Address/ Network ranges/ ASN Number assigned?
+* Different Services/ Ports running on those IP Addresses?
 * Email addresses or People working in the organization?
-* What are the different Operating Systems/ Software used ?
+* What are the different Operating Systems/ Software used?
 * Any breaches which happened in the organization? 
 
 Possibly, we would be able to compromise a user credential or vulnerable service running and get inside the internal network of the organization.
@@ -34,56 +34,56 @@ Possibly, we would be able to compromise a user credential or vulnerable service
 Inside - Internal
 -----------------
 
-When we are inside the organization (Let's say physically), probably, posing as internal employee ( already have access to the internal network ) or external consultant ( with no internal network access as of now ). Let's explore what are the options we have as external consultant sitting in a conference room.
+When we are inside the organization (Let's say physically), probably, posing as internal employee (already have access to the internal network) or external consultant (with no internal network access as of now). Let's explore what are the options we have as external consultant sitting in a conference room.
 
 Wired LAN
 ^^^^^^^^^
 
 If there's a LAN cable around and we plug it in our computer, there might be few possibilities
 
-* DHCP ( Dynamic Host Configuration Protocol ) is enabled and your machine is provided with an IP Address.
-* DHCP is disabled, however, LAN cable is working. In this case, probably, we could sniff the network and figure out the near-by IP Address, netmask and default gateway.
-* Network Access Control is enabled, then probably we would need to search for a Printer attached to network ( clone it's MAC address and try ) or IP Phones or any Hub.
-* LAN port is disabled ( Here you can't much! Can you? ).
+* DHCP (Dynamic Host Configuration Protocol) is enabled and your machine is provided with an IP Address.
+* DHCP is disabled; however, LAN cable is working. In this case, probably, we could sniff the network and figure out the near-by IP Address, netmask and default gateway.
+* Network Access Control is enabled, then probably we would need to search for a Printer attached to network (clone it's MAC address and try) or IP Phones or any Hub.
+* LAN port is disabled (Here you can't much! Can you?).
 
 Wireless LAN
 ^^^^^^^^^^^^
 
-* Check for Open / Guest Wi-Fi - If you are connected somehow, probably try to internal network ranges. Most probably, the organization would have segregated the network well. However, sometimes DNS Name can be resolved.
+* Check for Open/ Guest Wi-Fi - If you are connected somehow, probably try to internal network ranges. Most probably, the organization would have segregated the network well. However, sometimes DNS Name can be resolved.
 * Check if any WEP/ WPA2 networks are present. If so, probably, can try to crack them.
 
-Once you are inside, we need to find answer to the above questions ( Outside - External section ).
+Once you are inside, we need to find answer to the above questions (Outside - External section).
 
-.. Note:: We can do fingerprinting from both Internal / External of the organization
+.. Note:: We can do fingerprinting from both Internal/ External of the organization
 
 Responder/ Inveigh
 ^^^^^^^^^^^^^^^^^^
 
 Once, you are inside, probably the first thing would be utilize **Responder** or **Inveigh** in the **Analyze mode**.
 
-* `Responder <https://github.com/SpiderLabs/Responder>`_ : Responder is a LLMNR, NBT-NS and MDNS poisoner, with built-in HTTP/SMB/MSSQL/FTP/LDAP rogue authentication server supporting NTLMv1/NTLMv2/LMv2, Extended Security NTLMSSP and Basic HTTP authentication. It is very important to understand LLMNR, NBT-NS. Understand the basics by reading the `Local Network Attacks: LLMNR and NBT-NS Poisoning <https://www.sternsecurity.com/blog/local-network-attacks-llmnr-and-nbt-ns-poisoning>`_, `What is LLMNR & WPAD and How to Abuse Them During Pentest ? <https://pentest.blog/what-is-llmnr-wpad-and-how-to-abuse-them-during-pentest/>`_  and `How to get Windows to give you credentials through LLMNR <https://www.pentestpartners.com/security-blog/how-to-get-windows-to-give-you-credentials-through-llmnr/>`_
+* `Responder <https://github.com/SpiderLabs/Responder>`_ : Responder is a LLMNR, NBT-NS and MDNS poisoner, with built-in HTTP/ SMB/ MSSQL/ FTP/ LDAP rogue authentication server supporting NTLMv1/ NTLMv2/ LMv2, Extended Security NTLMSSP and Basic HTTP authentication. It is very important to understand LLMNR, NBT-NS. Understand the basics by reading the `Local Network Attacks: LLMNR and NBT-NS Poisoning <https://www.sternsecurity.com/blog/local-network-attacks-llmnr-and-nbt-ns-poisoning>`_, `What is LLMNR & WPAD and How to Abuse Them During Pentest ? <https://pentest.blog/what-is-llmnr-wpad-and-how-to-abuse-them-during-pentest/>`_  and `How to get Windows to give you credentials through LLMNR <https://www.pentestpartners.com/security-blog/how-to-get-windows-to-give-you-credentials-through-llmnr/>`_
 
  Basically it's like this
 
- * Let's say a user wants to access a file server named "NAS001" by \\NAS001, however, mistakenly types in \\NAS01.  
+ * Let's say a user wants to access a file server named "NAS001" by \\\\NAS001, however, mistakenly types in \\\\NAS01.  
  * The query goes to the DNS server to resolve the IP of NAS01. However, as it's not a valid hostname, DNS Server responds to the user saying that it doesn’t know that host.
- * The user then broadcasts on the local network if anyone knows who is \\NAS01
- * The attacker ( if on the same network ) seeing the opportunity says "I am NAS01 here is my IP Address"
+ * The user then broadcasts on the local network if anyone knows who is \\\\NAS01
+ * The attacker (if on the same network) seeing the opportunity says "I am NAS01 here is my IP Address"
  * The user believes the attacker and sends its own username and NTMLv2 hash to the attacker.
  * The attacker gathers all the hashes and then crack the hash to discover the password offline.
 
- Recently, the Responder also have the functionality of Multi-relay, which allows you to relay the NTLMv1/2 authentication to a specific target and possibly execute the code (during a successful attack) on the target node. NoSoSecure has written a detailed blog on `Pwning with Responder – A Pentester’s Guide <https://www.notsosecure.com/pwning-with-responder-a-pentesters-guide/>`_ 
+ Recently, the Responder also have the functionality of Multi-relay, which allows you to relay the NTLMv1/2 authentication to a specific target and possibly execute the code (during a successful attack) on the target node. NotSoSecure has written a detailed blog on `Pwning with Responder – A Pentester’s Guide <https://www.notsosecure.com/pwning-with-responder-a-pentesters-guide/>`_ 
 
  Similar to Python Responder, there's inveigh
 
-* `Inveigh <https://github.com/Kevin-Robertson/Inveigh>`_ is a PowerShell LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool designed to assist penetration testers/red teamers that find themselves limited to a Windows system.
+* `Inveigh <https://github.com/Kevin-Robertson/Inveigh>`_ is a PowerShell LLMNR/ mDNS/ NBNS spoofer and man-in-the-middle tool designed to assist penetration testers/ red teamers that find themselves limited to a Windows system.
 
 NTLM/ NTLMv1/v2 / Net-NTLMv1/v2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Probably, We should cover this in Exploitation. However as we have mentioned Responder/ Inveigh here, it makes sense to include this*
 
-* NTLM : NTLM hashes are stored in the Security Account Manager (SAM) database and in Domain Controller's NTDS.dit database. 
+* NTLM: NTLM hashes are stored in the Security Account Manager (SAM) database and in Domain Controller's NTDS.dit database. 
 
  ::
 
@@ -108,7 +108,7 @@ The above has been taken from `Practical guide to NTLM Relaying in 2017 (A.K.A g
 Fingerprinting
 ==============
 
-We can either do **Passive fingerprinting** (method to learn more about the enemy, without them knowing it ) or **Active fingerprinting** ( process of transmitting packets to a remote host and analysing corresponding replies ). **Passive fingerprinting** and **Active fingerprinting** can be done by using various methods such as
+We can either do **Passive fingerprinting** (method to learn more about the enemy, without them knowing it) or **Active fingerprinting** (process of transmitting packets to a remote host and analyzing corresponding replies). **Passive fingerprinting** and **Active fingerprinting** can be done by using various methods such as
 
 +------------------------------------------------+--------------------------------------+
 |         Passive Fingerprinting                 |       Active Fingerprinting          |
@@ -124,6 +124,26 @@ We can either do **Passive fingerprinting** (method to learn more about the enem
 | - Reverse DNS Lookup using External Websites   |                                      |
 +------------------------------------------------+--------------------------------------+
 
+Do you remember, We need to find answers to 
+
++---------------------------------------------------------------+-------------------------------------------------------+
+|     Questions (What are the)                                  | Answer                                                |
++===============================================================+=======================================================+
+| Different domain/ subdomains present?                         | whois, DNS-MX/AAAA/A/SRV, Enumeration with Domain Name|
++---------------------------------------------------------------+-------------------------------------------------------+
+| Different IP Address/ Network ranges/ ASN Number assigned?    | DNS, ASN-Number, DNS-Zone-Transfer                    |
++---------------------------------------------------------------+-------------------------------------------------------+
+| Different Services/ Ports running on those IP Addresses?      | Public Scans of IP/ Port Scanning                     |
++---------------------------------------------------------------+-------------------------------------------------------+
+| Email addresses or People working in the organization?        | harvestor, LinkedIn                                   |
++---------------------------------------------------------------+-------------------------------------------------------+
+| What are the different Operating Systems/ Software used?      | FOCA                                                  |
++---------------------------------------------------------------+-------------------------------------------------------+
+| Any breaches which happened in the organization?              |                                                       |
++---------------------------------------------------------------+-------------------------------------------------------+
+
+The active and passive fingerprinting would help us to get those answers!
+
 Passive Fingerprinting:
 =======================
 
@@ -133,8 +153,8 @@ Whois provide information about the registered users or assignees of an Internet
 
 whois command acts differently for ip address and domain name.
 
-* In Domain name it just provides registrar name etc.
-* In IP address it provides the net-block ASN Number etc.
+* In Domain name, it just provides registrar name etc.
+* In IP address, it provides the net-block, ASN Number etc.
 
 ::
 
@@ -153,15 +173,15 @@ also helps for to search for new domains registered by the same organization. "R
 ASN Number
 ----------
 
-We could find AS Number that participates in Border Gateway Protocol (BGP) used by particular organization which could further inform about the IP address ranges used by the organization.ASN Number and information could be found by using Team CMRU whois service
+We could find AS Number that participates in Border Gateway Protocol (BGP) used by particular organization which could further inform about the IP address ranges used by the organization. ASN Number could be found by using Team CMRU whois service
 
 :: 
     
   whois -h whois.cymru.com " -v 216.90.108.31"                         |
       
-If you want to do bulk queries refer @`IP-ASN-Mapping-Team-CYMRU <http://www.team-cymru.org/IP-ASN-mapping.html>`__
+If you want to do bulk queries refer @ `IP-ASN-Mapping-Team-CYMRU <http://www.team-cymru.org/IP-ASN-mapping.html>`_
 
-Hurricane Electric Internet Services also provide a website `BGPToolkit <http://bgp.he.net>`__ which provides your IP Address ASN or search function by Name, IP address etc. It also provides AS Peers which might help in gathering more information about the company in terms of it's neighbors.
+Hurricane Electric Internet Services also provide a website `BGPToolkit <http://bgp.he.net>`__ which provides your IP Address ASN or search function by Name, IP address etc. It also provides AS Peers which might help in gathering more information about the company in terms of its neighbors.
 
 .. Todo ::  Commandline checking of subnet and making whois query efficient.
 
@@ -202,8 +222,8 @@ The harvester provides a email address, virtual hosts, different domains, shodan
 .. Todo :: Combine these results with recon-ng and DNS Dumpsters and create one csv with all results.
 
 
-Enumeration with Domain Name (e.g example.com) using external websites
-----------------------------------------------------------------------
+Enumeration with Domain Name (e.g. example.com) using external websites
+-----------------------------------------------------------------------
 
 If you have domain name you could use
 
@@ -213,47 +233,36 @@ DNS Dumpster API
 We can utilize DNS Dumpster API to know the various sub-domain related to that domain.
 :: 
        
-  #Script connects to the API and convert the required output to a CSV ready format.                       
-  #!/bin/bash 
-  #$1 is the first argument to script 
-  curl -s http://api.hackertarget.com/hostsearch/?q=$1 > hostsearch    
-  cat hostsearch | awk -F , '{print "\""$1"\""",""\""$2"\""}' > temp.csv
+  curl -s http://api.hackertarget.com/hostsearch/?q=example.com > hostsearch    
 
 and the various dns queries by
 
 :: 
 
-  #Script connects to the API and greps only the Name Servers.                                          
-  #!/bin/bash                      
-  #$1 is the first argument to the script                              
-  curl -s http://api.hackertarget.com/dnslookup/?q=$1 > dnslookup      
-  cat dnslookup | grep -v RRSIG | grep -v DNSKEY | grep -v SOA | grep NS > temp                            
-  cat -T temp > temp2 
-  cat temp2 | cut -d "I" -f7 | rev | cut -c 2- | rev
-  #rm temp temp2        
+  curl -s http://api.hackertarget.com/dnslookup/?q=example.com > dnslookup      
 
 Google search operators
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 * **site**: Get results from certain sites or domains.
 * **filetype:suffix**: Limits results to pages whose names end in suffix. The suffix is anything following the last period in the file name of the web page. For example: filetype:pdf
-* **allinurl/inurl**: Restricts results to those containing all the query terms you specify in the URL. For example, [ allinurl: google faq ] will return only documents that contain the words “google” and “faq” in the URL, such as “www.google.com/help/faq.html”.
-* **allintitle/intitle**:Restricts results to those containing all the query terms you specify in the title.
+* **allinurl/ inurl**: Restricts results to those containing all the query terms you specify in the URL. For example, [ allinurl: google faq ] will return only documents that contain the words “google” and “faq” in the URL, such as “www.google.com/help/faq.html”.
+* **allintitle/ intitle**:Restricts results to those containing all the query terms you specify in the title.
 
 Three good places to refer are `Search Operators <https://support.google.com/websearch/answer/2466433>`__, `Advanced Operators <https://sites.google.com/site/gwebsearcheducation/advanced-operators>`__ and `Google Hacking Database <https://www.exploit-db.com/google-hacking-database/>`__.
 
 Other Tools
 ^^^^^^^^^^^
 
-* `Mcafee Site Digger <http://www.mcafee.com/in/downloads/free-tools/sitedigger.aspx>`__ which searches Google’s cache to look for vulnerabilities, errors, configuration issues,proprietary information, and interesting security nuggets on web sites.
-* `SearchDiggityv3 <http://www.bishopfox.com/resources/tools/google-hacking-diggity/attack-tools/>`__ It is Bishop Fox’s MS Windows GUI application that serves as a front-end to the most recent versions of our Diggity tools: GoogleDiggity, BingDiggity, Bing, LinkFromDomainDiggity, CodeSearchDiggity, DLPDiggity, FlashDiggity, MalwareDiggity, PortScanDiggity, SHODANDiggity, BingBinaryMalwareSearch, and NotInMyBackYard Diggity.
+* `Mcafee Site Digger <http://www.mcafee.com/in/downloads/free-tools/sitedigger.aspx>`__ searches Google’s cache to look for vulnerabilities, errors, configuration issues,proprietary information, and interesting security nuggets on web sites.
+* `SearchDiggityv3 <http://www.bishopfox.com/resources/tools/google-hacking-diggity/attack-tools/>`__ is Bishop Fox’s MS Windows GUI application that serves as a front-end to the most recent versions of our Diggity tools: GoogleDiggity, BingDiggity, Bing, LinkFromDomainDiggity, CodeSearchDiggity, DLPDiggity, FlashDiggity, MalwareDiggity, PortScanDiggity, SHODANDiggity, BingBinaryMalwareSearch, and NotInMyBackYard Diggity.
 
 
 Publicly available scans of IP Addresses
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* `Exfiltrated <https://exfiltrated.com/>`__  It provides the scans from the 2012 Internet Census. It would provide the IP address and the port number running at the time of scan in the year 2012.
-* `Shodan <https://www.shodan.io/>`__: Shodan provides the same results may be with recent scans. You need to be logged-in. Shodan CLI is available at `Shodan Command-Line Interface <https://cli.shodan.io/>`__
+* `Exfiltrated <https://exfiltrated.com/>`__ provides the scans from the 2012 Internet Census. It would provide the IP address and the port number running at the time of scan in the year 2012.
+* `Shodan <https://www.shodan.io/>`__: provides the same results may be with recent scans. You need to be logged-in. Shodan CLI is available at `Shodan Command-Line Interface <https://cli.shodan.io/>`__
 
 Shodan Queries 
 
@@ -271,12 +280,11 @@ Shodan Queries
 
 .. Todo :: Learn how to access Shodan with API
 
-* `Netmux <http://www.netmux.com/>`__: NETMUX is the all-source information hub about every IP address, device, IOT, or domain on the internet. All with a single query.
-* `Censys <https://censys.io/>`__: Censys is a search engine that allows computer scientists to ask questions about the devices and networks that compose the Internet.Driven by Internet-wide scanning, Censys lets researchers find specific hosts and create aggregate reports on how devices, websites, and certificates are configured and deployed. A good feature is the Query metadata which tells the number of Http,https and other protocols found in the IP network range.
+* `Censys <https://censys.io/>`__: Censys is a search engine that allows computer scientists to ask questions about the devices and networks that compose the Internet. Driven by Internet-wide scanning, Censys lets researchers find specific hosts and create aggregate reports on how devices, websites, and certificates are configured and deployed. A good feature is the Query metadata which tells the number of Http, https and other protocols found in the IP network range.
 
-Censys.io queries
+ Censys.io queries
    
-:: 
+ :: 
 
   ip:192.168.0.0/24 -- CIDR notation
 
@@ -284,7 +292,7 @@ Censys.io queries
 Reverse DNS Lookup using External Websites
 ------------------------------------------
 
-Even after doing the above, sometimes we miss few of the domain name. Example: Recently, In  one of our engagement, the domain name was example.com and the asn netblock was 192.168.0.0/24. We did recon-ng, theharvester, DNS reverse-lookup via nmap. Still, we missed few of the websites hosted on same netblock but with different domain such as exam.in. We can find such entries by using ReverseIP lookup by
+Even after doing the above, sometimes we miss few of the domain name. Example: Recently, In  one of our engagement, the domain name was example.com and the asn netblock was 192.168.0.0/24. We did recon-ng, theharvester, DNS reverse-lookup via nmap. Still, we missed few of the websites hosted on same netblock but with different domain such as example.in. We can find such entries by using ReverseIP lookup by
 
 DomainTools Reverse IP Lookup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -297,11 +305,11 @@ PassiveTotal
 Server-Sniff
 ^^^^^^^^^^^^
 
-`Server Sniff <http://serversniff.net.ipaddress.com/>`__ : A website providing IP Lookup,Reverse IP services.
+`Server Sniff <http://serversniff.net.ipaddress.com/>`__ : A website providing IP Lookup, Reverse IP services.
 
 Robtex
 ^^^^^^
-`Robtex <https://www.robtex.com/>`__ : Robtex is one of the world's largest network tools. At robtex.com, you will find everything you need to know about domains, DNS, IP, Routes, Autonomous Systems, etc. There's a nmap nse `http-robtex-reverse-ip <https://nmap.org/nsedoc/scripts/http-robtex-reverse-ip.html>`__ which can be used to find the domain/website hosted on that ip.
+`Robtex <https://www.robtex.com/>`__ : Robtex is one of the world's largest network tools. At robtex.com, you will find everything you need to know about domains, DNS, IP, Routes, Autonomous Systems, etc. There's a nmap nse `http-robtex-reverse-ip <https://nmap.org/nsedoc/scripts/http-robtex-reverse-ip.html>`__ which can be used to find the domain/ website hosted on that ip.
 
 ::
  
@@ -316,7 +324,7 @@ Robtex
 Active Fingerprinting
 =====================
 
-Most probably by now we have gathered all the public available information without interacting with client infrastructure. Next, we can use **DNS enumeration** to  gather more information about the client. The below information could gather externally as well as internally. However, amount of information gathered from internal network would definitely be more than when done externally.
+Most probably by now we have gathered all the public available information without interacting with client infrastructure. Next, we can use **DNS enumeration** to gather more information about the client. The below information could gather externally as well as internally. However, amount of information gathered from internal network would definitely be more than when done externally.
 
 Finding DNS, MX, AAAA, A using
 ------------------------------
@@ -421,7 +429,7 @@ Service record (SRV record) is a specification of data in the Domain Name System
 
  :: 
 
-   Teamspeak 3 (since version 3.0.8 - Neither priority nor weight is taken into consideration.The client appears to choose an SRV record at random for a connection attempt.[1])
+   Teamspeak 3 (since version 3.0.8 - Neither priority nor weight is taken into consideration. The client appears to choose an SRV record at random for a connection attempt.[1])
    Minecraft (since version 1.3.1, _minecraft._tcp)
    CalDAV and CardDAV
    Client SMTP Authorization
@@ -437,7 +445,7 @@ Service record (SRV record) is a specification of data in the Domain Name System
    Microsoft Lync
    Citrix Receiver
 
- Checkout the brute\_srv function in the dnsrecon tool script to get familar with the different SRV names and services.
+ Checkout the brute\_srv function in the dnsrecon tool script to get familiar with the different SRV names and services.
 
 
 Internal Infrastructure Mapping
@@ -449,6 +457,15 @@ Internal Network Range Identification
 -------------------------------------
 
 In many instances, we are provided or expected to find vulnerabilities in a 10.0.0.0/8 network which would contain around 16 million IP Addresses. Scanning 16 million IP address in a considerable time is difficult. In which case, we need faster and targeted result. So, how do we find out the ranges?
+
+Ping Gateway IP Addresses
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say internally, we got an IP address 192.168.56.101 netmask 255.255.255.0 with a default gateway of 192.168.56.1. It is a high probability that rest of network rangers would have been defined as /24 CIDR. In that case, a ping scan to 192.168.*.1 with a watch on the TTL would possibly reveal what are the other network ranges.
+
+::
+
+ nmap -sn -v -PE 192.168.*.1
 
 DNS Enumeration
 ^^^^^^^^^^^^^^^^
@@ -468,7 +485,7 @@ which should result in outputting different name servers, mail servers, A, AAAA,
 Internal Portal Links
 ^^^^^^^^^^^^^^^^^^^^^
 
-Most of the organization have one internal portals which serves has a one-stop links to every possible portal link. This could also result in some internal range exposure.
+Most of the organizations have one internal portals which serves has a one-stop links to every possible portal link. This could also result in some internal range exposure.
          
 .. Todo :: Write the script for grep and printing host and IP address and combine it with DNS Enumeration.
       
@@ -488,15 +505,6 @@ It can also be used with the below options:
   --randomize-hosts  : make the scans less obvious to various network monitoring systems
   --dns-servers server1,server2 : By default, it would use the dns servers which are listed in resolve.conf (if you haven't used --system-dns option). We can also list custom servers using these options.
 
-Ping Gateway IP Addresses
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Let's say internally, we got an IP address 192.168.56.101 netmask 255.255.255.0 with a default gateway of 192.168.56.1. It is a high probability that rest of network rangers would have been defined as /24 CIDR. In that case, a ping scan to 192.168.*.1 with a watch on the TTL would possibly reveal what are the other network ranges.
-
-::
-
- nmap -sn -v -PE 192.168.*.1
-
 
 Identifying Alive IP Addresses
 ------------------------------
@@ -510,7 +518,7 @@ Let's see what the nmap does when do a ping scan.
   nmap -sn -n 10.0.0.230
   #My IP is 10.0.0.1
         
-It is very important to mention that -n option (No DNS resolution) should be used going forward as we have already did DNS resolution while using List scan. Since DNS can be slow even with Nmap's built-in parallel stub resolver, this option can slash scanning times. TCP Dump output is presented here. As both the IP address are in the same subnet, nmap would use ARP Ping scan to find the alive IP Address.
+It is very important to mention that -n option (No DNS resolution) should be used going forward as we have already did DNS resolution while using List scan. Since DNS can be slow even with Nmap's built-in parallel stub resolver, this option can slash scanning times. TCP Dump output is presented here. As both the IP addresses are in the same subnet, nmap would use ARP Ping scan to find the alive IP Address.
 
 :: 
 
@@ -544,7 +552,7 @@ If you use --reason option, nmap would tell why it thinks the host is alive. In 
   Nmap scan report for 10.0.0.230
   Host is up, received echo-reply (0.073s latency).
       
-If we only want to send ICMP Ping query ( as if the host replies to it, the other three packets (SYN 443, ACK 80 and Timestamp )are extra burden. ( I may be wrong here). We can use
+If we only want to send ICMP Ping query (as if the host replies to it, the other three packets (SYN 443, ACK 80 and Timestamp) are extra burden. (I may be wrong here). We can use
 
 ::
 
@@ -569,14 +577,14 @@ This could be evaded by using
   --data-string <string> (Append custom string to sent packets)
   --data-length <number> (Append random data to sent packets)
 
-Please note that you should use this options only on ICMP Echo Request for IDS Evasion as the data gets appended to every packet (ex. port scan packets). Designing the ideal combinations of probes as suggested in the Nmap Book is
+Please note that you should use these options only on ICMP Echo Request for IDS Evasion as the data gets appended to every packet (ex. port scan packets). Designing the ideal combinations of probes as suggested in the Nmap Book is
 
 ::
      
   -PE -PA -PS 21,22,23,25,80,113,31339 -PA 80,113,443,10042
    Adding --source-port 53 might also help
 
-The above combination would find more hosts than just the ping scan, however it also gonna cost a decent amount of time. Normal Time vs Accuracy trade off.
+The above combination would find more hosts than just the ping scan, however it also gonna cost a decent amount of time. Normal Time vs. Accuracy trade off.
 
 Port Scanning
 --------------
@@ -588,11 +596,11 @@ Once you have the list of IP Addresses which are alive, we can do port scan on t
   -sS TCP SYN Stealth : Half Open SYN Scan : Nmap sends the SYN packet, Server would send SYN/ACK, System would send RST.
   -sT TCP Connect Scan : Nmap uses system to send the SYN scan : Connect full TCP Handshake
   -sU UDP Scan 
-  -sA ACK Scan : Ack scan is generally used to map out firewall rulesets. Whether firewall is stateful or not.
+  -sA ACK Scan : Ack scan is generally used to map out firewall rule sets. Whether firewall is stateful or not.
 
 Please note p0f recognizes Nmap's SYN scan because of the TCP Options such as TCP window size a multiple of 1024, and only the MSS option supported with a value of 1460 (Check the tcpdump output of Ping scan above, SYN Packet). Recently, a IRC user was getting filtered port while using SYN Scan whereas was getting OPN ports which using telnet or TCP Connect Scan. Also, A patch to allow a user to override the TCP Window size in SYN scan was just posted to the `Nmap DevelopmentList <http://seclists.org/nmap-dev/2015/q3/52>`__. 
 
-By default, nmap scans the 1000 most popular ports of eachprotocol ( gathered by scanning million of IP address ). Scanning 1000 ports in an unknown environment with 16 million IP Address could be challenging. Nmap also provides -F Fast scan option which scans the 100 most common ports in each protocol. Otherwise it also provides --top-ports to specify an arbitrary number of ports. So, How do we know what are the ports scanned with --top-portsoption. This could be found by
+By default, nmap scans the 1000 most popular ports of each protocol (gathered by scanning million of IP address). Scanning 1000 ports in an unknown environment with 16 million IP Address could be challenging. Nmap also provides -F Fast scan option which scans the 100 most common ports in each protocol. Otherwise it also provides --top-ports to specify an arbitrary number of ports. So, How do we know what are the ports scanned with --top-ports option. This could be found by
 
 :: 
  
@@ -604,7 +612,7 @@ or
 
   nmap localhost -F -oX - | grep '^<scaninfo'
 
-Nmap needs an nmap-services file with frequency information in order to know which ports are the most common. See the sectioncalled `Well Known Port List: nmap-services <http://seclists.org/nmap-dev/2015/q3/52>`__ : for more information about port frequencies. We could provide ports to nmap by using -p option also, for example
+Nmap needs an nmap-services file with frequency information in order to know which ports are the most common. See the section called `Well Known Port List: nmap-services <http://seclists.org/nmap-dev/2015/q3/52>`__ : for more information about port frequencies. We could provide ports to nmap by using -p option also, for example
 
 :: 
  
@@ -622,7 +630,7 @@ For a TCP scan, the format is
 ::
       
   nc -vvn -z xxx.xxx.xxx.xxx startport-endport
-     -z flag is Zero-I/O mode ( used for scannng )  
+     -z flag is Zero-I/O mode (used for scanning)  
      -vv will provide verbose information about the results
      -n flag allows to skip the DNS lookup
 
@@ -649,7 +657,7 @@ Ideally, to avoid the IDS Detection, we should avoid using -sV option. However, 
   --version-all (Try every single probe) : An alias for --version-intensity 9
   --version-trace (Trace version scan activity) : Print debugging information.
       
-Also, when -sV is specified apart from the probes, all the scripts in the `Version <https://nmap.org/nsedoc/categories/version.html>`__ category are executed. These scripts could be prevented from running by removing them from the script.db catalog or by building Nmap without NSE support (./configure --without-liblua). However,if --version-intensity option is less than 7, those scripts won't be executed ( I might be a little wrong here).
+Also, when -sV is specified apart from the probes, all the scripts in the `Version <https://nmap.org/nsedoc/categories/version.html>`__ category are executed. These scripts could be prevented from running by removing them from the script.db catalog or by building Nmap without NSE support (./configure --without-liblua). However, if --version-intensity option is less than 7, those scripts won't be executed (I might be a little wrong here).
  
 So our scan would become approx
 
@@ -661,7 +669,7 @@ So our scan would become approx
 Performance
 ^^^^^^^^^^^
       
-So, How can we improve the performance of our nmap scan, so that result could be  achieved faster. However, as always we will have Time Vs Accuracy Trade off.
+So, How can we improve the performance of our nmap scan, so that result could be achieved faster. However, as always we will have Time Vs Accuracy Trade off.
       
 :: 
   
@@ -673,12 +681,12 @@ So, How can we improve the performance of our nmap scan, so that result could be
   --min-rate <number>: Send packets no slower than <number> per second
   --max-rate <number>: Send packets no faster than <number> per second
       
-T0,T1,T2 is specifically for IDS Evasion. T3 is the default. We can set max-retries to a lower value such as 2. Currently it's 10 for T0,T1,T2,T3; 6 for T4 and 2 for T5.
+T0, T1, T2 is specifically for IDS Evasion. T3 is the default. We can set max-retries to a lower value such as 2. Currently it's 10 for T0, T1, T2, T3; 6 for T4 and 2 for T5.
      
 Nmap Scripts
 ^^^^^^^^^^^^^
  
-As bonsaiviking says `Here <http://blog.bonsaiviking.com/2015/07/they-see-me-scannin-part-2.html>`__: If you are wild enough to try NSE scripts against an IDS-protected target, you should know how to read Lua, since the script sources are the final authority on what data is sent. But if you're just looking to get a little better at blending in, these tips should help:
+As bonsaiviking says in `They See Me Scanning Part 2 <http://blog.bonsaiviking.com/2015/07/they-see-me-scannin-part-2.html>`__ If you are wild enough to try NSE scripts against an IDS-protected target, you should know how to read Lua, since the script sources are the final authority on what data is sent. But if you're just looking to get a little better at blending in, these tips should help:
 
 * Use --script-args-file to pass script arguments to Nmap from a file. This will keep your command line clean and make it harder to accidentally miss one of the options you choose
 * Obviously avoid dos, intrusive, and exploit category scripts.
@@ -721,14 +729,14 @@ There are four ways (in my knowledge to do this)
 
 * Another method is to use `html2image <https://code.google.com/p/java-html2image/>`__ which is a simple Java library converts plain HTML markup to image and provides client-side image-map using html element.
 
-* **RAWR: Rapid Assesment of Web Resourses**: `RAWR <https://bitbucket.org/al14s/rawr/wiki/Home>`__ provides with a customizable CSV containing ordered information gathered for each host, with a field for making notes/etc.; An elegant, searchable, JQuery-driven HTML report that shows screenshots, diagrams, and other information. A report on relevent security headers. In short, it provides a landscape of your  webapplications. It takes input from multiple formats such as Nmap, Nessus, OpenVAS etc.
+* **RAWR: Rapid Assessment of Web Resources**: `RAWR <https://bitbucket.org/al14s/rawr/wiki/Home>`__ provides with a customizable CSV containing ordered information gathered for each host, with a field for making notes/etc.; An elegant, searchable, JQuery-driven HTML report that shows screenshots, diagrams, and other information. A report on relevant security headers. In short, it provides a landscape of your webapplications. It takes input from multiple formats such as Nmap, Nessus, OpenVAS etc.
       
 Information Gathering for http* Services
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* `WhatWeb <http://www.morningstarsecurity.com/research/whatweb>`__ recognises web technologies including content management systems (CMS), blogging platforms, statistic/analytics packages, JavaScript libraries, web servers, and embedded device. `Tellmeweb <https://www.aldeid.com/wiki/Tellmeweb>`__ is a ruby script to read Nmap Gnmap file and run whatweb on all of them. A `WhatWeb Result Parser <https://github.com/stevecoward/whatweb-parser>`__ also has been written which converts the results to CSV format. More information about advance usage can be found `here <https://github.com/urbanadventurer/WhatWeb/wiki/Advanced-Usage>`__.
+* `WhatWeb <http://www.morningstarsecurity.com/research/whatweb>`__ recognises web technologies including content management systems (CMS), blogging platforms, statistic/analytics packages, JavaScript libraries, web servers, and embedded device. `Tellmeweb <https://www.aldeid.com/wiki/Tellmeweb>`__ is a ruby script to read Nmap Gnmap file and run whatweb on all of them. A `WhatWeb Result Parser <https://github.com/stevecoward/whatweb-parser>`__ also has been written which converts the results to CSV format. More information about advance usage can be found `Whatweb Advance Usage <https://github.com/urbanadventurer/WhatWeb/wiki/Advanced-Usage>`__.
       
-* Wapplyzer <http://wappalyzer.com>`__ is a Firefox plug-in. There are four ways (in my knowledge to do this)be loaded on browser. It works completely at the browser level and gives results in the form of icons.
+* `Wapplyzer <http://wappalyzer.com>`__ is a Firefox plug-in. There are four ways (in my knowledge to do this)be loaded on browser. It works completely at the browser level and gives results in the form of icons.
 * `W3Tech <http://w3techs.com/>`__ is another Chrome plug-in which provides information about the usage of various types technologies on the web. It tells the web technologies based on the crawling it has done. So example.com, x1.example.com, x2.example.com will show the same technologies as the domain is same (which is not correct).
       
 * `ChromeSnifferPlus <https://github.com/justjavac/ChromeSnifferPlus>`__ is another chrome extension to sniff about the different web-technologies used by the website.
@@ -761,7 +769,7 @@ NBTSCAN
       
 enum4linux
 ^^^^^^^^^^^^
-A Linux alternative to enum.exe for enumerating data from Windows and Samba hosts. It is is basically a wrapper around the Samba tools smbclient, rpclient, net and nmblookup.A very good usage guide is`here <https://labs.portcullis.co.uk/tools/enum4linux/>`__
+A Linux alternative to enum.exe for enumerating data from Windows and Samba hosts. It is is basically a wrapper around the Samba tools smbclient, rpclient, net and nmblookup. A very good usage guide is `enum4linx <https://labs.portcullis.co.uk/tools/enum4linux/>`__
 
          
 SNMP Enumeration
@@ -794,8 +802,8 @@ It also allows us to interact with the SNMP version 3. It also allows to extract
 
 onesixtyone allows you to brute force the community strings, you could onesixty one tool
 
-Attack Surface Area - Reconnaisnce Tools
-========================================
+Attack Surface Area - Reconnaissance Tools
+==========================================
 
 Aquatone: A tool for domain flyovers
 ------------------------------------
@@ -819,7 +827,7 @@ Overview:
 Spiderfoot
 ----------
 
-`SpiderFoot <http://www.spiderfoot.net/>`_ SpiderFoot is an open source intelligence automation tool. Its goal is to automate the process of gathering intelligence about a given target, which may be an IP address, domain name, hostname or network subnet. SpiderFoot can be used offensively, i.e. as part of a black-box penetration test to gather information about the target or defensively to identify what information your organisation is freely providing for attackers to use against you.
+`SpiderFoot <http://www.spiderfoot.net/>`_ is an open source intelligence automation tool. Its goal is to automate the process of gathering intelligence about a given target, which may be an IP address, domain name, hostname or network subnet. SpiderFoot can be used offensively, i.e. as part of a black-box penetration test to gather information about the target or defensively to identify what information your organization is freely providing for attackers to use against you.
 
 Intrigue.io
 -----------
@@ -830,7 +838,7 @@ Appendix-I : Interesting Stories
 ================================
 
 Initial Compromise
------------------
+-------------------
 
 * `Apache and Java Information Disclosures Lead to Shells <http://threat.tevora.com/apache-and-java-information-disclosures-lead-to-shells/>`_ : Richard De La Cruz talks about a recent Red-Team engagement, where they discovered a series of information disclosures on a site allowing the team to go from zero access to full compromise in a matter of hours.
 

@@ -1,6 +1,6 @@
-*************************************************
-Infrastruture PenTest Series : Part 5 - Reporting
-*************************************************
+**************************************************
+Infrastructure PenTest Series : Part 5 - Reporting
+**************************************************
 
 This blog would explore different open-source reporting tools and data-management tools which can be utilized to during Penetration Test.
 

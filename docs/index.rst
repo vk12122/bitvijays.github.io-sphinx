@@ -16,16 +16,16 @@ The Magic of Learning
 The Essentials Series
 #####################
 
-Series covers the essential concepts/ skills required to be in the field of Cyber-Security.
+The Essentials Series covers the essential concepts/ skills required to be in the field of CyberSecurity.
 
-- :doc:`Overview of CyberSecurity in an Enterprise <LFF-ESS-P0A-OverviewCyberSecurityEnterprise>` : IT Technical challenges and solutions required to protect the organization faced during the transformation from two people staring a new company and scaling it to Micro, Small, Medium-sized, larger.
+- :doc:`CyberSecurity in an Enterprise <LFF-ESS-P0A-CyberSecurityEnterprise>` : IT Technical challenges and solutions required to protect the organization faced during the transformation from two people staring a new company and scaling it to Micro, Small, Medium-sized, larger.
 - :doc:`Linux Basics <LFF-ESS-P0B-LinuxEssentials>` : Essential linux commands and concepts required in Infosec field.
 
 #############################
 Infrastructure Pentest Series
 #############################
 
-Series cover all the phases of Infrastructure Pentest as described in Pentest-Standard.org
+The Infrastructure Pentest Series cover all the phases of Infrastructure Pentest as described in Pentest-Standard.org
 
 - :doc:`Intelligence Gathering <LFF-IPS-P1-IntelligenceGathering>` : Technical steps to perform information gathering phase of an organization and figuring out the attack-surface area.
 - :doc:`Vulnerability Analysis <LFF-IPS-P2-VulnerabilityAnalysis>` : Exploring different services running on different ports of a machine by utilizing metasploit-fu and nmap or other tools.
@@ -37,14 +37,15 @@ Series cover all the phases of Infrastructure Pentest as described in Pentest-St
 Capture the flag Series
 #######################
 
-Series covers the learning obtained by solving the Capture the flag ( CTF ) challenges
+Series covers the learning obtained by solving the Capture the flag (CTF) challenges
 
-- :doc:`Vulnerable Machines <LFC-Vulnhub>`                         : Knowledge gained by solving/ reading write-ups of vulnerable machines provided by the `VulnHub Website <https://www.vulnhub.com/>`_.
+- :doc:`Vulnerable Machines <LFC-VulnerableMachines>`                         : Knowledge gained by solving/ reading write-ups of vulnerable machines provided by the `VulnHub Website <https://www.vulnhub.com/>`_, `Hack the Box <https://www.hackthebox.eu/en>`_ etc. 
 - :doc:`Binary Exploitation <LFC-BinaryExploitation>` : Knowledge gained by solving/ reading write-ups of binary exploitation challenges.
 
-#########################
-About Me and Blog Archive
-#########################
+#######################################
+Contributors, Blog Archive and About Me
+#######################################
 
-- :doc:`About Me <aboutme>`
+- :doc:`Contributors <contrib>`
 - :doc:`Blog Archive <content>`
+- :doc:`About Me <aboutme>`

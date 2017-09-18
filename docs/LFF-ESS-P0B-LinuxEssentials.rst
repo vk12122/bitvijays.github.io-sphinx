@@ -7,7 +7,7 @@
 The Essentials : Linux Basics
 *****************************
 
-This post lists essential commands and concepts which would be helpful to a Linux user. We would cover tools required for programming ( Vi, git ), system administration ( Bash configuration files, Updating Debian Linux System, Adding/ Deleting/ Modifying Users/ Groups, Changing Group/ Owner/ Permission, Mounting/ Unmounting, Linux Directories, Runlevels and Kernel Configurations ). Also, provide some useful tips, tricks and TODO which would help you learn and practice.
+This post lists essential commands and concepts which would be helpful to a Linux user. We would cover tools required for programming (Vi, git), system administration (Bash configuration files, Updating Debian Linux System, Adding/ Deleting/ Modifying Users/ Groups, Changing Group/ Owner/ Permission, Mounting/ Unmounting, Linux Directories, Runlevels and Kernel Configurations). Also, provide some useful tips, tricks and TODO which would help you learn and practice.
 
 Vi : Powerful Editor
 ======================
@@ -32,17 +32,17 @@ Two modes - Command and Insert Mode. All commands below are in command mode.
   b                           - Move to the beginning of the word.
   3w                          - 3w is similar to pressing w 3 times, moves to the start of the third word.
   30i-'EscKey'                - 30<insert>-<EscapeKey> : Inserts 30 - at once.
-  f                           - find and move to the next ( or previous ) occurence of a character. fo find next o.
-  3fo                         - find third occurence of o
+  f                           - find and move to the next (or previous) occurrence of a character. fo find next o.
+  3fo                         - find third occurrence of o
   %                           - In text that is structured with parentheses or brackets, ( or { or [, use % to jump to the matching parenthesis or bracket.
   0 (Zero)                    - Reach beginning of the line
   $                           - Reach end of the line.
-  *                           - Find the next occurence of the word under cursor
-  #                           - Find the previous occurence of the word under cursor
+  *                           - Find the next occurrence of the word under cursor
+  #                           - Find the previous occurrence of the word under cursor
   gg                          - Reach beginning of the file
   G                           - Reach end of the file
   30G                         - Reach the 30th line in the file
-  /<text>                     - Search for the text. Utilize n, N for next and previous occurences.
+  /<text>                     - Search for the text. Utilize n, N for next and previous occurrences.
   o                           - Insert a new line below the cursor
   O                           - Insert a new line above the cursor
   x                           - Delete the character
@@ -62,7 +62,7 @@ Two modes - Command and Insert Mode. All commands below are in command mode.
   :set nospell                - Turn spell checking off
   :set list                   - If 'list' is on, whitespace characters are made visible. The default displays "^I" for each tab, and "$" at each EOL (end of line, so trailing whitespace can be seen)
   :u                          - Undo one change.
-  z=                          - If the cursor is on the word ( which is highlighted with spell check), Vim will suggest a list of alternatives thatit thinks may be correct.
+  z=                          - If the cursor is on the word ( which is highlighted with spell check), Vim will suggest a list of alternatives that it thinks may be correct.
   yy                          - Yank or copy current line.
   y$, yny                     - Similar to delete lines.
   p                           - Paste the line in the buffer in to text after the currentline.
@@ -87,7 +87,7 @@ A good details about various options which can be set in vimrc can be found at `
 
 .viminfo
 ^^^^^^^^
-Viminfo file stores command-line, search string, input-line history and other stuff.Useful if you want to find out what user has been doing in vi.
+Viminfo file stores command-line, search string, input-line history and other stuff. Useful if you want to find out what user has been doing in vi.
 
 .. Tip:: Both files are present in user home directory.
 
@@ -100,6 +100,16 @@ Replace text in Vi
   :s/test/learn/g   - would replace test to learn in current line all the instance.
   :s/test/learn/gi  - would replace test (all cases) to learn in current line all the instance.
   :%s/test/learn/gi - would replace test to learn in the file (all lines)
+
+Other Info:
+^^^^^^^^^^^
+
+* `Vim Awesome <https://vimawesome.com/>`_ provides Awesome VIM plugins from across the universe. Few good one are
+
+ * The NERD tree : A tree explorer plugin for vim
+ * Syntastic : Syntax checking hacks for vim
+ * Youcompleteme : A code-completion engine for Vim
+
 
 Bash configuration files - For Debian/Ubuntu based Systems 
 ==========================================================
@@ -142,9 +152,8 @@ Using apt-get
   apt-cache show  "Package name" - Shows what package is used for.
   apt-cache search "Keywords"    - Search package name based on keywords.
 
-.. Tip:: As mostly, updating takes time, you can club all the commands like "apt-get update && apt-get upgrade && apt-get dist-upgrade &&  poweroff".
+.. Tip:: As mostly, updating takes time, you can club all the commands like "apt-get update && apt-get upgrade && apt-get dist-upgrade &&  poweroff". poweroff would shutdown the system after everything is updated.
 
-  poweroff would shutdown the system after everything is updated.
 
 Using Debian Package Manager dpkg
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -191,8 +200,8 @@ Changing Group/Owner/Permission
   chmod              : change file mode bits.
   chgrp              : change group ownership.
   SUID bit           : SetUID bit specifies that an executable should run as its owner instead of the user executing it.
-                       : SUID is mostly commonly used to run an executable as root, allowing users to perform tasks such as changing their passwords.
-                       :If there is a flaw in a SUID root executable, you can run arbitrary code as root.
+                     : SUID is mostly commonly used to run an executable as root, allowing users to perform tasks such as changing their passwords.
+                     : If there is a flaw in a SUID root executable, you can run arbitrary code as root.
 
 Mounting/ Unmounting
 --------------------
@@ -234,9 +243,9 @@ Linux Boot Process
 
 :: 
       
-  1. BIOS starts the boot loader 
-  2. Boot loader loads the kernel into memory 
-  3. The Kernel mounts disks/partitions and starts the init daemon 
+  1. BIOS start the boot loader. 
+  2. Boot loader loads the kernel into memory.
+  3. The Kernel mounts disks/partitions and starts the init daemon. 
   4. The init daemon starts services based on the runlevel.
           
 Linux has six runlevels 0-6. Scripts are contained in /etc/rc[0-6,S].d/. Each folder contains the scripts which are followed by either K or S. If the first letter is K that script is not executed. If S, that script is executed. /etc/inittab contains the default run level.
@@ -249,7 +258,7 @@ ID     Name                                                       Description
 2      Multi-user Mode                                            Does not configure network interfaces and does not export networks services      
 3      Multi-user Mode with Networking                            Starts the system normally.                       
 4      Not used/User-definable                                    For special purposes.                        
-5      Start system normally with display manager. ( with GUI )   Same as runlevel 3 + display manager               
+5      Start system normally with display manager (with GUI).     Same as runlevel 3 + display manager               
 6      Reboot                                                     Reboot the system                              
 ====   ========================================================   =============================================================================
 
@@ -286,14 +295,19 @@ Debian GNU provides a convenient tool to manage runlevels (to control when servi
 
  :: 
 
-   update-rc.d -f <service name> remove : Disabling a service
+   update-rc.d -f <service name> remove : Disabling a service.
    update-rc.d <service name> defaults  : Insert links using defaults, start in runlevel 2-5 and stop in runlevels 0,1 and 6.
  
 * Systemctl : Control the systemd system and service manager. systemctl may be used to introspect and control the state of the "systemd" system and service manager.
 
  :: 
 
-   systemctl : Present a detailed output about the different services running
+   systemctl : Present a detailed output about the different services running.
+
+   e.g. 
+   
+   systemctl status <service_name> - Status of the service.
+   systemctl start <service_name>  - Start the service
 
 Programming
 ===========
@@ -330,7 +344,7 @@ GDB: GNU debugger
   bt                : to print the stack call, mainly useful to find segmentation fault when multiple functions are called.
 
 
-Gathering information
+Gathering Information
 =====================
 
 From Files
@@ -360,8 +374,8 @@ From Commands
   hostname  : prints out the hostname of the machine which is stored in /etc/hostname.
 
 
-Useful Utilites/ Commands
-=========================
+Useful Utilities/ Commands
+==========================
     
 Copy - Copy files and directories
 ---------------------------------
@@ -379,6 +393,7 @@ cut - remove sections from each line of files
 
 ::  
 
+ cut OPTION... [FILE]...
   -d        : use DELIM instead of TAB for field delimiter.
   -f        : select only these fields.
 
@@ -387,7 +402,7 @@ Pipes
 
 ::
 
-  >        : direct normal output.
+  >         : direct normal output.
   2>        : direct error output.
   &>        : direct all output.
 
@@ -413,7 +428,7 @@ find - Searching files
   -user       : File is owned by user uname (numeric user ID allowed).
   -group      : File belongs to group gname (numeric group ID allowed).
   -size       : File uses n units of space. c/k/M/G: bytes/Kilobytes/Megabytes/Gigabytes.
-  -name       :
+  -name       : Base  of  file  name
 
 Delete empty file and directories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -456,7 +471,7 @@ Other commands
   tee       : saves output in file as well as forward it.
   touch     : Create zero byte files, mainly used for changing the timestamps of the file.
   make      : If your program source file name is test.c/cpp, then you can directly write make test, this would compile the test.c/cpp program. Remember this it's a faster way.
-  stat      : View detailed information about a file, including its name,size, last modified date, and permissions.
+  stat      : View detailed information about a file, including its name, size, last modified date and permissions.
   uniq      : Report or omit repeated lines.
     -c      : prefix lines by the number of occurrences. (--count)
 
@@ -634,7 +649,7 @@ Confidentiality, Integrity, Availability
 We want our information to 
 
 * be read by only the right people (confidentiality).
-* only be changed by authorised people or processes (integrity)
+* only be changed by authorized people or processes (integrity)
 * be available to read and use whenever we want (availability).
 
 Non-repudiation
@@ -647,11 +662,39 @@ Difference between su and sudo
 su
 ^^
 
-Change users or become superuser. The difference between su - and su is that former su - would switch to the new user directory. It would also change the environment variable according to the changed user.
+Change users or become superuser. The difference between "su -" and "su" is that former "su -" would switch to the new user directory. It would also change the environment variable according to the changed user. Whereas "su" would only change the user but will stay in the same directory.
+
+Example: "su -" 
+
+::
+
+ root@Kali-Home:~# su - bitvijays
+ bitvijays@Kali-Home:~$ pwd
+ /home/bitvijays
+
+Example: "su"
+
+::
+
+ root@Kali-Home:~# su bitvijays
+ bitvijays@Kali-Home:/root$ pwd
+ /root
+
+su -c
+^^^^^
+
+Executing command as another user
 
 :: 
 
   su -c "command" : Specify a command that will be invoked by the shell using its -c.
+
+Example:
+
+::
+
+ su bitvijays -c id
+ uid=1000(bitvijays) gid=1001(bitvijays) groups=1001(bitvijays)
 
 sudo
 ^^^^
@@ -750,7 +793,7 @@ Scan files for a text present in them Find a way to scan my entire linux system 
     -B <NUM>              : Print NUM lines of trailing context before matching lines.
     -a, --text            : Process a binary file as if it were text; this is equivalent to the --binary-files=text option.
  
- .. Note :: --exclude or --include parameter could be used for efficient searching.
+.. Note :: --exclude or --include parameter could be used for efficient searching.
 
 Apt-get error?
 --------------
@@ -815,11 +858,11 @@ Keyboard shortcuts
 
 :: 
 
-  Move to the start of line. Ctrl + a
-  Move to the end of line. Ctrl + e
-  Cut from cursor to previous whitespace. Ctrl + w
-  Cut from cursor to the end of line. Ctrl + k
-  Paste the last cut text. Ctrl + y
+  Ctrl + a : Move to the start of line.
+  Ctrl + e : Move to the end of line.
+  Ctrl + w : Cut from cursor to previous whitespace.
+  Ctrl + k : Cut from cursor to the end of line.
+  Ctrl + y : Paste the last cut text.
 
 Searching History
 -----------------
@@ -828,7 +871,7 @@ Searching History
 
   Search as you type. Ctrl + r and type the search term;
 
-Read `here <http://www.gnu.org/software/bash/manual/bashref.html#Command-Line-Editing>`_. more for Command Line Editing. 
+Read `Command Line Editing <http://www.gnu.org/software/bash/manual/bashref.html#Command-Line-Editing>`_ for more information.
 
 Awk converting to normal output to csv
 --------------------------------------
@@ -884,27 +927,27 @@ Supposed you got access via shell to a linux system and extract some information
 Task 3 : Add User
 ^^^^^^^^^^^^^^^^^
 
-* Create a alice, bob, eve with the password "password" HINT: set password using chpasswd, look some examples in google to change from cmdline.
+* Create a Alice, Bob, eve with the password "password" HINT: set password using chpasswd, look some examples in google to change from cmdline.
 
 * Login from eve
 
  * Copy and preserve all the configuration files from /etc and save it in eve home directory in the folder etc-backup-YYYYMMDD, direct all errors to cp.err
- * Change the owner of all the files in the folder just created to bob and the group of all the files to alice and change the permission of all the files to 440 i.e r--r----- HINT: would have to be logined as root
+ * Change the owner of all the files in the folder just created to Bob and the group of all the files to Alice and change the permission of all the files to 440 i.e r--r----- HINT: would have to be logined as root
  * Provide me all the unique shells used by the user present in the system in CAPS. HINT: /etc/passwd file contains all the shells, three four commands would be used.
  * Cover your tracks, clear out the /var/log/auth.log (Have a look at this file and create a backup before clearing), clean your terminal history HINT: man pages would help you.
- * Delete all the user bob, alice, eve. Make sure you delete there files too.
+ * Delete all the user Bob, Alice, eve. Make sure you delete their files too.
 
  * Turn off the ping responses for your system permanently and turn on the Syn-cookies protection mechanism. {Search on Google}
 
-* Use your previous script to create three users alice, bob, eve.
+* Use your previous script to create three users Alice, Bob, eve.
 
  * create a folder dept inside it two folder hr, web.
  * create two group hr and web.
  * change group of web folder to web and hr to hr.
- * add alice and bob user to web group
- * add alice to hr group.
- * check that bob is not able to enter in the hr folder and alice is able to enter in both hr and web folder
- * add user bob to sudo group and check if it is able to run sudo ifconfig ?
+ * add Alice and Bob user to web group
+ * add Alice to hr group.
+ * check that Bob is not able to enter in the hr folder and Alice is able to enter in both hr and web folder
+ * add user Bob to sudo group and check if it is able to run sudo ifconfig ?
 
 Bash Scripting
 --------------
@@ -922,7 +965,7 @@ Objective to get few IP addresses of Microsoft.com Domains.
 Interesting Stuff
 =================
 
-* Linux Monitoring Tools : server density has written most comprehensive list of `80 Linux Monitoring Tools <https://www.serverdensity.com/monitor/linux/how-to/>`_
+* Linux Monitoring Tools : Server density has written most comprehensive list of `80 Linux Monitoring Tools <https://www.serverdensity.com/monitor/linux/how-to/>`_
 
 * Windows Monitoring Tools : Server density has written similar list for Windows too `60+ Windows Monitoring Tools <https://www.serverdensity.com/monitor/windows/how-to/>`_
 
