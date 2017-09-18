@@ -20,4 +20,5 @@ The Magic of Learning
    LFF-IPS-P5-Reporting
    LFC-VulnerableMachines
    LFC-BinaryExploitation
+   contrib
    aboutme

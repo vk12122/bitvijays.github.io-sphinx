@@ -4,7 +4,7 @@ CTF Series : Vulnerable Machines
 
 This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the VulnHub, Hack the Box and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
 
-We would like to **thank g0tm1lk** for maintaining Vulnhub and **shout-out** to each and every **author of the Vulnerable Machine / write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
+We would like to **thank g0tm1lk** for maintaining Vulnhub and **shout-out** to each and every **author of the Vulnerable Machine/ write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
 
 In solving any vulnerable machine, there are few stages:
 
