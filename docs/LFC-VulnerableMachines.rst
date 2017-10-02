@@ -398,7 +398,7 @@ Also, if we have unprivileged user shell, however don't have permission to write
 Reverse Shells
 --------------
 
-Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and some more.
+Possibly, we would have figured out some vulnerablity in the services running or misconfiguration and can have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and some more.
 
 netcat (nc)
 ^^^^^^^^^^^
@@ -587,7 +587,7 @@ MYSQL
 Spawning a TTY Shell
 --------------------
 
-Spawning a TTY Shell and Post-Exploitation Without A TTY has provided multiple ways to get a tty shell
+Once we have reverse shell, we need a full TTY session by using either Python, sh, perl, ruby, lua, IRB. `Spawning a TTY Shell <https://netsec.ws/?p=337>`_ and `Post-Exploitation Without A TTY <http://pentestmonkey.net/blog/post-exploitation-without-a-tty>`_ has provided multiple ways to get a tty shell
 
 Python
 ^^^^^^
@@ -746,7 +746,7 @@ Operating System
 ^^^^^^^^^^^^^^^
 ::
 
- proc/sched_debug	This is usually enabled on newer systems, such as RHEL 6.  It provides information as to what process is running on which cpu.  This can be handy to get a list of processes and their PID number.
+ /proc/sched_debug	This is usually enabled on newer systems, such as RHEL 6.  It provides information as to what process is running on which cpu.  This can be handy to get a list of processes and their PID number.
  /proc/mounts		Provides a list of mounted file systems.  Can be used to determine where other interesting files might be located
  /proc/net/arp		Shows the ARP table.  This is one way to find out IP addresses for other internal servers.
  /proc/net/route	Shows the routing table information.
@@ -979,7 +979,7 @@ or
 SUDO -l Permissions
 -------------------
 
-Let's see which executables have permission to run as sudo, We have collated the different methods to get a shell if the below applications are suid: nmap, tee, tcpdump, 
+Let's see which executables have permission to run as sudo, We have collated the different methods to get a shell if the below applications are suid: nmap, tee, tcpdump, find
 
 nmap suid
 ^^^^^^^^^
