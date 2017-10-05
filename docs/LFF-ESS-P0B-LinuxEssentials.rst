@@ -101,14 +101,14 @@ Replace text in Vi
   :s/test/learn/gi  - would replace test (all cases) to learn in current line all the instance.
   :%s/test/learn/gi - would replace test to learn in the file (all lines)
 
-Other Info:
-^^^^^^^^^^^
+Other Info
+^^^^^^^^^^
 
 * `Vim Awesome <https://vimawesome.com/>`_ provides Awesome VIM plugins from across the universe. Few good one are
 
- * The NERD tree : A tree explorer plugin for vim
- * Syntastic : Syntax checking hacks for vim
- * Youcompleteme : A code-completion engine for Vim
+ * The NERD tree : Tree explorer plugin for vim
+ * Syntastic     : Syntax checking hacks for vim
+ * Youcompleteme : Code-completion engine for Vim
 
 
 Bash configuration files - For Debian/Ubuntu based Systems 
@@ -376,6 +376,142 @@ From Commands
 
 Useful Utilities/ Commands
 ==========================
+
+Grep - Global Regular Expression Print
+--------------------------------------
+
+Two ways to provide input to Grep:
+
+* search a given file or files on a system (including a recursive search through sub-folders). 
+
+ :: 
+
+  grep bitvijays /etc/passwd
+
+* Grep also accepts inputs (usually via a pipe) from another command or series of commands.
+
+ ::
+
+   cat /etc/passwd | grep bitvijays
+
+Syntax
+^^^^^^
+
+::
+
+ grep [options] [regexp] [filename]
+
+    -i, --ignore-case     : 'it DoesNt MatTTer WhaT thE CAse Is'
+    -v, --invert-match    : 'everything , BUT that text'
+    -A <NUM>              : Print NUM lines of trailing context after matching lines.
+    -B <NUM>              : Print NUM lines of trailing context before matching lines.
+    -C <NUM>              : Print additional (leading and trailing) context lines before and after the match.
+    -a, --text            : Process a binary file as if it were text; this is equivalent to the --binary-files=text option.
+    -w                    : Whole-word search
+    -L --files-without-match : which outputs the names of files that do NOT contain matches for your search pattern.
+    -l --files-with-matches  : which prints out (only) the names of files that do contain matches for your search pattern.
+
+    -H <pattern> filename    : Print the filename for each match.
+	example: grep -H 'a' testfile
+		 testfile:carry out few cyber-crime investigations
+
+	Now, let’s run the search a bit differently:
+		cat testfile | grep -H 'a'
+		(standard input):carry out few cyber-crime investigations
+
+.. Note :: Regular expression should be enclosed in single quotation marks or double quotes (allows environment variables to be used), to prevent the shell (Bash or others) from trying to interpret and expand the expression before launching the grep process.
+
+Using regular expressions
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+ 
+ grep 'v.r' testfile
+ thank you very much
+
+In the search above, . is used to match any single character - matches “ver” in “very”. 
+
+A regular expression may be followed by one of several repetition operators:
+
+* The period (.) matches any single character.
+* ? means that the preceding item is optional, and if found, will be matched at the most, once.
+* \* means that the preceding item will be matched zero or more times.
+* \+ means the preceding item will be matched one or more times.
+* {n} means the preceding item is matched exactly n times, while {n,} means the item is matched n or more times. {n,m} means that the preceding item is matched at least n times, but not more than m times. {,m} means that the preceding item is matched, at the most, m times.
+
+Search a specific string
+^^^^^^^^^^^^^^^^^^^^^^^^
+Scan files for a text present in them Find a way to scan my entire linux system for all files containing a specific string of text. Just to clarify, I'm looking for text within the file, not in the file name.
+
+:: 
+        
+  grep -rnw 'directory' -e "pattern" --include={*.c,*.h} --exclude=*.o
+
+    -r                    : search recursively
+    -n                    : print line number
+    -w                    : match the whole word. 
+    --include={*.c,*.h}   : Only search through the files which have .c or .h extensions.
+    --exclude=*.o         : Exclude searching in files with .o extensions.
+ 
+.. Note :: --exclude or --include parameter could be used for efficient searching.
+
+Line and word anchors
+^^^^^^^^^^^^^^^^^^^^^
+
+* The ^ anchor specifies that the pattern following it should be at the start of the line:
+
+ ::
+
+  grep '^th' testfile
+  this
+
+* The $ anchor specifies that the pattern before it should be at the end of the line.
+
+ ::
+  
+  grep 'i$' testfile
+  Hi
+
+* The operator \< anchors the pattern to the start of a word.
+
+ ::
+ 
+  grep '\<fe' testfile
+  carry out few cyber-crime investigations
+
+* \> anchors the pattern to the end of a word.
+
+ ::
+
+  grep 'le\>' testfile
+  is test file
+
+* The \b (word boundary) anchor can be used in place of \< and \> to signify the beginning or end of a word:
+
+ ::
+  
+  grep -e '\binve' testfile
+  carry out few cyber-crime investigations
+
+Shell expansions - input to Grep
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If we don’t single-quote the pattern passed to Grep, the shell could perform shell expansion on the pattern and actually feed a changed pattern to Grep. 
+
+::
+
+ grep "$HOME" /etc/passwd
+ root:x:0:0:root:/root:/bin/bash
+
+We used double quotes to make the Bash shell replace the environment variable $HOME with the actual value of the variable (in this case, /root). Thus, Grep searches the /etc/passwd file for the text /root, yielding the two lines that match.
+
+::
+
+ grep `whoami` /etc/passwd
+ root:x:0:0:root:/root:/bin/bash
+
+Here, back-tick expansion is done by the shell, replacing `whoami` with the user name (root) that is returned by the whoami command.
+
     
 Copy - Copy files and directories
 ---------------------------------
@@ -486,7 +622,7 @@ Special Characters
   ;(semi colon)       : Command separator that can be used to run multiple commands on a single line unconditionally.
   &&(double ampersand): Command separator which will only run the second command if the first one is successful (does not return an error.)
   ||(double pipe)     : Command separator which will only run the second command if the first command failed (had errors). Commonly used to terminate the script if an important command fails.
-
+  # (Comments)        : Lines beginning with a # (with the exception of #!) are comments and will not be executed.
 
 
 
@@ -773,27 +909,6 @@ Where,
 
 Tips and tricks
 ===============
-
-Grep
-----
-
-Scan files for a text present in them Find a way to scan my entire linux system for all files containing a specific string of text. Just to clarify, I'm looking for text within the file, not in the file name.
-
-:: 
-        
-  grep -rnw 'directory' -e "pattern" --include={*.c,*.h} --exclude=*.o
-    -r                    : search recursively
-    -n                    : print line number
-    -w                    : match the whole word. 
-    --include={*.c,*.h}   : Only search through the files which have .c or .h extensions.
-    --exclude=*.o         : Exclude searching in files with .o extensions.
-    -i, --ignore-case     : 'it DoesNt MatTTer WhaT thE CAse Is'
-    -v, --invert-match    : 'everything , BUT that text'
-    -A <NUM>              : Print NUM lines of trailing context after matching lines.
-    -B <NUM>              : Print NUM lines of trailing context before matching lines.
-    -a, --text            : Process a binary file as if it were text; this is equivalent to the --binary-files=text option.
- 
-.. Note :: --exclude or --include parameter could be used for efficient searching.
 
 Apt-get error?
 --------------
