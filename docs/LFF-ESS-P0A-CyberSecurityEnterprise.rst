@@ -176,7 +176,23 @@ Linters
 * `Pylint <https://www.pylint.org/>`_ : Pylint is a tool that checks for errors in Python code, tries to enforce a coding standard and looks for code smells. It can also look for certain type errors, it can recommend suggestions about how particular blocks can be refactored and can offer you details about the code’s complexity.
 
 * `rst-lint <https://github.com/twolfson/restructuredtext-lint>`_ : Restructured Text Linter
-  
+
+* PHP 
+
+  * php 
+
+   ::
+
+    php -l             Syntax check only (lint)
+
+  * `php-codesniffer <http://www.squizlabs.com/php-codesniffer>`_ (phpcs) - PHP, CSS and JavaScript coding standard analyzer and checker : PHP_CodeSniffer is a set of two PHP scripts; the main phpcs script that tokenizes PHP, JavaScript and CSS files to detect violations of a defined coding standard, and a second phpcbf script to automatically correct coding standard violations. PHP_CodeSniffer is an essential development tool that ensures your code remains clean and consistent.:w
+
+  * `phpmd <https://phpmd.org/>`_ - PHP Mess Detector takes a given PHP source code base and look for several potential problems within that source such as Possible bugs, Suboptimal code, Overcomplicated expressions, Unused parameters, methods, properties.
+
+* HTML  
+
+ * `TIDY <https://www.w3.org/People/Raggett/tidy/>`_ 
+   
 Security Breach 1
 =================
 

