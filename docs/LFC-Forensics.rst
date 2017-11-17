@@ -1,7 +1,39 @@
-Learning from the CTF : Forensics
-=================================
+********************************
+CTF Series : Forensics
+********************************
 
 This post (Work in Progress) lists the tips and tricks while doing Forensics challenges during various CTF's.
+
+Steganography
+=============
+
+Images
+------
+If you are looking for hidden flag in an image first check with 
+
+* file, exiftool command, and make sure the extension is correctly displayed. 
+* strings 
+ * Sometimes, it is better to see lines only greater than x length.
+
+  ::
+
+    strings RainingBlood.mp3 | awk 'length($0)>20' | sort -u
+
+* binwalk the file, just to make sure, there's nothing extra stored in that image.
+* hexdump -C and look for interesting pattern may be? If you get 7z or PK they represent Zipped files. If so, you can extract those file with 7z x . If somehow, you get a passphrase for the image, then you might have to use steghide tool as it allows to hide data with a passphrase.
+* stegsolve - check all the planes. There's a data-extracter, we may try to extract all the values of RGB and see if there's any flag in that.
+* stegosuite 
+* steghide : If there's any text present in the Image file or the filename of the image or any link ( maybe to youtube video; video name can be the password ) that can be a passphrase to steghide. Sometimes, you may have to try all lowercase/ uppercase combinations.
+
+
+Sound Files
+-----------
+
+* Open the file in Audacity or `Spectrum Analyzer <https://academo.org/demos/spectrum-analyzer/>`_ and probably analyze the Spectogram
+
+ * Arrow next to the track name to switch from waveform (top) to logarithmic spectrogram (bottom).
+ * Morse code possible? As all the morse data appears to be below 100 Hz, we can use a low pass filter (effects menu, cutoff 100 Hz) to ease transcription  
+ * `Golang mp3 Frame Parser <https://github.com/tcolgate/mp3>`_ 
 
 * If you are provided a jar file in the challenge, JAR (Java ARchive) is a package file format typically used to aggregate many Java class files and associated metadata and resources (text, images, etc.) into one file to distribute application software or libraries on the Java platform. It can be extracted using
 
