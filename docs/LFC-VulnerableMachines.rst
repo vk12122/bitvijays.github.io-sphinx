@@ -2533,6 +2533,18 @@ Reading the hidden stream
 
  more < testfile.txt:hidden_stream::$DATA
 
+Redirecting Standard Out and Standard Error from PowerShell Start-Process
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Often reverse shells will not display standard error. Sometimes they will not display standard out when a new process is started. The following will redirect standard out and standard error to text files when PowerShell starts a new process.
+
+::
+
+ PS C:\> Start-Process -FilePath C:\users\administrator\foo.txt -NoNewWindow -PassThru -Wait -RedirectStandardOutput stdout.txt -RedirectStandardError stderr.txt
+
+`Powershell Start-Process Module Documentation <https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process>`_.
+
+
 NTDS.dit and SYSTEM hive
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2548,7 +2560,6 @@ Probably, there are dump of domain controller NTDS.dit file, from which password
 ::
 
  python secretsdump.py -ntds /root/ntds_cracking/ntds.dit -system /root/ntds_cracking/systemhive LOCAL
-
 
 
 Others
