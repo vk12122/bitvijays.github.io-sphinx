@@ -2513,8 +2513,6 @@ Check a directory for ADS?
 
  gci -recurse | % { gi $_.FullName -stream * } | where stream -ne ':$Data'
 
-
-=======
 DIR Way
 
 Current directory ADS Streams
@@ -2544,7 +2542,8 @@ Often reverse shells will not display standard error. Sometimes they will not di
 
  PS C:\> Start-Process -FilePath C:\users\administrator\foo.txt -NoNewWindow -PassThru -Wait -RedirectStandardOutput stdout.txt -RedirectStandardError stderr.txt
 
-`Powershell Start-Process Module Documentation <https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-5.1>`_.
+`Powershell Start-Process Module Documentation <https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process>`_.
+
 
 NTDS.dit and SYSTEM hive
 ^^^^^^^^^^^^^^^^^^^^^^^^^
