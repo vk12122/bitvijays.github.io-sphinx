@@ -35,6 +35,151 @@ Sound Files
  * Morse code possible? As all the morse data appears to be below 100 Hz, we can use a low pass filter (effects menu, cutoff 100 Hz) to ease transcription  
  * `Golang mp3 Frame Parser <https://github.com/tcolgate/mp3>`_ 
 
+USB Forensics
+=============
+
+Probably, we would be provided with the USB-based PCAP file, now as there are USB-Mouse/ Keyboard and Storage devices. There would be data related to that. Now, to figure what device is connected. Check the below packets in the wireshark
+
+::
+
+ 1	0.000000	host	1.12.0	USB	36	GET DESCRIPTOR Request DEVICE
+ 2	0.000306	1.12.0	host	USB	46	GET DESCRIPTOR Response DEVICE
+
+In the GET DESCRIPTOR Response packet, there would be a idVendor and idProduct, searching for that. We can figure out that whether it's a Keyboard, mouse or storage device.
+
+::
+
+ DEVICE DESCRIPTOR
+    bLength: 18
+    bDescriptorType: 0x01 (DEVICE)
+    bcdUSB: 0x0200
+    bDeviceClass: Device (0x00)
+    bDeviceSubClass: 0
+    bDeviceProtocol: 0 (Use class code info from Interface Descriptors)
+    bMaxPacketSize0: 8
+    idVendor: Razer USA, Ltd (0x1532)
+    idProduct: BlackWidow Ultimate 2013 (0x011a)
+    bcdDevice: 0x0200
+    iManufacturer: 1
+    iProduct: 2
+    iSerialNumber: 0
+    bNumConfigurations: 1
+
+USB-Keyboard
+-------------
+
+If the device connected is the keyboard, we can actually, check for the "interrupt in" message
+
+::
+
+ 51	8.808610	1.12.1	host	USB	35	URB_INTERRUPT in
+
+and check for the Leftover Capture Data field
+
+::
+
+ Frame 159: 35 bytes on wire (280 bits), 35 bytes captured (280 bits)
+ USB URB
+    [Source: 1.12.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffa5045d1653c0
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x81, Direction: IN
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [bInterfaceClass: HID (0x03)]
+ Leftover Capture Data: 0000500000000000
+
+Now, we can use tshark to take out, usb.capdata out
+
+::
+
+ tshark -r usb-keyboard-data.pcap -T fields -e usb.capdata
+ 00:00:08:00:00:00:00:00
+ 00:00:00:00:00:00:00:00
+ 00:00:0e:00:00:00:00:00
+ 00:00:00:00:00:00:00:00
+ 00:00:16:00:00:00:00:00
+
+Here there are 8 bytes
+
+Keyboard Report Format
+^^^^^^^^^^^^^^^^^^^^^^
+
+* Byte 0: Keyboard modifier bits (SHIFT, ALT, CTRL etc)
+* Byte 1: reserved
+* Byte 2-7: Up to six keyboard usage indexes representing the keys that are currently "pressed". Order is not important, a key is either pressed (present in the  buffer) or not pressed.
+
+USB HID Keyboard Scan Codes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+MightyPork has created a gist mentioning USB HID Keyboard scan codes as per USB spec 1.11 at `usb_hid_keys.h <https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2>`_
+
+The above can be referred and utilized to convert the usb.capdata to know what was the user typing using the USB Keyboard!
+
+USB-Mouse
+----------
+
+If we take the USB-Mouse Leftover Capture data, we have around four bytes
+
+Format of First 3 Packet Bytes
+
+Even if your mouse is sending 4 byte packets, the first 3 bytes always have the same format. 
+* The first byte has a bunch of bit flags. 
+
+ ::
+
+  byte 1:
+  Y overflow	X overflow	Y sign bit	X sign bit	Always 1	Middle Btn	Right Btn	Left Btn
+
+* The second byte is the "delta X" value -- that is, it measures horizontal mouse movement, with left being negative. 
+
+ ::
+
+  byte 2:
+  X movement
+
+* The third byte is "delta Y", with down (toward the user) being negative. Typical values for deltaX and deltaY are one or two for slow movement, and perhaps 20 for very fast movement. Maximum possible values are +255 to -256 (they are 9-bit quantities, two's complement).
+
+ ::
+
+  byte 3:
+  Y movement
+
+Let's say we capture this data into a file, we can eventually capture the mouse movements,
+
+::
+
+ tshark -r challenge.pcapng usb.capdata and usb.device_address==12 -T fields -e usb.capdata > mouse_data.txt
+
+This can be plotted using GNUplot as shown in a writeup of `Riverside <https://github.com/ctfs/write-ups-2015/tree/master/boston-key-party-2015/school-bus/riverside>`_
+
+::
+
+ awk -F: 'function comp(v){if(v>127)v-=256;return v}{x+=comp(strtonum("0x"$2));y+=comp(strtonum("0x"$3))}$1=="01"{print x,y}' mouse_data.txt > click_coordinates.txt
+
+GNUplot
+
+::
+
+ gnuplot -e "plot 'click_coordinates.txt'"
+
+If the mouse movement shows a on-screen keyboard, probably, we can use 
+
+::
+
+ awk 'BEGIN{split("          zxcvbnm  asdfghjkl qwertyuiop",key,//)}{r=int(($2-20)/-100);c=int(($1 - 117 + (r % 2 * 40)) / 85);k=r*10+c;printf "%s",key[k]}END{print""}' click_coordinates.txt 
+
+USB-Storage-Device
+------------------
+
+If the device found in the PCAP is a USB-Storage-Device, check for the packets having size greater than 1000 bytes with flags URB_BULK out/in. Select the stream and press Ctrl + h or you can use File->Export Packet Bytes.
+
 * If you are provided a jar file in the challenge, JAR (Java ARchive) is a package file format typically used to aggregate many Java class files and associated metadata and resources (text, images, etc.) into one file to distribute application software or libraries on the Java platform. It can be extracted using
 
  :: 
@@ -55,6 +200,8 @@ Sound Files
  * If the challenge says IP address has been spoofed, then you should look for MAC address as it wouldn't have changed. You would find packets with two different IP address having same MAC address. In another scenario, if the MAC address has been spoofed, IP address might be the same. In both cases display filter "arp" (to only show arp requests) and "ip.addr==" (to show only packets with either source or destination being the IP address). might be helpful.
 
  * Sometimes, it is better to check which objects we are able to export, (File --> Export Objects --> HTTP/DICOM/SMB/SMB2) export the http/DICOM/SMB/SMB2 object
+
+ * SSL Traffic? and have a key? Visit Wireshark->Edit->Preferences->Protocols->SSL->RSA Key List. SSL Traffic with forward secretcy ->SSL->Pre-Master-Secret-Log filename
  
  * Sometimes, you need to find all the unique ip address in the network capture, for that you can use 
 
@@ -95,7 +242,7 @@ Sound Files
 
 * If you are having a source code of evil program, check the source code of the real program, do a comparision and find the added evil code.
 
-* If you are looking for hidden flag in an image first check with file, exiftool command, and make sure the extension is correctly displayed. After that check the image file with hexdump -C and look for interesting pattern may be? If you get 7z or PK they represent Zipped files. If so, you can extract those file with 7z x . If somehow, you get a passphrase for the image, then you might have to use steghide tool as it allows to hide data with a passphrase.
+* Morse code, utilize `Transator <https://morsecode.scphillips.com/translator.html>`_
 
 * Sometimes, if you extract some files, if you wuld see a blank name, you know there is some file but can't see a name, like file name could be spaces?, then
 
