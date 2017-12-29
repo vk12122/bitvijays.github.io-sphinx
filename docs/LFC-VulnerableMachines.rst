@@ -16,7 +16,7 @@ You generally go through the following stages when solving a vulnerable machine:
 * :ref:`from-nothing-to-unprivileged-shell`
 * :ref:`unprivileged-shell-to-privileged-shell`
 
-On this blog, we have mentioned, what can be done in each stages. Furthermore, we have also provided :ref:`tips-and-tricks` for solving vulnerable VMs. Additionaly :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could be referred for exploitation of any particular services (As, it provides information such as "If you have identified service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited").Lastly there are also appendixes related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`.
+On this blog, we have mentioned, what can be done in each stages. Furthermore, we have also provided :ref:`tips-and-tricks` for solving vulnerable VMs. Additionaly :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could be referred for exploitation of any particular services (As, it provides information such as "If you have identified service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"). Lastly there are also appendixes related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`.
 
 .. _finding-the-ip-address:
 
@@ -52,7 +52,7 @@ Network exploration tool and security/ port scanner
   nmap [Scan Type] [Options] {target specification} 
   -sP/-sn Ping Scan -disable port scan 
 
-Example
+Example:
 
 ::
 
@@ -63,22 +63,25 @@ Example
 Port Scanning
 =============
 	
-Port scanning provides a large amount of information on open services and possible exploits that target these services. Three options: Unicornscan, nmap, netcat (when nmap is not available).
+Port scanning provides a large amount of information on open services and possible exploits that target these services. 
+Common port scanning software include: Unicornscan, nmap, netcat (when nmap is not available).
+
+**thank masscan**
 
 Unicornscan
 -----------
 
-A port scanner that utilizes its own userland TCP/IP stack, which allows it to run a asynchronous scans. Faster than nmap and can scan 65,535 ports in a relatively shorter time frame. 
+A port scanner that utilizes its own userland TCP/IP stack, which allows it to run asynchronous scans. It can scan 65,535 ports in a relatively shorter time frame (faster than nmap). 
 
 ::  
 
    unicornscan [options] X.X.X.X/YY:S-E 
      -i, --interface : interface name, like eth0 or fxp1, not normally required 
      -m, --mode : scan mode, tcp (syn) scan is default, U for udp T for tcp \`sf' for tcp connect scan and A for arp for -mT you can also specify tcp flags following the T like -mTsFpU for example that would send tcp syn packets with (NO Syn\|FIN\|NO Push\|URG)
-     Address ranges are cidr like 1.2.3.4/8 for all of 1.?.?.?, if you omit the cidr mask then /32 is implied. 
-     Port ranges are like 1-4096 with 53 only scanning one port, a for all 65k and p for 1-1024
+     Address ranges are in cidr notation like 1.2.3.4/8 for all of 1.?.?.?, if you omit the cidr mask /32 is implied. 
+     Port ranges are like 1-4096 with 53 only scanning one port, **a** for all 65k and p for 1-1024
 
-    example: unicornscan 192.168.1.5:1-4000 gateway:a would scan port 1 - 4000 for 192.168.1.5 and all 65K ports for gateway.
+    example: unicornscan 192.168.1.5:1-4000 gateway:a would scan port 1 - 4000 for 192.168.1.5 and all 65K ports for the host named gateway.
 
 Nmap
 -----
@@ -91,7 +94,7 @@ Network exploration tool and security/ port scanner
 
   HOST DISCOVERY:
   -sL: List Scan - simply list targets to scan 
-  -sn: Ping Scan - disable port scan 
+  -sn/-sP: Ping Scan - disable port scan 
   -Pn: Treat all hosts as online -- skip host discovery
 
   SCAN TECHNIQUES: 
@@ -112,18 +115,18 @@ Network exploration tool and security/ port scanner
   MISC: -6: Enable IPv6 scanning -A: Enable OS detection, version detection, script scanning, and traceroute
 
 
-As unicornscan is so fast, it makes sense to use it for scanning large networks or a large number of ports. The idea is to use unicornscan to scan all ports, and make a list of those ports that are open and pass them to nmap for service detection. superkojiman has written a script for this available at `GitHub <https://github.com/superkojiman/onetwopunch>`_.
+As unicornscan is so fast, it makes sense to use it for scanning large networks or a large number of ports. The idea is to use unicornscan to scan all ports, and make a list of those ports that are open and pass them to nmap for service detection. Superkojiman has written a script for this available at `GitHub <https://github.com/superkojiman/onetwopunch>`_.
 
-When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you what application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine what application is running.
+When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you what application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine which application is running.
 
 netcat 
 ------
-Netcat might not be the best tool to use for port scanning, but can be used quickly. netcat scans TCP ports by default, but we can perform UDP scans as well.
+Netcat might not be the best tool to use for port scanning, but it can be used quickly. Netcat scans TCP ports by default, but we can perform UDP scans as well.
 
 TCP Scan
 ^^^^^^^^
 
-For a TCP scan, the format is
+For a TCP scan, the format is:
 
 ::
 
@@ -135,7 +138,7 @@ For a TCP scan, the format is
 UDP Scan
 ^^^^^^^^
 
-For a UDP Port Scan, we need to add -u flag which makes the format
+For a UDP Port Scan, we need to add -u flag which makes the format:
 
 ::
 
@@ -148,7 +151,7 @@ If we have windows machine without nmap, we can use `PSnmap <https://www.powersh
 Amap - Application mapper
 -------------------------
 
-By using **amap**, we can identify if any SSL server is running on port 3445 or some oracle listener on port 23. Also, it will actually do an SSL connect if you want and then try to identify the SSL-enabled protocol! One of the VM in vulnhub was running http and https on the same port.
+By using **amap**, we can identify which services is running on a given port. For example is there a SSL server running on port 3445 or some oracle listener on port 23. Note that the application can also handle services that requies SSL. Herefore it will perform an SSL connect following by trying to identify the SSL-enabled protocol!  One of the vulnhub VM's for example was running http and https on the same port.
 
 ::
 
@@ -166,14 +169,16 @@ By using **amap**, we can identify if any SSL server is running on port 3445 or 
 Rabbit Holes?
 =============
 
-There would be instances where you are not able to find anything such as any open port or any entry point. The below may provide some clue.
+There will be instances when you will not able to find anything entry point such as any open port. The section below may provide some clues how to get unstuck.
 
 .. _listen-to-the-interface:
 
 Listen to the interface
 ------------------------
 
-We should always listen to the local interface on which the VM is hosted such as vboxnet0 or vmnet using wireshark or tcpdump. Many VMs send data randomly, for example, In one of the VM, it does the arp scan and sends a SYN packet on the port 4444, if something is listening on that port, it send the data.
+Many VMs send data on random ports therefore we recommend to listen to the local interface (vboxnet0 / vmnet) on which the VM is running. This can be done by using wireshark or tcpdump. For example, one of the vulnhub VMs, performs an arp scan and sends a SYN packet on port 4444, if something is listening on that port, it sends some data.
+
+**TODO add command for first example**
 
 :: 
 
@@ -183,7 +188,7 @@ We should always listen to the local interface on which the VM is hosted such as
   18:02:04.100773 ARP, Request who-has 192.168.56.3 tell 192.168.56.101, length 28
   18:02:04.096292 IP 192.168.56.101.36327 > 192.168.56.1.4444: Flags [S],
 
-While listening on port 4444, we might receive a something like a base64 encoded string or some message.
+While listening on port 4444, we might receive something like a base64 encoded string or some message.
 
 ::
 
@@ -196,7 +201,7 @@ While listening on port 4444, we might receive a something like a base64 encoded
 DNS Server
 ----------
 
-If the targeted machine is running a DNS Server and we have possible domain name, we may try to figure out A, MX, AAAA records or try zone-transfer to figure out other possible domain names.
+If the targeted machine is running a DNS Server and we have a possible domain name, we may try to figure out A, MX, AAAA records or try zone-transfer to figure out other possible domain names.
 
 ::
 
@@ -208,11 +213,15 @@ If the targeted machine is running a DNS Server and we have possible domain name
  host -t soa <domain>               -- Start of Authority
  host <IP>                          -- Reverse Lookup
  host -l <Domain Name> <DNS Server> -- Domain Zone Transfer
+ 
+ **todo add output example**
 
 SSL Certificate
 ---------------
 
-If the targetted machine is running https server and we are getting a apache default webpage on hitting the https://IPAddress, probably, check the alt-dns-name on the ssl-certificate, create a entry in /etc/hosts and browse with the https://alt-dns-name.
+If the targetted machine is running an https server and we are getting a apache default webpage on hitting the https://IPAddress. vhosts are probably in use. Check the alt-dns-name on the ssl-certificate, create an entry in hosts file ( /etc/hosts ) and check what is being hosted on these domain names by surfing to https://alt-dns-name.
+
+**todo add command for given output**
 
 ::
 
@@ -225,14 +234,14 @@ If the targetted machine is running https server and we are getting a apache def
 From Nothing to a Unprivileged Shell
 ====================================
 
-At this point, you would have an idea about the different services and service version running on the system. (aka figure out what webservices such as cms or software's are running on the vulnerable machine)
+At this point, you would have an idea about the different services and service version running on the system. Besides the output given by the nmap and the like is also recommend to check what software is being used on the webservers (eg certain cms's)
 
 searchsploit
 ------------
 
 Exploit Database Archive Search
 
-First, we need to check if the operating system is using any services which are vulnerable or the exploit is already available in the internet. For example, A vulnerable service webmin is present in one of the VM which can be exploited to extract information from the system.
+First, we check if the operating system and/or the exposed services are vulnerable to exploits which are already available on the internet. For example, a vulnerable service webmin is present in one of the VM which could be exploited to extract information from the system.
 
 ::
 
@@ -245,7 +254,7 @@ First, we need to check if the operating system is using any services which are 
   |_  ERROR: Failed to get host information from server
   **********Trimmed**************
 
-If we search for webmin in searchsploit, we will find different exploits available for it and we just have to use the correct one based on the utility and the version matching.
+If we search for webmin with searchsploit, we will find different exploits available for it and we just have to use the correct one based on utility and the version matching.
 
 ::
 
@@ -265,7 +274,7 @@ Once we have figured out which exploit to check we can read about it by using th
  searchsploit -x 24674
 
 
-Searchsploit even provide an option to read the nmap XML file and suggest vulnerabilities ( Need nmap -sV -x xmlfile ).
+Searchsploit even provide an option to read the nmap XML file and suggest vulnerabilities ( Requires nmap -sV -x xmlfile ).
 
 ::
   
@@ -274,27 +283,27 @@ Searchsploit even provide an option to read the nmap XML file and suggest vulner
                               Use "-v" (verbose) to try even more combinations
 
 
-.. Tip :: If we don't get a exact exploit for a version, it is also recommended to read the exploits which are highlighted as they may be valid for lower versions too. For example Let's say we are searching for exploits in Example_Software version 2.1.3. However, version 2.2.2 contains multiple vulnerablities. Reading the description for 2.2.2 we find out it's valid for lower versions too.
+.. Tip :: If we don't manage to find an exploit for a specfic version, it is recommended to check the notes of the exploits which are highlighted as they may be valid for lower versions too. For example Let's say we are searching for exploits in Example_Software version 2.1.3. However, version 2.2.2 contains multiple vulnerablities. Reading the description for 2.2.2 we find out it's valid for lower versions too.
 
 SecLists.Org Security Mailing List Archive
 ------------------------------------------
 
-There would be some days, when you won't find vulnerability in searchsploit. We should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug for that particular software. 
+There will be some days, when you won't find vulnerability with searchsploit. In this case, we should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug for that particular software that we can exploit. 
 
 Google-Vulns
 ------------
 
-It is suggested that whenever you are googling something,  also try with the words such as ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or in a specific cms. Search for docker ctf or <cms_name> ctf/ github etc.
+It is suggested that whenever you are googling something,  you add words such as vulnerability, exploit,ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or on a specific cms. Search for docker ctf or <cms_name> ctf/ github etc.
 
 Webservices
 -----------
 
-If a webserver is running on the machine, we can start with running 
+If a webserver is running on a machine, we can start with running 
  
 whatweb
 ^^^^^^^
 
-Utilize whatweb to find what server is running.
+Utilize whatweb to find what software stack a server is running.
 
 ::
 
