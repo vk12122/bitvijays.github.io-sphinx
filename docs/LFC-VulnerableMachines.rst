@@ -2,11 +2,13 @@
 CTF Series : Vulnerable Machines
 ********************************
 
-This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the `VulnHub <https://vulnhub.com>`_ , `Hack the Box <https://hackthebox.eu>`_ and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
+This post (Work in Progress [WIP]) records what we learned by doing vulnerable machines provided by `VulnHub <https://vulnhub.com>`_ , `Hack the Box <https://hackthebox.eu>`_ and others. The steps below could be followed to find vulnerabilities, exploit these vulnerablities and finally become system/root.
 
-We would like to **thank g0tm1lk** for maintaining **Vulnhub** and **moderators** of **HackTheBox**. Also, **shout-out** to each and every **author of the Vulnerable Machine/ write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community!. **Thank You!!**
+Once you download a virtual machines from `VulnHub <https://vulnhub.com>`_  you can run it by using virtualization software such as VMware or Virtual Box.
 
-In solving any vulnerable machine, there are few stages:
+We would like to **thank g0tm1lk** for maintaining **Vulnhub** and the **moderators** of **HackTheBox**. Also, **shout-outs** are in order for each and every **authors of Vulnerable Machines and/or write-ups**. Thank you for providing these awesome challenges to learn from and sharing your knowledge with the IT security community!. **Thank You!!**
+
+You generally go through the following stages when solving a vulnerable machine:
 
 * :ref:`finding-the-ip-address`
 * :ref:`port-scanning`
@@ -14,7 +16,7 @@ In solving any vulnerable machine, there are few stages:
 * :ref:`from-nothing-to-unprivileged-shell`
 * :ref:`unprivileged-shell-to-privileged-shell`
 
-In this blog, we have mentioned, what can be done in each stages. Have also provided :ref:`tips-and-tricks` for solving the VMs. :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could also be referred for exploitation of any particular services (As, it provides information such as "If you have found service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"). There are also appendix related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`
+On this blog, we have mentioned, what can be done in each stages. Furthermore, we have also provided :ref:`tips-and-tricks` for solving vulnerable VMs. Additionaly :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could be referred for exploitation of any particular services (As, it provides information such as "If you have identified service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited").Lastly there are also appendixes related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`.
 
 .. _finding-the-ip-address:
 
@@ -29,13 +31,13 @@ An active/ passive arp reconnaissance tool
 ::
 
   netdiscover [options] 
-  -i interface : The network interface to sniff and inject packets. 
-  -r range : Scan a given range instead of auto scan.
+  -i interface : The network interface to sniff and inject packets on. 
+  -r range : Scan a given range instead performing an auto scan.
 
   Example: 
   netdiscover -i eth0/wlan0/vboxnet0/vmnet1 -r 192.168.1.0/24 
 	
-Interface name for Virtualization Software
+Interface names of common Virtualization Software:
 
 * Virtualbox : vboxnet 
 * Vmware     : vmnet 
