@@ -4,6 +4,8 @@ CTF Series : Forensics
 
 This post (Work in Progress) lists the tips and tricks while doing Forensics challenges during various CTF's.
 
+This might be a good reference `Useful tools for CTF <http://g33kinfo.com/info/archives/6261>`_
+
 Steganography
 =============
 
@@ -24,7 +26,9 @@ If you are looking for hidden flag in an image first check with
 * stegsolve - check all the planes. There's a data-extracter, we may try to extract all the values of RGB and see if there's any flag in that.
 * stegosuite 
 * steghide : If there's any text present in the Image file or the filename of the image or any link ( maybe to youtube video; video name can be the password ) that can be a passphrase to steghide. Sometimes, you may have to try all lowercase/ uppercase combinations.
-
+* `zsteg <https://github.com/zed-0xff/zsteg>`_ : detect stegano-hidden data in PNG & BMP
+* `pngcheck <http://www.libpng.org/pub/png/apps/pngcheck.html>`_ : pngcheck verifies the integrity of PNG, JNG and MNG files (by checking the internal 32-bit CRCs [checksums] and decompressing the image data); it can optionally dump almost all of the chunk-level information in the image in human-readable form. 
+* `Mediaextract <https://github.com/panzi/mediaextract>`_ : Extracts media files (AVI, Ogg, Wave, PNG, ...) that are embedded within other files.
 
 Sound Files
 -----------
@@ -189,6 +193,39 @@ If the device found in the PCAP is a USB-Storage-Device, check for the packets h
    f : JAR file from which files are to be extracted is specified on the command line, rather than through stdin.
    The jar-file argument is the filename (or path and filename) of the JAR file from which to extract files.
 
+Esoteric Languages
+==================
+
+* `Malbolge <https://en.wikipedia.org/wiki/Malbolge>`_ : Malbolge is a public domain esoteric programming language invented by Ben Olmstead in 1998, named after the eighth circle of hell in Dante's Inferno, the Malebolge.
+
+Volatility
+==========
+
+`Command Reference <https://github.com/volatilityfoundation/volatility/wiki/Command-Reference>`_
+
+Important commands to try
+
+* imageinfo/ pslist / cmdscan/ consoles/ consoles/ memdump/ procdump/ filescan/ connscan/
+
+* Extract files using filescan and `dumpfiles <https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#dumpfiles>`_
+
+Extracting RAW pictures from memory dumps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+`Extracting RAW pictures from Memory Dumps <https://w00tsec.blogspot.in/2015/02/extracting-raw-pictures-from-memory.html>`_
+
+Probably, dump the process running MSRDP, MSPAINT
+
+* Rename the file extensions from *.dmp to *.data, download/install GIMP and open them as "RAW Image Data":
+* We can use GIMP to navigate within the memory dump and analyse the rendered pixels/bitmaps on their corresponding offsets
+
+Interesting Blog
+^^^^^^^^^^^^^^^^
+
+* `APT-Incident-Response <https://github.com/ctfs/write-ups-2015/tree/master/camp-ctf-2015/forensics/APT-incident-response-400>`_
+* `Securityfest CTF - Coresec challenge writeup <https://dubell.io/securityfest-ctf-coresec-challenge-writeup/>`_
+* `SHX7 - for300 <http://dann.com.br/shx7-for300-go_deeper/>`_
+  
 * Wireshark - Searching for answers in pcap file?
 
  * Searching passwords in HTTP Web traffic in wireshark?
