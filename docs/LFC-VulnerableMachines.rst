@@ -2,11 +2,11 @@
 CTF Series : Vulnerable Machines
 ********************************
 
-This post (Work in Progress [WIP]) records what we learned by doing vulnerable machines provided by `VulnHub <https://vulnhub.com>`_, `Hack the Box <https://hackthebox.eu>`_ and others. The steps below could be followed to find vulnerabilities, exploit these vulnerablities and finally become system/ root.
+This post (Work in Progress) records what we learned by doing vulnerable machines provided by `VulnHub <https://vulnhub.com>`_, `Hack the Box <https://hackthebox.eu>`_ and others. The steps below could be followed to find vulnerabilities, exploit these vulnerablities and finally become system/ root.
 
 Once you download a virtual machines from `VulnHub <https://vulnhub.com>`_  you can run it by using virtualization software such as VMware or Virtual Box.
 
-We would like to **thank g0tm1lk** for maintaining **Vulnhub** and the **moderators** of **HackTheBox**. Also, **shout-outs** are in order for each and every **authors of Vulnerable Machines and/or write-ups**. Thank you for providing these awesome challenges to learn from and sharing your knowledge with the IT security community! **Thank You!!**
+We would like to **thank g0tm1lk** for maintaining **Vulnhub** and the **moderators** of **HackTheBox**. Also, **shout-outs** are in order for each and every **authors of Vulnerable Machines and/ or write-ups**. Thank you for providing these awesome challenges to learn from and sharing your knowledge with the IT security community! **Thank You!!**
 
 You generally go through the following stages when solving a vulnerable machine:
 
@@ -152,7 +152,7 @@ Amap - Application mapper
 
 When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you what application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine which application is running.
 
-By using **amap**, we can identify which services are running on a given port. For example is there a SSL server running on port 3445? or some oracle listener on port 23?. Note that the application can also handle services that requies SSL. Herefore it will perform an SSL connect following by trying to identify the SSL-enabled protocol!  One of the vulnhub VM's for example was running http and https on the same port.
+By using **amap**, we can identify which services are running on a given port. For example is there a SSL server running on port 3445? or some oracle listener on port 23?. Note that the application can also handle services that requires SSL. Therefore it will perform an SSL connect following by trying to identify the SSL-enabled protocol!  One of the vulnhub VM's for example was running http and https on the same port.
 
 ::
 
@@ -180,7 +180,8 @@ Listen to the interface
 Many VMs send data on random ports therefore we recommend to listen to the local interface (vboxnet0 / vmnet) on which the VM is running. This can be done by using wireshark or tcpdump. For example, one of the vulnhub VMs, performs an arp scan and sends a SYN packet on port 4444, if something is listening on that port, it sends some data.
 
 :: 
-  tcpdump -I eth0
+
+  tcpdump -i eth0
 
   18:02:04.096292 IP 192.168.56.101.36327 > 192.168.56.1.4444: Flags [S], seq 861815232, win 16384, options [mss 1460,nop,nop,sackOK,nop,wscale 3,nop,nop,TS val 4127458640 ecr 0], length 0
   18:02:04.096330 IP 192.168.56.1.4444 > 192.168.56.101.36327: Flags [R.], seq 0, ack 861815233, win 0, length 0
@@ -325,9 +326,9 @@ It will examine a web server to find potential problems and security vulnerabili
 dirb, wfuzz, dirbuster
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Furthermore, we can run the folling programs to find any hidden directories.
+Furthermore, we can run the following programs to find any hidden directories.
 
-* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analizing the response.
+* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analyzing the response.
 * `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing an image. Most of the time, we then need to figure out which image is different. In this case, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
 * `Dirbuster <https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project>`_ : DirBuster is a multi threaded java application designed to brute force directories and files names on web/ application servers. 
 
@@ -338,7 +339,7 @@ Furthermore, we can run the folling programs to find any hidden directories.
 BurpSuite Spider
 ^^^^^^^^^^^^^^^^
 
-There will be some cases when dirb/ dirbuster doesn't find anything. This appened with us on a Node.js web application. Burpsuite's spider helped in finding extra-pages which contained the credentials.
+There will be some cases when dirb/ dirbuster doesn't find anything. This happened with us on a Node.js web application. Burpsuite's spider helped in finding extra-pages which contained the credentials.
 
 
 Parameter Fuzz?
@@ -363,7 +364,7 @@ The other things which may try is putting a valid command such as 'ls, test' so 
 PUT Method
 ^^^^^^^^^^
 
-Sometimes, it is also a good option to check for the various HTTP verbs that are availble such as GET, PUT, DELETE, etc.
+Sometimes, it is also a good option to check for the various HTTP verbs that are available such as GET, PUT, DELETE, etc.
 This can be done by making an OPTIONS request.
 
 Curl can be used to check the available options (supported http verbs):
@@ -389,7 +390,7 @@ Curl can be used to check the available options (supported http verbs):
   <
   * Connection #0 to host 192.168.126.129 left intact
 
-The PUT method allows you to upload a file. Which can help us to get a shell on the machine. There are multiple methods avaialble for uploading a file with the PUT method mentioned on `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
+The PUT method allows you to upload a file. Which can help us to get a shell on the machine. There are multiple methods available for uploading a file with the PUT method mentioned on `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
 
 A few are:
 
@@ -447,7 +448,7 @@ Tips
 * The configuration of worpdress is normally speaking stored in wp-config.php. If you are able to download it, you might be luckiy and be able to loot plaintext username and passwords to database or wp-admin page. 
 * If the website is vulnerable for SQL-Injection. We should be able to extract the wordpress users and their password hashes. However, if the password hash is not crackable. Probably, check the wp-posts table as it might contain some hidden posts.
 * Got wordpress credentials, may be utilize `WPTerm <https://wordpress.org/plugins/wpterm/>`_ xterm-like plugin. It can be used to run non-interactive shell commands from the WordPress admin dashboard.
-* If their's a custom plugin created, probably, it would be in the location
+* If there's a custom plugin created, probably, it would be in the location
 
  ::
 
@@ -523,7 +524,7 @@ Examples:
 Reverse Shells
 --------------
 
-Possibly, we would have figured out some vulnerablity or misconfiguration in the running services which allows us to have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and more.
+Possibly, we would have figured out some vulnerability or misconfiguration in the running services which allows us to have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and more.
 
 netcat (nc)
 ^^^^^^^^^^^
@@ -1036,7 +1037,7 @@ On Victim (launch):
 
 If socat isn't installed, download standalone binaries that can be downloaded from `static binaries <https://github.com/andrew-d/static-binaries>`_ 
 
-Download the correct binary architecture of socat to a writable directoy, chmod it, execute
+Download the correct binary architecture of socat to a writable directory, chmod it, execute
 
 stty
 ^^^^
@@ -1136,7 +1137,7 @@ Definition
 It limits a user's ability and only allows them to perform a subset of system commands. Typically, a combination of some or all of the following restrictions are imposed by a restricted shell:
 
 * Using the 'cd' command to change directories.
-* Setting or unsetting certain environment variables (i.e. SHELL, PATH, etc...).
+* Setting or un-setting certain environment variables (i.e. SHELL, PATH, etc...).
 * Specifying command names that contain slashes.
 * Specifying a filename containing a slash as an argument to the '.' built-in command.
 * Specifying a filename containing a slash as an argument to the '-p' option to the 'hash' built-in command.
@@ -1252,7 +1253,7 @@ SSHing from outside
 Getting out of rvim
 ^^^^^^^^^^^^^^^^^^^
 
-Main difference of rvim vs vim is that rvim does not allow escape to shell with previously described techincs and, on top of that, no shell commands at all. Taken from `vimjail <https://ctftime.org/writeup/5784>`_
+Main difference of rvim vs vim is that rvim does not allow escape to shell with previously described techniques and, on top of that, no shell commands at all. Taken from `vimjail <https://ctftime.org/writeup/5784>`_
 
 * To list all installed features it is possible to use ':version' vim command. 
 
@@ -2375,7 +2376,7 @@ Sometimes, inbound and outbound traffic from any port is disallowed and only ICM
 
 The above code is basically a reduced version of the powershell version of ICMP and have a limited buffer (which means commands whose output is greater than the buffer, won't be displayed!). Now, there's a painful way of transferring files to the victim system which is
 
-* Convert the file/ code which needs to be transferred in to base64. (If possible, remove all the uncessesary code/ comments, this would help us to reduce the length of the base64)
+* Convert the file/ code which needs to be transferred in to base64. (If possible, remove all the unnecessary code/ comments, this would help us to reduce the length of the base64)
 * Utilize the `Add-Content cmdlet <https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/add-content?view=powershell-5.1>`_ to transfer the file to the victim system. Do, remember to transfer the data in chunks as we have limited buffer! Probably, we have to run the below command twice or thrice to transfer the whole base64-encoded chunk.
  
  ::
@@ -2390,7 +2391,7 @@ The above code is basically a reduced version of the powershell version of ICMP 
   -decode Decode a Base64-encoded file
   -encode Encode a file to Base64
 
-* Now, we can execute the file (assuming powershell ps1 file) to get the full powershell ICMP reverse shell with buffer managment so, we would be able to get full output of the commands.
+* Now, we can execute the file (assuming powershell ps1 file) to get the full powershell ICMP reverse shell with buffer management so, we would be able to get full output of the commands.
 
 * Now, most of the time after getting the intial shell, probably, we would have figured out user credentials ( let's say from www-data or iisapppool user to normal/ admin user credentials. ) At this point of time, we can use the below code to create a PSCredential.
 
