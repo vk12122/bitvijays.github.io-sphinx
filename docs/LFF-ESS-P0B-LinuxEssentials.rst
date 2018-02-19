@@ -702,6 +702,26 @@ or
 
 Bash performs the expansion by executing command and replacing the command substitution with the standard output of the command, with any trailing newlines deleted.
 
+Bash Case modification
+----------------------
+
+Taken from `Case Modification <http://wiki.bash-hackers.org/syntax/pe#case_modification>`_
+
+::
+
+ ${PARAMETER^}
+ ${PARAMETER^^}
+ ${PARAMETER,}
+ ${PARAMETER,,}
+ ${PARAMETER~}
+ ${PARAMETER~~}
+
+These expansion operators modify the case of the letters in the expanded text.
+
+The ^ operator modifies the first character to uppercase, the , operator to lowercase. When using the double-form (^^ and ,,), all characters are converted.
+
+The operators ~ and ~~ reverse the case of the given text (in PARAMETER).~ reverses the case of first letter of words in the variable while ~~ reverses case for all.
+
 Bash Programming
 ----------------
 
