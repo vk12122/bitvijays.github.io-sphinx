@@ -991,13 +991,34 @@ ls showing full path
 Keyboard shortcuts
 ------------------
 
+Moving
+^^^^^^
+
 :: 
 
   Ctrl + a : Move to the start of line.
   Ctrl + e : Move to the end of line.
+  Alt  + b : Move to the start of the current word
+  Alft + f : Move to the end of the current word
+
+Erasing
+^^^^^^^
+
+::
+
   Ctrl + w : Cut from cursor to previous whitespace.
+  Ctrl + u : Cut from cursor to the start of line.
   Ctrl + k : Cut from cursor to the end of line.
   Ctrl + y : Paste the last cut text.
+
+Window
+^^^^^^
+
+::
+
+ WinKey + H : Minimize/ Hide the Window
+ WinKey + Up Arrow Key : Maximize the current windows
+ WinKey + Down Arrow Key : Return to original 
 
 Searching History
 -----------------
