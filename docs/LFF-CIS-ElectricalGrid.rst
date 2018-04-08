@@ -18,17 +18,18 @@ Electricity
 An electric current can be compared to the water flowing through a hose. 
 
 * The pressure inside the hose, or the force with which the water flows, is like voltage (V). V / Volt is the standard unit for measuring the force of electricity, or voltage.
-* The hose’s discharge, or the amount of water flowing, is like current intensity, measured in amperes (A). A / Ampere is the unit for measuring the amount of electric current.
-* Friction along the hose’s inner wall is similar to resistance (Ω). Ω / Ohm, is the unit for measuring the resistance of a substance through which electricity flows.
-* Power is what is produced by multiplying voltage by intensity, and is expressed in watts (W). Consumption is expressed in watthours (Wh) and indicates the energy used by a system or device over a given period of time. W / Watt is the standard unit for measuring power, including that of alternating current. 
+* The hose’s discharge, or the amount of water flowing, is called current (or I), measured in amperes (A). A / Ampere is the unit for measuring the amount of electric current.
+* Friction along the hose’s inner wall is similar to resistance (R). It is measured in Ohms and expressed as Ω. It is the unit for measuring the resistance of a substance through which electricity flows.
+* Voltage, current, and resistance are all related. V = IR, I = V/R, R = V/I 
+* Power is what is produced by multiplying voltage by current (VA) or by (I^2 x R), and is expressed in watts (W). Consumption is expressed in watthours (Wh) and indicates the energy used by a system or device over a given period of time. W / Watt is the standard unit for measuring power, including that of alternating current.
 
 Other Facts
 -----------
 
-* **Direct Current**: In direct current, electrons move in a single direction.
-* **Alternating Current** : In alternating current, electrons move in both directions because they are attracted alternately by the north and south poles of a magnet. In fact, alternating current changes direction 120 times per second!
+* **Direct Current**: In direct current, electrons move in a a single direction from negative to positive.
+* **Alternating Current** : In alternating current, electrons change direction 50-60 times per second (expressed at Hertz, or Hz). 
 
-* Electricity always takes the shortest path to reach the ground. When a person gets an electric shock, their body becomes that shortest route. Why? The body is made up of approximately 70% water, and water, like metal, is an excellent conductor of electricity.
+* Electricity always takes the path of least resistance. When a person gets an electric shock, their body becomes that shortest route. Why? The body is made up of approximately 70% water, and water, like metal, is an excellent conductor of electricity.
 * Tree branches can also conduct electricity because they have liquid, or sap, inside. Even low-voltage current can be lethal or very harmful to humans.
 
 Generation to the Consumption
@@ -45,7 +46,7 @@ Below is the rough diagram visualizing the flow of electricity from the Generati
 
 The transmission of electricity involves a series of transformations, checkpoints and crossroads. These three basic functions are carried out along the way between the power station and the home.
 
-A transformer is used to raise or lower the voltage of alternating current. Raising voltage facilitates the transmission of massive volumes of electricity, reduces energy losses and lowers the total cost of power transmission—for example, by avoiding the construction of additional power lines. As electrical energy approaches consumption centres, its voltage is lowered gradually to the point where homes are supplied with low-voltage power, namely 120/240 volts.
+A transformer is used to raise or lower the voltage of alternating current. Raising voltage for transmission reduces the loss due to the resistance of the power lines. As voltage is inversely proportional to current (R = V/I) and the power consumption of the power lines (at this scale the tranmission lines act as a source of resistance) and that the power consumption is given as I^2 x R it is more efficient to increase the voltage in order to reduce the current. As electrical energy approaches consumption centres, its voltage is lowered gradually to the point where homes are supplied with low-voltage power, namely 120/240 volts.
 
 ::
 
@@ -88,7 +89,7 @@ At a generating station, if rotors have 32 pairs of electromagnets. To supply a 
 Towers
 ------
 
-Transmission towers support the high-voltage conductors of overhead power lines, from the generating station’s switchyard right up to source substations and satellite substations located near populated areas. Their shape, height and sturdiness (mechanical strength) depend on the stresses to which they are exposed. Towers do not transmit electricity themselves unless lightning strikes the ground wire strung along the top of the structure. This cable is designed to protect conductors by allowing a lightning discharge to reach the ground through the tower. 
+Transmission towers support the high-voltage conductors of overhead power lines, from the generating station’s switchyard right up to source substations and satellite substations located near populated areas. Their shape, height and sturdiness (mechanical strength) depend on the stresses to which they are exposed. Towers do not transmit electricity themselves.
 
 Towers Wires?
 ^^^^^^^^^^^^^
@@ -99,7 +100,7 @@ To stabilize power transmission and avoid energy losses, the alternating current
 Tower Wires not straight?
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Wires strung between two transmission towers seem to sag in the middle. Electrical lines curve downward to reduce the force needed to hold them in place. Otherwise, towers would have to be built even stronger and they would cost more.
+Wires strung between two transmission towers seem to sag in the middle. This is to allow for wind sheer on the towers without stressing the lines.
 
 Substations
 -----------
@@ -133,7 +134,7 @@ Let's say a there exists a substation which converts 735KV to 120KV or 220kV to 
 
 Substations maybe of different types:
 
-* Transmission Substation (TSS) : Raises the voltage of electricity. This makes it easier to transmit electrical power because the higher the voltage, the more electricity can be carried over the same line.
+* Transmission Substation (TSS) : Raises the voltage of electricity. This makes it easier to transmit electrical power because the higher the voltage the lower the effect of the resistance of the transmission lines.
 
 * Distribution Substation (DSS) : Contains transformers which lower the voltage for a second time and supply the lines which distribute the power in cities and towns.
 * Customer Substation (CSS) : Mostly, connected remotely via GPRS/ 3G/ 4G via a private APN.
@@ -227,7 +228,7 @@ SCADA System
 Hierarchical Structure
 ----------------------
 
-SCADA system is hierarchical in nature having two distinct hierarchies - one at national level other at regional level. At national level, SCADA/EMS system of all RLDCs report to NLDC. Data from each RLDC is transmitted to NLDC in real time on dedicated communication lines.
+SCADA stand SCADA stands for Supervisory Control And Data Acquisition, and is hierarchical in nature having two distinct hierarchies - one at national level other at regional level. At national level, SCADA/EMS system of all RLDCs report to NLDC. Data from each RLDC is transmitted to NLDC in real time on dedicated communication lines.
 
 Hierarchy at Regional Level
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -389,6 +390,7 @@ Measurement and acquisition of electrical parameters
  * IEC 60870-5-101/104
  * DNP3
  * ICCP
+ * OPC - expand below
 
 Typical applications of RTU in Electrical Grid
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
