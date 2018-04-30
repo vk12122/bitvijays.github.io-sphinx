@@ -6,11 +6,17 @@ Hey There! Are you Pentesting a Electrical Grid? or responsible for securing it?
 
 We would cover 
 
-* Few general concepts about electricity.
-* How the electricity travels from the generation (Power Station) to the consumption (Home).
-* General Architecture of the Electrical Grid SCADA (Transmission/ Distribution/ Customer) Substation.
-* Protocols used in the Electrical Grid.
-* Vulnerabilities and how to secure the Electrical Grid.
+* Few general concepts about :ref:`electricity`.
+* How the electricity travels from the :ref:`generation-to-consumption`
+* General :ref:`scada-architecture` of the Electrical Grid (Transmission/ Distribution/ Customer) Substation.
+* :ref:`metering` : Availability based tariff and Automated Meter Reading
+* :ref:`international-standards-protocols` used in the Electrical Grid.
+* :ref:`solutions-software` used in the Electrical Grid.
+* :ref:`cybersecurity` : Vulnerabilities and Remediations (how to secure the Electrical Grid).
+
+.. Note :: By no means, we are Electrical Grid/ SCADA expert. This is just an effort to write down our understanding of Electrical Grid
+
+.. _electricity:
 
 Electricity
 ===========
@@ -31,6 +37,8 @@ Other Facts
 
 * Electricity always takes the path of least resistance. When a person gets an electric shock, their body becomes that shortest route. Why? The body is made up of approximately 70% water, and water, like metal, is an excellent conductor of electricity.
 * Tree branches can also conduct electricity because they have liquid, or sap, inside. Even low-voltage current can be lethal or very harmful to humans.
+
+.. _generation-to-consumption:
 
 Generation to the Consumption
 =============================
@@ -139,6 +147,35 @@ Substations maybe of different types:
 * Distribution Substation (DSS) : Contains transformers which lower the voltage for a second time and supply the lines which distribute the power in cities and towns.
 * Customer Substation (CSS) : Mostly, connected remotely via GPRS/ 3G/ 4G via a private APN.
 
+Substation Data Flow
+^^^^^^^^^^^^^^^^^^^^
+
+**Process Level**
+
+The process level comprises devices such as circuit breakers and data acquisition equipment used to measure the current, voltage, and other parameters in different parts of the substation.
+
+**Bay Level**
+
+The bay level consists of the IEDs that collect the measurements provided by the process level. The IEDs can make local control decisions, transmit the data to other IEDs, or send the data to the substation SCADA system for further processing and monitoring.
+
+
+**Station Level**
+
+The station level is where you’ll find SCADA servers and HMIs, as well as the human operators (if needed) who monitor the status of the substation.
+
+**Bus**
+
+The Process Bus handles communication between the Process Level and the Bay Level, and the Station Bus handles communication between the Bay Level and Station Level.
+
+Process bus replaces hard wired connections with communication lines. "Smart" CT's, PT's and switchgear continuously transmits data over the process bus and any upstream devices that wish to use the data for protection, measurements, metering, or 
+monitoring do so by monitoring the communications.  
+
+.. image:: Images/LFF-CIS-ElectricalGrid/Process_Station_Bus.png
+   :scale: 70 %
+   :align: center
+   :alt: Process_Station_Bus
+
+
 Electrical parameters of a substation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -222,8 +259,6 @@ National Load Dispatch Center (NLDC) coordinates the activities of all RLDCs. NL
    :align: center
    :alt: National Grid
 
-SCADA System
-============
 
 Hierarchical Structure
 ----------------------
@@ -268,6 +303,8 @@ EMS Functions
 * Load Forecasting
 * MIS Reporting
 
+.. _scada-architecture:
+
 SCADA Architecture
 ==================
 
@@ -298,38 +335,6 @@ Below diagrams display a rough architecture for the Transmission and the Distrib
  * Web Server : For possible display of any information
  * ICCP Server : For transfer of information from control-center to control center.
 
-Substation Architecture
------------------------
-
-Process Level
-^^^^^^^^^^^^^
-
-The process level comprises devices such as circuit breakers and data acquisition equipment used to measure the current, voltage, and other parameters in different parts of the substation.
-
-Bay Level
-^^^^^^^^^
-
-The bay level consists of the IEDs that collect the measurements provided by the process level. The IEDs can make local control decisions, transmit the data to other IEDs, or send the data to the substation SCADA system for further processing and monitoring.
-
-
-Station Level
-^^^^^^^^^^^^^
-
-The station level is where you’ll find SCADA servers and HMIs, as well as the human operators (if needed) who monitor the status of the substation.
-
-Bus
-^^^
-
-The Process Bus handles communication between the Process Level and the Bay Level, and the Station Bus handles communication between the Bay Level and Station Level.
-
-Process bus replaces hard wired connections with communication lines. "Smart" CT's, PT's and switchgear continuously transmits data over the process bus and any upstream devices that wish to use the data for protection, measurements, metering, or 
-monitoring do so by monitoring the communications.  
-
-.. image:: Images/LFF-CIS-ElectricalGrid/Process_Station_Bus.png
-   :scale: 70 %
-   :align: center
-   :alt: Process_Station_Bus
-
 Transmission Architecture
 -------------------------
 
@@ -337,6 +342,7 @@ Transmission Architecture
    :scale: 70 %
    :align: center
    :alt: Transmission Architecture
+
 
 Transmission Substation Architecture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -431,8 +437,9 @@ The above points can be implemented all together in one box or with different co
        |               |
    Parallel I/Os     Sub-devices such as IED
 
-Measurement and acquisition of electrical parameters
 
+Measurement and acquisition of electrical parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Serial communication using
 
@@ -446,7 +453,7 @@ Measurement and acquisition of electrical parameters
  * IEC 60870-5-101/104
  * DNP3
  * ICCP
- * OPC - expand below
+ * OPC
 
 Typical applications of RTU in Electrical Grid
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -515,6 +522,25 @@ Intelligent Electronic Devices
  * Recloser controllers
  * Voltage regulators
 
+These devices provide 
+
+* Overcurrent Protection
+* Line Protection
+
+  * Distance Protection and control
+  * Line differential and control
+  * Combined line differential and distance protection and control
+  * Breaker management and control 
+  * Overcurrent protection as backup for lines
+
+* Transformer differential protection
+* Motor protection
+* Generator protection
+* Busbar protection
+* Bay controller with control /interlocking functions and monitoring, optionally with protection functions
+* Fault recorder and power quality recorder
+
+
 IED Interfaces
 ^^^^^^^^^^^^^^
 
@@ -554,14 +580,91 @@ ICCP Server
 Historian Server
 ----------------
 
-International Standards
-=======================
+
+.. _metering:
+
+Metering
+========
+
+An electricity meter, electric meter, electrical meter, or energy meter is a device that measures the amount of electric energy consumed by a residence, a business, or an electrically powered device.
+
+Now, as a electricity company, we need to measure
+
+* How much electricity we are providing to our consumers (Home/ Business)
+* How much electricity we are providing to other electricity companies for distribution.
+
+Availability-based tariff
+-------------------------
+
+Availability Based Tariff (ABT) is a frequency based pricing mechanism applicable in India for unscheduled electric power transactions. The ABT falls under electricity market mechanisms to charge and 
+regulate power to achieve short term and long term network stability as well as incentives and dis-incentives to grid participants against deviations in committed supplies
+
+Scheduling
+^^^^^^^^^^
+
+* Each day of 24 hrs starting from 00.00 hours be divided into 96 time blocks of 15 minutes each.
+* Each generating station is to make advance declaration of its capacity for generation in terms of MWh delivery ex-bus for each time block of the next day. In addition, the total ex-bus MWh which can actually be delivered during the day will also be declared in case of hydro stations. These shall constitute the basis of generation scheduling.
+* While declaring the capability, the generator should ensure that the capability during peak hours is not less than that during other hours.
+* The Scheduling as referred to above should be in accordance with the operating procedures in force.
+* Based on the above declaration, the Regional Load Dispatch Centre(RLDC) shall communicate to the various beneficiaries their respective shares of the available capability.
+* After the beneficiaries give their requisition for power based on the generation schedules, the RLDC shall prepare the generation schedules and drawal schedules for each time block after taking into account technical limitations and transmission constraints.
+* The schedule of actual generation shall be quantified on ex-bus basis, whereas for beneficiaries, scheduled drawals shall be quantified at their respective receiving points.
+* For calculating the drawal schedule for beneficiaries, the transmission losses shall be apportioned in proportion to their drawals.
+* In case of any forced outage of a unit, or in case of any transmission bottleneck, RLDC will revise the schedules. The revised schedules will become effective from the 4th time block, counting the time block in which the revision is advised by the generator, to be the 1st one.
+* It is also permissible for the generators and the beneficiaries to revise their schedules during a day, but any such revisions shall be effective only from the 6th time block reckoned in the manner as already stated.
+
+Architecture
+^^^^^^^^^^^^
+
+.. image:: Images/LFF-CIS-ElectricalGrid/AMR_ABT_Architecture.png
+   :scale: 70 %
+   :align: center
+   :alt: Generation to the Consumption
+
+Automatic meter reading
+-----------------------
+
+Automatic meter reading, or AMR, is the technology of automatically collecting consumption, diagnostic, and status data from water meter or energy metering devices (gas, electric) and transferring that data to a central database for billing, troubleshooting, and analyzing. 
+This technology mainly saves utility providers the expense of periodic trips to each physical location to read a meter. Another advantage is that billing can be based on near real-time consumption rather than on estimates based on past or predicted consumption.
+
+
+Both ABT and AMR work on the DLMS/ COSEC Protocol
+
+
+Meter data acquisition system (MDAS) 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The main objective of the MDAS is to acquire meter data from meters within the distribution system and consumer meters for:
+
+* System performance monitoring and decision support 
+* Network analysis and system planning
+* Monitoring and collecting data of consumer energy usage for billing and CRM and for tamper, outage detection and notification
+* Monitoring energy flows in the energy supply chain to provide information for energy auditing.
+
+
+Features of MDAS
+
+* AMR data collection from system meters (distribution transformer, HVDS, feeder, etc.)
+* AMR data collection from HV and selective LV consumers’ meters 
+* Polling of data to the Data Center
+* Generation of alarms and notifications based on system conditions and validation logic
+* Reading of energy usage parameters including instantaneous load, load survey, event logging, etc.
+* Use of user defined dashboards
+* Reports based on the above mentioned parameters for feeder/ distribution transformer MIS.
+
+.. _international-standards-protocols:
+
+International Standards/ Protocols
+==================================
 
 The communication between 
 
 * IED, RTU, RTU Gateway, FEP, SCADA Server happens in IEC-60870-5-104.
 * Control Center to Contol Center or Control Center to SLDC happens in ICCP Protocol.
 * IED to IED happens in GOOSE.
+* Smart Meters to Meter Data Acquistion System happens in DLMS/ COSEC protocol
+
+Information about the Substation configuration (such as how many IEDs are present, IEDs configurations are present in SCD/ ICD files.
 
 IEC-60870-5-104
 ---------------
@@ -969,28 +1072,6 @@ The data objects defined by GOMSFE also describe the way information is presente
  Object Model Structure from Object Foundry
 
 
-SCL Substation Configuration Language
--------------------------------------
-
-Substation Configuration Language (SCL), based on XML, specified by IEC 61850-6-1 to describe configurations. The various SCL files include: 
-
-* system specification description (SSD) files, 
-* IED capability description (ICD) files, 
-* substation configuration description (SCD) files, 
-* configured IED description (CID) files. 
-
-Substation Configuration Language (SCL) allows describing in a standardised way
-
-* IEDs, their configuration and their functional and communication capabilities
-* Concrete communication structure of a SA system
-* Allocation of devices to the substation primary equipment.
-
-SCL – Benefits
-^^^^^^^^^^^^^^
-
-The benefits of SCL are Automation, Remote Configuration, Offline Configurations, Sharing of IED configurations, Custom configurations, Elimination of discrepancies.
-
-
 GOOSE
 ------
 
@@ -1067,6 +1148,11 @@ Examples
 
 The above has been taken from `Enhanced protection functionality with IEC 61850 and GOOSE <http://www02.abb.com/global/sgabb/sgabb005.nsf/bf177942f19f4a98c1257148003b7a0a/e81bb489e5ae0b68482574d70020bf42/$FILE/B5_G2_Enhanced+protection+functionality+with+IEC+61850+and+GOOSE.pdf>`_
 
+GOOSE Communication
+^^^^^^^^^^^^^^^^^^^
+
+To view GOOSE communication, we can use GOOSE Wheel which provides you with the overall picture of GOOSE communications in substation at glance. Refer `Enjoy spectacular views on GOOSE communications in substations <http://digitalsubstation.com/tekvel-en/2016/05/30/enjoy-spectacular-views-on-goose-communications-in-substations/>`_ 
+
 Substation Communication Example
 ---------------------------------
 
@@ -1104,7 +1190,29 @@ The DLMS/COSEM specification is fully described in the DLMS UA coloured books:
 * the Yellow book describes the conformance testing process
 * the White book holds the Glossary of DLMS/COSEM terms
 
+SCL Substation Configuration Language
+-------------------------------------
 
+Substation Configuration Language (SCL), based on XML, specified by IEC 61850-6-1 to describe configurations. The various SCL files include: 
+
+* system specification description (SSD) files, 
+* IED capability description (ICD) files, 
+* substation configuration description (SCD) files, 
+* configured IED description (CID) files. 
+
+Substation Configuration Language (SCL) allows describing in a standardised way
+
+* IEDs, their configuration and their functional and communication capabilities
+* Concrete communication structure of a SA system
+* Allocation of devices to the substation primary equipment.
+
+SCL – Benefits
+^^^^^^^^^^^^^^
+
+The benefits of SCL are Automation, Remote Configuration, Offline Configurations, Sharing of IED configurations, Custom configurations, Elimination of discrepancies.
+
+
+.. _solutions-software:
 
 Solutions/ Softwares?
 =====================
@@ -1136,49 +1244,23 @@ Siemens
 
 `Spectrum Power <https://w3.siemens.com/smartgrid/global/en/products-systems-solutions/control-center-solutions/grid-control-platform/about-spectrum-power/Pages/overview.aspx>`_
 
-Nomenclature of control centre servers
 
-WGOM0DS1
+OSI
+^^^
 
-Western Region
+`OSI monarch <http://www.osii.com/solutions/platforms/monarch.asp>`_ is a state-of-the-art open system architecture designed for unequaled portability and is available on various high-performance hardware and operating system platforms. The main thing is monarch is vendor independent. It doesn't matter
+which vendor is your gateway, RTU, IED. OSI monarch works with everything.
 
-State
+Key features supported by the monarch platform are:
 
-Main control
-centre Server name
-
-Identity of a parameter
-^^^^^^^^^^^^^^^^^^^^^^^
-
-• Composite key
-• Made up of SUBSTN, DEVICETYP, DEVICE & ANALOG/POINT
-• e.g. PONDA_GA$BUS$2B1$KV, PONDA_GA$CB$20152$STTD
-
-Sources of data
-^^^^^^^^^^^^^^^^
-• RTU – Based on IEC addreses
-• ICCP – Based on mapping table
-• Calculated – Database calculations
-
-For RTU data
-^^^^^^^^^^^^
-* Mapping with field is through IEC addresses
-* Mapping needs to be done both at site and at control centre
-* Series considered
-
- * 3001 ..... For analogs
- * 2001 ..... For Circuit breakers
- * 1001 ..... For Protection signals
- * 1 ............ For Isolators
-
-For ICCP data
-^^^^^^^^^^^^^
-* Mapping table used
-
- ::
-
-   e. g. PONDA_GABUS$2B1$KV, PONDA_GA$BUS$2B1$KV
-
+* Multiple operating systems including Microsoft Windows®, Linux® and UNIX®
+* All popular relational database management systems as well as NoSQL technologies
+* Physical or virtualized hardware configurations, on premise or cloud-deployable
+* Secure segmented architecture with multiple points of defense and a robust security shield
+* Distributed (IP-based) front-end communications interface to field devices
+* Many popular RTU, IED and PLC protocols including legacy and open protocols such as DNP, MODBUS and IEC
+* Secure Microsoft Windows- or web-based lightweight operator user interface
+* Advanced data visualization and user interface, including 3D rendering and virtualization
 
 Network Planning Toolkit
 ------------------------
@@ -1265,24 +1347,6 @@ Siemens
 
 Siemens has `Products for Protection <http://w3.siemens.com/smartgrid/global/en/products-systems-solutions/Protection/Pages/overview.aspx>`_ such as SIPROTEC5, SIPROTEC4, SIPTROTEC Compact, Reyrolle for Protection.
 
-These devices provide 
-
-* Overcurrent Protection
-* Line Protection
-
-  * Distance Protection and control
-  * Line differential and control
-  * Combined line differential and distance protection and control
-  * Breaker management and control 
-  * Overcurrent protection as backup for lines
-
-* Transformer differential protection
-* Motor protection
-* Generator protection
-* Busbar protection
-* Bay controller with control /interlocking functions and monitoring, optionally with protection functions
-* Fault recorder and power quality recorder
-
 Softwares for Siemens
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -1314,11 +1378,63 @@ SICAM Protocol Test System
 * GOOSE publish
 * Network overview analysis - which server is connected to which client?
 
+Nomenclature/ Identification
+----------------------------
+
+Nomenclature of control centre servers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+WGOM0DS1
+
+* W - Western Region
+* GO - State
+* M - Main control centre
+* S1 - Server name
+
+Identity of a parameter
+^^^^^^^^^^^^^^^^^^^^^^^
+
+• Composite key
+• Made up of SUBSTN, DEVICETYP, DEVICE & ANALOG/POINT
+• e.g. PONDA_GA$BUS$2B1$KV, PONDA_GA$CB$20152$STTD
+
+Sources of data
+^^^^^^^^^^^^^^^^
+• RTU – Based on IEC addreses
+• ICCP – Based on mapping table
+• Calculated – Database calculations
+
+For RTU data
+^^^^^^^^^^^^
+* Mapping with field is through IEC addresses
+* Mapping needs to be done both at site and at control centre
+* Series considered
+
+ * 3001 ..... For analogs
+ * 2001 ..... For Circuit breakers
+ * 1001 ..... For Protection signals
+ * 1 ............ For Isolators
+
+For ICCP data
+^^^^^^^^^^^^^
+* Mapping table used
+
+ ::
+
+   e. g. PONDA_GABUS$2B1$KV, PONDA_GA$BUS$2B1$KV
+
+
+.. _cybersecurity:
+
 Cybersecurity
 =============
 
+
+
 Vulnerabilities
 ---------------
+
+Let's see, what could be the Vulnerabilities present in Electrical Grid from a overall pattern.
 
  .. image:: Images/LFF-CIS-ElectricalGrid/EGVuln.png
     :scale: 70 %
@@ -1334,6 +1450,117 @@ Remediation
     :align: center
     :alt: Remediation in SCADA
 
+The new generation of control systems is more and more based on open standards and commercial technology, e.g. Ethernet and TCP/IP based communication protocols such as IEC 60870-5-104, DNP 3.0 or IEC 61850. Let's see what options the devices (RTU/ IED) provides
+
+.. Warning:: Not all the devices support the below functionality. However, new products are slowly-slowly supporting the below features. You are suggested to read the product "CyberSecurity Deployment Guidelines" or "User Manuals"!
+
+User access control
+^^^^^^^^^^^^^^^^^^^
+
+* User account management : Devices supports user authentication and authorization on an individual user level. User authentication is required and authorization is enforced for all interactive access to the device.
+* Role Based Access Control : Devices supports Role Based Access Control (RBAC) according to IEC 62351. Every user account can be assigned different roles and the user roles can be added, removed and changed as needed.
+* Password complexity : Devices offers the possibility of enforcing password policies that can be customized by specifying minimum password length, maximum password lifetime, as well as usage of lower case, upper case, numeric and special characters.
+
+Secure communication
+^^^^^^^^^^^^^^^^^^^^
+
+* Web server : Devices permits encrypted communication between the web browser and the RTU/ IED. Furthermore the operator can select between https:// and http:// by configuration. In addition, self-signed certificates and customer certificates (X509), can be used.
+* Secure IEC 60870-5-104 communication (IEC 62351-3) : Devices allows point-to-point data traffic encryption for TCP/IP-based communication. This can be enabled by using Transport Layer Security (TLS) with respective authentication of client and server using X.509 certificates.
+* VPN function : Devices offers an encrypted channel between the RTU/ IED and the IPsec Router on customer‘s side. The VPN provides confidentiality and integrity and authenticity. A secure communication via public networks is possible. The authentication is handled by pre-shared keys or customer certifications (X509).
+* Secure DNP3 communication (IEC 62351-5) : Devices provides a secure implementation for serial and TCP IP communication based on DNP3. This part of IEC 62351 focuses on application layer authentication. All application layer messages are defined as critical, therefore they are authenticated and encrypted.
+
+
+Integrated firewall
+^^^^^^^^^^^^^^^^^^^
+
+Devices enables different services on dedicated Ethernet interfaces (E1, E2, USB, PPP). The configuration of the firewall is automatically created from the RTU/ IED configuration.
+
+Manipulation protection
+^^^^^^^^^^^^^^^^^^^^^^^
+Devices are protected by signatures against manipulation. Manipulated RTU/ IED download files, e.g. configuration files, are detected and refused.
+
+Device supervision via SNMP V3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Simple Network Management Protocol (SNMP) is one of the most commonly used technologies for network monitoring. By implementing SNMP, devices becomes a managed device that can share:
+* Diagnosis information (e.g. CPU load and telegram traffic load)
+* System events (RTU/ IED and sub devices)
+* Configurable Single Indications
+
+Security logging
+^^^^^^^^^^^^^^^^
+* Local logging : Devices creates audit trails (log files) of all security relevant user activities. Security events that are being logged include user login, logout, change of parameters, configurations, or updates of firmware. For each event date and time, user, event ID, outcome and source of event are logged. Access to the audit trail is available to authorized users only.
+* Remote Logging : Security events of the RTU/ IED can be sent to external security syslog servers. 
+  
+Network access control (Authentication)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Devices supports the authentication and authorization in TCP/IP-based networks, according to the standard IEEE 802.1X. With the help of an authentication server, the access rights for the devices can centrally be managed, to ensure only known devices are allowed to communicate.
+
+Communication Ports
+-------------------
+
+The risk to the SCADA can be reduced greatly by using firewalls with correct ports allowed.
+
+
+
+ +-----------+-----------------------+
+ | Protocol  |   Port                |
+ +===========+=======================+
+ | ICCP      | TCP: 102              |
+ +-----------+-----------------------+
+ | IEC104    | TCP: 2404             |
+ +-----------+-----------------------+
+ | DNP3      | TCP: 20000            |
+ +-----------+-----------------------+
+ | DLMS/COSEC| TCP: 4059 UDP:4059    |
+ +-----------+-----------------------+
+
+
+ If the ABT/ AMR application server are in the SCADA LAN, we also need to make sure that only DLMS/ COSEC ports are open on the firewall.
+
+Vendor Security Configuration Tools
+-----------------------------------
+
+Schneider Electric
+^^^^^^^^^^^^^^^^^^
+
+Schneider Electric has written `A Framework for Developing and Evaluating Utility Substation Cyber Security <https://www.schneider-electric.us/en/download/document/998-2095-07-21-14AR0_EN/>`_ and `Cybersecurity System Technical Note - Reducing Vulnerabilities to Cyber Attack <https://www.schneider-electric.com/en/download/document/Cybersecurity_STN_V2/>`_ 
+
+`Security Administration Tool <https://www.schneider-electric.com/en/product-range-presentation/63515-ecostruxure%E2%84%A2-cybersecurity-admin-expert>`_ : 
+
+EcoStruxure™ Cybersecurity Admin Expert SAT is an intuitive, software-based tool used for multiple purposes:
+
+* Creating a cybersecurity and security policy
+* Configuring the security of devices
+* Retrieving security logs of a whole substation, plant or industrial environment
+
+Main functions include:
+
+1. Define the security policy, including for example: password complexity or password strategy
+2. Define rules for security logs, choose between NERC CIP, BDEW, P1686 2014 or a combination.
+3. Define the RBAC* (Role Base Access Control) parameters of your environment. RBAC technology is the most efficient way to apply the defined roles and permissions to an individual, deploying to each device.
+4. Define users of your system or product and assign one or several roles per user, based on your organization.
+5. Retrieve security logs including several Schneider Electric devices
+
+As of now (April 2018), EcoStruxure Cybersecurity Admin Expert can be used in conjunction with several Schneider Electric OT devices such as Easergy MiCOM P40 or P30 protection relays, Easergy T300, Saitel or MiCOM C264 RTUs or Gateway software for EcoStruxure Substation Operation.
+
+ABB
+^^^
+
+`System Data Manager SDM600 <http://new.abb.com/substation-automation/products/software/system-data-management>`_
+
+Key Features
+
+* Data management : Automatically collect, store and provide evaluation for disturbance recorder files.
+ * Disturbance recorder data management
+ * Disturbance recorder data evaluation
+* Cyber security management : Provide centralized user account management and security logging for modern networks.
+ * Central user account management
+ * Central cyber security logging
+* Maintenance and service : Documentation of Firmware and configuration revisions of the supervised IEC 61850 relays.
+ * Tracking relay software versions
+ * Tracking relay configuration revision
+
 Security Advisory Feeds
 -----------------------
 
@@ -1342,6 +1569,11 @@ Security Advisory Feeds
 3. `Siemens Product CERT <https://twitter.com/ProductCERT>`_
 4. `ICS-CERT <https://twitter.com/ICSCERT>`_
 
+SCADA Cybersecurity Related Blogs
+---------------------------------
+
+1. `Monitor those Control System Networks! <http://www.netresec.com/?page=Blog&month=2011-08&post=Monitor-those-Control-System-Networks>`_
+2. `SCADA Network Forensics with IEC-104 <http://www.netresec.com/?page=Blog&month=2012-08&post=SCADA-Network-Forensics-with-IEC-104>`_ 
 
 References
 ==========
@@ -1366,6 +1598,8 @@ References
 18. `An Architecture and System for IEC 61850 Process Bus <https://pdfs.semanticscholar.org/2d4f/7ba20460b96a58eb60da4b0d8b423a208676.pdf>`_
 19. `IEC 61850-9-2 Process Bus Communication Interface for Light Weight Merging Unit Testing Environment <http://www.diva-portal.org/smash/get/diva2:559563/fulltext02>`_
 20. `Smart meter demonstration board with DLMS/COSEM using ST7570 S-FSK modem with STM32™ and SPEAr <http://www.st.com/content/ccc/resource/technical/document/user_manual/37/6f/55/ce/31/88/45/17/DM00051173.pdf/files/DM00051173.pdf/jcr:content/translations/en.DM00051173.pdf>`_
+21. `Meter Data Acquistion System (MDAS) Implementation Challenges in India's R-APDRP <http://securemeters.com/files/7613/7853/6534/MDAS_vivek_pathak.pdf>`_
+22. `Hands-on Control System Cyber Security Training <https://www.smartgrid.gov/files/National_SCADA_Test_Bed_Handson_Control_System_Cyber_Securit_200911.pdf>`_
 
 ToWrite
 =======
@@ -1457,3 +1691,5 @@ Bus couple, incoming outgoing feeder, outgoing feeder with bus pt , reacter feed
 ABB FOX 515 Differential
 
 G950 SE - Gateway:
+
+.. disqus::

