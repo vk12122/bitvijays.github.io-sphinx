@@ -279,7 +279,7 @@ Kernel Modules
 Kernel modules are contained in /lib/modules/$(uname -r)/
 
 :: 
-
+ 
   lsmod      : list all loaded modules
   modprobe   : load kernel modules
   lspci      : list all pci devices
@@ -308,6 +308,67 @@ Debian GNU provides a convenient tool to manage runlevels (to control when servi
    
    systemctl status <service_name> - Status of the service.
    systemctl start <service_name>  - Start the service
+
+Screen Multiplexer
+------------------
+
+tmux
+^^^^
+
+::
+
+ tmux new -s myname            : start new with session name:
+ tmux list-sessions            : show sessions
+ tmux ls                       : show sessions
+ tmux list-windows             : show windows
+ tmux attach-session -t myname : Attach to session named "myname"
+ tmux a -t myname              : Attach to session named "myname"
+ (Prefix) + d                  : detach
+
+**Windows (Tabs)**
+
+::
+
+ (Prefix Key) + 
+ c  create window
+ w  list windows
+ n  next window
+ p  previous window
+ f  find window
+ ,  name window
+ &  kill window
+
+
+**tmux.conf**
+
+::
+
+ # Enable mouse mode (tmux 2.1 and above)
+ set -g mouse on
+
+**Reloading tmux config**
+
+If we have made changes to tmux configuration file in the ~/.tmux.conf file, it shouldn’t be necessary to start the server up again from scratch with kill-server. Instead, we can prompt the current tmux session to reload the configuration with the source-file command.
+This can be done either from within tmux, by pressing Ctrl+B or Prefix key and then : to bring up a command prompt, and typing:
+
+::
+
+ :source-file ~/.tmux.conf
+
+Or simply from a shell:
+
+::
+
+ $ tmux source-file ~/.tmux.conf
+
+This should apply your changes to the running tmux server without affecting the sessions or windows within them.
+
+**Copy Paste**
+
+For copying, Press the Shift key; i.e., Shift-MouseHighlight properly selects text and - still holding down the shift key 
+
+* we can right-click and get the standard bash context menu with Copy, Paste, etc.
+* or Ctrl-Shift-C and Ctrl-Shift-V does work to copy and paste text.
 
 Programming
 ===========
