@@ -1191,4 +1191,11 @@ Interesting Stuff
 
 * Windows Monitoring Tools : Server density has written similar list for Windows too `60+ Windows Monitoring Tools <https://www.serverdensity.com/monitor/windows/how-to/>`_
 
+Changelog
+=========
+.. git_changelog::
+  :filename_filter: docs/LFF-ESS-P0B-LinuxEssentials.rst
+  :hide_date: false
+
+
 .. disqus::

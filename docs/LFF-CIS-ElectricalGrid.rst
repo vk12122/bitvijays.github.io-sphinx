@@ -1714,4 +1714,10 @@ ABB FOX 515 Differential
 
 G950 SE - Gateway:
 
+Changelog
+=========
+.. git_changelog::
+  :filename_filter: docs/LFF-CIS-ElectricalGrid.rst
+  :hide_date: false
+
 .. disqus::

@@ -5074,4 +5074,10 @@ Installing tftp - Windows
 
   pkgmgr /iu:"TFTP"
 
+Changelog
+=========
+.. git_changelog::
+  :filename_filter: docs/LFC-VulnerableMachines.rst
+  :hide_date: false
+
 .. disqus::
