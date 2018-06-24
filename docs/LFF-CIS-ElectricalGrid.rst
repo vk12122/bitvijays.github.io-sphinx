@@ -4,9 +4,9 @@ Critical Infrastructure Series : Electrical Grid
 
 Hey There! Are you Pentesting a Electrical Grid? or responsible for securing it? or New to the concept of Electrical Grid? Here are the basics which would help you in your journey!
 
-We would cover 
+We will cover 
 
-* Few general concepts about electricity.
+* General concepts about electricity.
 * How the electricity travels from the generation (Power Station) to the consumption (Home).
 * General Architecture of the Electrical Grid SCADA (Transmission/ Distribution/ Customer) Substation.
 * Protocols used in the Electrical Grid.
@@ -34,9 +34,9 @@ Other Facts
 Generation to the Consumption
 =============================
 
-At any rate, the electricity we use is wheeled through overhead cables that are attached to tall support structures called **towers**, which link generating station **switchyards** to power intersections called **source substations**. Power is then routed through **satellite substations** before running along the distribution lines to finally reach our homes. The fascinating thing is that we use electricity as soon as it is generated. The transfer of electricity therefore occurs at breakneck speed. Actually, it moves nearly as fast as light, which rushes along at 300,000 kilometres per second!
+At any rate, the electricity we use is transmitted via overhead cables that are attached to tall support structures called **towers**, which link generating station **switchyards** to power intersections called **source substations**. Power is then routed through **satellite substations** before running along the distribution lines to finally reach our homes. The fascinating thing is that we use electricity as soon as it is generated. The transfer of electricity therefore occurs at breakneck speed. Actually, it moves nearly as fast as light, which rushes along at 300,000 kilometres per second!
 
-Below is the rough diagram visualizing the flow of electricity from the Generation to the Consumption.
+Below is the rough diagram visualizing the flow of electricity from Generation to Consumption.
 
 .. image:: Images/LFF-CIS-ElectricalGrid/Generation2Consumer.png
    :scale: 70 %
@@ -99,7 +99,7 @@ To stabilize power transmission and avoid energy losses, the alternating current
 Tower Wires not straight?
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Wires strung between two transmission towers seem to sag in the middle. Electrical lines curve downward to reduce the force needed to hold them in place. Otherwise, towers would have to be built even stronger and they would cost more.
+Wires strung between two transmission towers seem to sag in the middle. Tensioning the wires to keep them straight would require much stronger and therefor expensive towers for no benefit and remove any slack to counter contraction and expansion due to hot and cold weather.
 
 Substations
 -----------
