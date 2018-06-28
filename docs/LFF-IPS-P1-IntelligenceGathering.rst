@@ -772,6 +772,12 @@ At this point, it's good to find what are the most common ports open in the scan
 
   grep "^[0-9]\+" <nmap file .nmap extension> | grep "\ open\ " | sort | uniq -c | sort -rn | awk '{print "\""$1"\",\""$2"\",\""$3"\",\""$4"\",\""$5" "$6" "$7" "$8" "$9" "$10" "$11" "$12" "$13"\""}' > test.csv
 
+or 
+
+::
+
+ xmlstarlet sel -t -m '//port/state[@state="open"]/parent::port' -v 'ancestor::host/address/@addr' -o : -v './@portid' -n nmap-output.xml
+
 Exploring the Network Further
 ------------------------------
 
