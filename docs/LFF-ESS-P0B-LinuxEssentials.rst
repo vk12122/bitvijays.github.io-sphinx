@@ -66,6 +66,8 @@ Two modes - Command and Insert Mode. All commands below are in command mode.
   yy                          - Yank or copy current line.
   y$, yny                     - Similar to delete lines.
   p                           - Paste the line in the buffer in to text after the currentline.
+  :%!xxd                      - to turn it into a hexeditor. 
+  :%!xxd -r                   - to go back to normal mode (from hexedit mode)
 
 Vi Configuration Files
 ----------------------
@@ -763,7 +765,7 @@ or
 
 Bash performs the expansion by executing command and replacing the command substitution with the standard output of the command, with any trailing newlines deleted.
 
-Bash Case modification
+Bash Case Modification
 ----------------------
 
 Taken from `Case Modification <http://wiki.bash-hackers.org/syntax/pe#case_modification>`_
@@ -782,6 +784,45 @@ These expansion operators modify the case of the letters in the expanded text.
 The ^ operator modifies the first character to uppercase, the , operator to lowercase. When using the double-form (^^ and ,,), all characters are converted.
 
 The operators ~ and ~~ reverse the case of the given text (in PARAMETER).~ reverses the case of first letter of words in the variable while ~~ reverses case for all.
+
+Example: Parameter ^
+^^^^^^^^^^^^^^^^^^^^
+
+::
+
+ VAR="hack the PLANET"
+
+ echo ${VAR^}
+ Hack the PLANET
+
+ echo ${VAR^^}
+ HACK THE PLANET
+
+Example: Parameter ,
+^^^^^^^^^^^^^^^^^^^^
+
+::
+
+ VAR="HACK THE PLANET"
+
+ echo ${VAR,}
+ hACK THE PLANET
+
+ echo ${VAR,,}
+ hack the planet
+
+Example: Parameter ~
+^^^^^^^^^^^^^^^^^^^^
+
+::
+
+ VAR="hack the PLANET"
+
+ echo ${VAR~}
+ Hack The pLANET
+
+ echo ${VAR~~}
+ HACK THE planet
 
 Bash Programming
 ----------------
