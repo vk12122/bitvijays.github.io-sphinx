@@ -9,6 +9,7 @@ We will cover
 
 * General concepts about electricity :ref:`electricity`.
 * How the electricity travels from the :ref:`generation-to-consumption`.
+* General :ref:`scada-architecture` of the Electrical Grid (Transmission/ Distribution/ Customer) Substation.
 * :ref:`metering` : Availability based tariff and Automated Meter Reading
 * :ref:`international-standards-protocols` used in the Electrical Grid.
 * :ref:`solutions-software` used in the Electrical Grid.
