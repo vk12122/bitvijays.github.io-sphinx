@@ -4,10 +4,11 @@ Critical Infrastructure Series : Electrical Grid
 
 Hey There! Are you Pentesting a Electrical Grid? or responsible for securing it? or New to the concept of Electrical Grid? Here are the basics which would help you in your journey!
 
-We would cover 
+We will cover 
 
-* Few general concepts about :ref:`electricity`.
-* How the electricity travels from the :ref:`generation-to-consumption`
+
+* General concepts about electricity :ref:`electricity`.
+* How the electricity travels from the :ref:`generation-to-consumption`.
 * General :ref:`scada-architecture` of the Electrical Grid (Transmission/ Distribution/ Customer) Substation.
 * :ref:`metering` : Availability based tariff and Automated Meter Reading
 * :ref:`international-standards-protocols` used in the Electrical Grid.
@@ -17,6 +18,7 @@ We would cover
 .. Note :: By no means, we are Electrical Grid/ SCADA expert. This is just an effort to write down our understanding of Electrical Grid
 
 .. _electricity:
+
 
 Electricity
 ===========
@@ -43,9 +45,9 @@ Other Facts
 Generation to the Consumption
 =============================
 
-At any rate, the electricity we use is wheeled through overhead cables that are attached to tall support structures called **towers**, which link generating station **switchyards** to power intersections called **source substations**. Power is then routed through **satellite substations** before running along the distribution lines to finally reach our homes. The fascinating thing is that we use electricity as soon as it is generated. The transfer of electricity therefore occurs at breakneck speed. Actually, it moves nearly as fast as light, which rushes along at 300,000 kilometres per second!
+At any rate, the electricity we use is transmitted via overhead cables that are attached to tall support structures called **towers**, which link generating station **switchyards** to power intersections called **source substations**. Power is then routed through **satellite substations** before running along the distribution lines to finally reach our homes. The fascinating thing is that we use electricity as soon as it is generated. The transfer of electricity therefore occurs at breakneck speed. Actually, it moves nearly as fast as light, which rushes along at 300,000 kilometres per second!
 
-Below is the rough diagram visualizing the flow of electricity from the Generation to the Consumption.
+Below is the rough diagram visualizing the flow of electricity from Generation to Consumption.
 
 .. image:: Images/LFF-CIS-ElectricalGrid/Generation2Consumer.png
    :scale: 70 %
@@ -108,7 +110,7 @@ To stabilize power transmission and avoid energy losses, the alternating current
 Tower Wires not straight?
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Wires strung between two transmission towers seem to sag in the middle. This is to allow for wind sheer on the towers without stressing the lines.
+Wires strung between two transmission towers seem to sag in the middle. Tensioning the wires to keep them straight would require much stronger and therefor expensive towers for no benefit and remove any slack to counter contraction and expansion due to hot and cold weather.
 
 Substations
 -----------
