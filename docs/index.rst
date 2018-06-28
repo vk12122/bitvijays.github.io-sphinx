@@ -8,13 +8,12 @@ The Magic of Learning
 
 **Hey there!** Three years back, when we started our journey in Infosec, we didn't had proper guidance. At that point of time, we decided to share our knowledge gathered during this journey with the community. The blog entries below can be seen as reading material for anyone starting in the InfoSec Community or even a one-stop-reference for a seasoned InfoSec person. 
 
-Currently, **three series** have been published:
+Currently, **four series** have been published:
 
 - **The Essentials**
 - **Infrastructure Pentest**
 - **Capture the flag**
-
-..   - **Critical Infrastructure**
+- **Critical Infrastructure**
 
 Want to provide us some feedback? Write it down at :doc:`Feedback` page!
 
@@ -40,6 +39,7 @@ The Infrastructure Pentest Series cover all the phases of Infrastructure Pentest
 - :doc:`Exploitation <LFF-IPS-P3-Exploitation>`                    : Enumeration methods that can be used after compromising a domain user credentials and Remote code execution methods after compromising administrative credentials.
 - :doc:`Post Exploitation <LFF-IPS-P4-PostExploitation>`           : Different methods to gather credentials after getting an administrative remote shell. Also, performing post-exploitation to leave high-impact to C-Level executives is also covered in this section.
 - :doc:`Reporting <LFF-IPS-P5-Reporting>`                          : Open-source ways to automate report writing after a successfull Pentest.
+- :doc: `Configuration Review <LFF-IPS-P6-ConfigurationReview>`    : Methods to perform configuration review for the switches, routers, firewall and endpoint devices.
 
 
 #######################
@@ -52,12 +52,13 @@ The Capture the flag series covers what we have learned by solving Capture the f
 - :doc:`Binary Exploitation <LFC-BinaryExploitation>` : Knowledge gained by solving/ reading write-ups of binary exploitation challenges.
 - :doc:`Forensics <LFC-Forensics>` : Knowledge gained by solving/ reading write-ups of Forensics challenges.
 
-..
 
- ##############################
- Critical Infrastructure Series
- ##############################
- .. - :doc:`Electrical Grid <LFF-CIS-ElectricalGrid>` : Pentesting or Securing a Electrical Grid? Probably, the concepts you need to know!
+
+##############################
+Critical Infrastructure Series
+##############################
+
+- :doc:`Electrical Grid <LFF-CIS-ElectricalGrid>` : Pentesting or Securing a Electrical Grid? Probably, the concepts you need to know before starting!
 
 #######################################
 Contributors, Blog Archive and About Me

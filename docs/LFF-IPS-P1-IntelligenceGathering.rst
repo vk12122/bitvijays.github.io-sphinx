@@ -928,4 +928,11 @@ Summary:
 
 .. Todo:: A lot of tools are being mentioned in this blog article. It might therefore be interesting to give a run down. Which might be highly situationals
 
+Changelog
+=========
+.. git_changelog::
+  :filename_filter: docs/LFF-IPS-P1-IntelligenceGathering.rst
+  :hide_date: false
+
+
 .. disqus::
