@@ -47,11 +47,11 @@ Two modes - Command and Insert Mode. All commands below are in command mode.
   O                           - Insert a new line above the cursor
   x                           - Delete the character
   r                           - replace the character with the next key pressed.
-  dw			      - Delete the current word.
+  dw			              - Delete the current word.
   dd                          - Delete the current line. 
   d$                          - Delete the text from where your cursor is to the end of the line.
   dnd                         - Delete n lines.
-  . 			      - Repeat the last command
+  . 			              - Repeat the last command
   :q                          - Quit.
   :wq                         - Save and close.
   :syntax on                  - Turn on Syntax highlighting for C programming and other languages.
@@ -62,6 +62,7 @@ Two modes - Command and Insert Mode. All commands below are in command mode.
   :set nospell                - Turn spell checking off
   :set list                   - If 'list' is on, whitespace characters are made visible. The default displays "^I" for each tab, and "$" at each EOL (end of line, so trailing whitespace can be seen)
   :u                          - Undo one change.
+  :!{cmd}                     - Run the command without exiting the vim. {cmd} can be whoami without external brackets.
   z=                          - If the cursor is on the word ( which is highlighted with spell check), Vim will suggest a list of alternatives that it thinks may be correct.
   yy                          - Yank or copy current line.
   y$, yny                     - Similar to delete lines.
@@ -339,6 +340,10 @@ tmux
  f  find window
  ,  name window
  &  kill window
+ "  split pane horizontally.
+ %  split pane vertically.
+ arrow key — switch pane.
+ Hold Ctrl+b, don’t release it and hold one of the arrow keys — resize pane.
 
 
 **tmux.conf**

