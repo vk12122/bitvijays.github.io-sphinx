@@ -47,11 +47,11 @@ Two modes - Command and Insert Mode. All commands below are in command mode.
   O                           - Insert a new line above the cursor
   x                           - Delete the character
   r                           - replace the character with the next key pressed.
-  dw			              - Delete the current word.
+  dw                          - Delete the current word.
   dd                          - Delete the current line. 
   d$                          - Delete the text from where your cursor is to the end of the line.
   dnd                         - Delete n lines.
-  . 			              - Repeat the last command
+  .                           - Repeat the last command
   :q                          - Quit.
   :wq                         - Save and close.
   :syntax on                  - Turn on Syntax highlighting for C programming and other languages.
@@ -110,11 +110,54 @@ Other Info
 * `Vim Awesome <https://vimawesome.com/>`_ provides Awesome VIM plugins from across the universe. Few good one are
 
  * The NERD tree : Tree explorer plugin for vim
+
+  ::
+
+     :NERDTreeToggle : Toggle the NERD Tree
+     :NERDTreeFocus  : Set the focus to NerdTree
+
  * Syntastic     : Syntax checking hacks for vim
+
+  ::
+
+   SyntasticCheck - Check for the possible syntax issues
+
  * Youcompleteme : Code-completion engine for Vim
+ * `fzf <https://github.com/junegunn/fzf.vim>`_ :  Bundle of fzf-based commands and mappings
+
+  ::
+
+   GFiles [OPTS] :    Git files (git ls-files)
+   GFiles?       :    Git files (git status)
+   History       :    v:oldfiles and open buffers
+   History:      :    Command history
+   History/      :    Search history
+   Snippets      :    Snippets (UltiSnips)
+   Commits       :    Git commits (requires fugitive.vim)
+   BCommits      :    Git commits for the current buffer
+   Commands      :    Commands
+
+ * `UltiSnips <https://github.com/SirVer/ultisnips>`_ The ultimate snippet solution for Vim
+ * `Tabular <https://github.com/godlygeek/tabular>`_ : Vim script for text filtering and alignment
+
+   ::
+
+    Select the text which you want to align in the visual mode (Do make sure that cursor is also at the same position as visual)
+    :Tabularize /{pattern to be aligned}
 
 
-Bash configuration files - For Debian/Ubuntu based Systems 
+
+
+* Utilize `Vundle, the plug-in manager for Vim <http://github.com/VundleVim/Vundle.Vim>`_
+
+ ::
+
+  :PluginList       - lists configured plugins
+  :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+  :PluginSearch foo - searches for foo; append `!` to refresh local cache
+  :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+
+Bash configuration files - For Debian/Ubuntu based Systems
 ==========================================================
 
 Important Files
@@ -182,19 +225,19 @@ Adding/Deleting/Modifying Users/Groups
    --disabled-login  : Do not run passwd to set the password.
   deluser <username> : Delete a user.
    --remove-home     : Remove the home directory of the user and its mailspool.
-   --remove-all-files: Remove all files from the system owned by this user. 
+   --remove-all-files: Remove all files from the system owned by this user.
    --backup          : Backup all files contained in the userhome and the mailspool-file to a file named /$user.tar.bz2 or /$user.tar.gz.
   usermod            : Modify a user account.
    -e EXPIREDATE     : The date on which the user account will be disabled. The date is specified in the format YYYY-MM-DD.
    -L, --lock        : Lock a user's password.
-   -U, --unlock      : Unlock a user's password  
+   -U, --unlock      : Unlock a user's password
   groupadd           : Create a new group.
   groupdel           : Delete a group.
   groupmod           : Modify a group definition on the system.
 
 Changing Group/Owner/Permission
 -------------------------------
-    
+
 ::
 
   chown              : Change file owner and group.
@@ -236,7 +279,6 @@ Linux Directories
   /usr/share/doc, /usr/share/man    : complete system documentation.
   /dev                              : system device files. In Unix, hardware devices are represented as files.
   /proc                             : "virtual" directory containing files through which you can query or tune Linux kernel settings.
-      
 
 Runlevels and Kernel Configurations
 -----------------------------------
@@ -250,7 +292,7 @@ Linux Boot Process
   2. Boot loader loads the kernel into memory.
   3. The Kernel mounts disks/partitions and starts the init daemon. 
   4. The init daemon starts services based on the runlevel.
-          
+
 Linux has six runlevels 0-6. Scripts are contained in /etc/rc[0-6,S].d/. Each folder contains the scripts which are followed by either K or S. If the first letter is K that script is not executed. If S, that script is executed. /etc/inittab contains the default run level.
 
 ====   ========================================================   =============================================================================
@@ -292,22 +334,22 @@ Kernel modules are contained in /lib/modules/$(uname -r)/
 Manage Runlevels
 ^^^^^^^^^^^^^^^^
 
-Debian GNU provides a convenient tool to manage runlevels (to control when services are started and shut down); 
-   
+Debian GNU provides a convenient tool to manage runlevels (to control when services are started and shut down);
+
 * update-rc.d and there are two commonly used invocation methods:
 
  :: 
 
    update-rc.d -f <service name> remove : Disabling a service.
    update-rc.d <service name> defaults  : Insert links using defaults, start in runlevel 2-5 and stop in runlevels 0,1 and 6.
- 
+
 * Systemctl : Control the systemd system and service manager. systemctl may be used to introspect and control the state of the "systemd" system and service manager.
 
  :: 
 
    systemctl : Present a detailed output about the different services running.
 
-   e.g. 
+   e.g.
    
    systemctl status <service_name> - Status of the service.
    systemctl start <service_name>  - Start the service
@@ -372,7 +414,7 @@ This should apply your changes to the running tmux server without affecting the 
 
 **Copy Paste**
 
-For copying, Press the Shift key; i.e., Shift-MouseHighlight properly selects text and - still holding down the shift key 
+For copying, Press the Shift key; i.e., Shift-MouseHighlight properly selects text and - still holding down the shift key
 
 * we can right-click and get the standard bash context menu with Copy, Paste, etc.
 * or Ctrl-Shift-C and Ctrl-Shift-V does work to copy and paste text.
@@ -420,7 +462,7 @@ From Files
 
 ::
         
-  /etc/issue     : Contains the message which is displayed on terminal before login. 
+  /etc/issue     : Contains the message which is displayed on terminal before login.
   /etc/motd      : Contains the message which is displayed on terminal after login.
   /proc/cpuinfo  : provides information about CPU.
   /proc/meminfo  : provides information about memory/ RAM.
@@ -450,7 +492,7 @@ Grep - Global Regular Expression Print
 
 Two ways to provide input to Grep:
 
-* search a given file or files on a system (including a recursive search through sub-folders). 
+* search a given file or files on a system (including a recursive search through sub-folders).
 
  :: 
 
@@ -469,13 +511,13 @@ Syntax
 
  grep [options] [regexp] [filename]
 
-    -i, --ignore-case     : 'it DoesNt MatTTer WhaT thE CAse Is'
-    -v, --invert-match    : 'everything , BUT that text'
-    -A <NUM>              : Print NUM lines of trailing context after matching lines.
-    -B <NUM>              : Print NUM lines of trailing context before matching lines.
-    -C <NUM>              : Print additional (leading and trailing) context lines before and after the match.
-    -a, --text            : Process a binary file as if it were text; this is equivalent to the --binary-files=text option.
-    -w                    : Whole-word search
+    -i, --ignore-case        : 'it DoesNt MatTTer WhaT thE CAse Is'
+    -v, --invert-match       : 'everything , BUT that text'
+    -A <NUM>                 : Print NUM lines of trailing context after matching lines.
+    -B <NUM>                 : Print NUM lines of trailing context before matching lines.
+    -C <NUM>                 : Print additional (leading and trailing) context lines before and after the match.
+    -a, --text               : Process a binary file as if it were text; this is equivalent to the --binary-files=text option.
+    -w                       : Whole-word search
     -L --files-without-match : which outputs the names of files that do NOT contain matches for your search pattern.
     -l --files-with-matches  : which prints out (only) the names of files that do contain matches for your search pattern.
 
@@ -1123,9 +1165,9 @@ Window
 
 ::
 
- WinKey + H : Minimize/ Hide the Window
- WinKey + Up Arrow Key : Maximize the current windows
- WinKey + Down Arrow Key : Return to original 
+ WinKey + H              : Minimize/ Hide the Window
+ WinKey + Up Arrow Key   : Maximize the current windows
+ WinKey + Down Arrow Key : Return to original
 
 Searching History
 -----------------
