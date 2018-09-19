@@ -547,7 +547,30 @@ A regular expression may be followed by one of several repetition operators:
 * ? means that the preceding item is optional, and if found, will be matched at the most, once.
 * \* means that the preceding item will be matched zero or more times.
 * \+ means the preceding item will be matched one or more times.
-* {n} means the preceding item is matched exactly n times, while {n,} means the item is matched n or more times. {n,m} means that the preceding item is matched at least n times, but not more than m times. {,m} means that the preceding item is matched, at the most, m times.
+* Matching with times
+ * {n} means the preceding item is matched exactly n times, 
+ * {n,} means the item is matched n or more times. 
+ * {n,m} means that the preceding item is matched at least n times, but not more than m times. 
+ * {,m} means that the preceding item is matched, at the most, m times.
+
+
+**grep -e / grep -E**
+
+::
+
+  Matcher Selection
+   -E, --extended-regexp        :  Interpret PATTERN as an extended regular expression.
+
+  Matching Control
+   -e PATTERN, --regexp=PATTERN :  Use  PATTERN  as the pattern.  If this option is used multiple times or is combined with the -f (--file) option, search for all patterns given.  This option can be used to protect a pattern beginning with “-”.
+
+Example:
+
+::
+
+ grep -E '^[0-9a-zA-Z]{30,}'
+
+Grep anything which is starting with string containing characters from 0-9,a-z or A-Z and has matched 30 or more times
 
 Search a specific string
 ^^^^^^^^^^^^^^^^^^^^^^^^
