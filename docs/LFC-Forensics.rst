@@ -223,6 +223,31 @@ Sound Files
  * Morse code possible? As all the morse data appears to be below 100 Hz, we can use a low pass filter (effects menu, cutoff 100 Hz) to ease transcription
  * `Golang mp3 Frame Parser <https://github.com/tcolgate/mp3>`_
 
+Patterns
+^^^^^^^^
+
+If you find a pattern like below
+
+.. image:: Images/LFC-Forensics/spectrogram_pattern_1.jpg
+   :scale: 70 %
+   :align: center
+   :alt: Spectogram Pattern 1
+
+it might mean binary pattern like
+
+.. image:: Images/LFC-Forensics/spectrogram_pattern_1_zoomed.jpg
+   :scale: 70 %
+   :align: center
+   :alt: Spectogram Pattern 1 Zoomed
+
+
+and result in something like
+
+::
+ 
+ 11111110 11111110
+ 01010110 00010101
+
 PCAP
 ====
 
@@ -689,6 +714,9 @@ Others
 	
    *pdf2txt Untitled-1_1a110935ec70b63ad09fec68c89dfacb.pdf
     PCTF{how_2_pdf_yo}*
+
+* If you get an IP address on the challenge and probably no port is open and pinging, try to check the response time of the pings, it might different each time and maybe representing binary 0 (If response time is less than Xms) or 
+  binary 1 (If the response time is greater than Xms).
 Changelog
 =========
 .. git_changelog::
