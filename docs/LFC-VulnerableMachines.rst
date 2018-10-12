@@ -5347,6 +5347,8 @@ Same as cat, but to a file and using inode number instead of the file name.
 
  debugfs: dump <2790782> file1-debugfs
 
+The above will copy the file to your file-system, useful when the flag is not in a text file and is in the jpg file or somethingelse.
+
 LXD
 ---
 
