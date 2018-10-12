@@ -419,6 +419,43 @@ For copying, Press the Shift key; i.e., Shift-MouseHighlight properly selects te
 * we can right-click and get the standard bash context menu with Copy, Paste, etc.
 * or Ctrl-Shift-C and Ctrl-Shift-V does work to copy and paste text.
 
+File System Superblock
+----------------------
+
+Superblock is stores the metadata of the file system such as
+
+* Blocks in the file system
+* No of free blocks in the file system
+* Inodes per block group
+* Blocks per block group
+* No of times the file system was mounted since last fsck.
+* Mount time
+* UUID of the file system
+* Write time
+* File System State (ie: was it cleanly unounted, errors detected etc)
+* The file system type etc(ie: whether its ext2,3 or 4).
+* The operating system in which the file system was formatted
+
+View superblock information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+ dumpe2fs -h /dev/sda4
+ dumpe2fs 1.42.9 (4-Feb-2014)
+ Filesystem volume name:   cloudimg-rootfs
+ Last mounted on:          /
+ Filesystem UUID:          f75f9307-27dc-xxxx-87b7-xxxxxxxxx
+ Filesystem magic number:  0xEF53
+ Filesystem revision #:    1 (dynamic)
+ Filesystem features:      has_journal ext_attr resize_inode dir_index filetype needs_recovery extent flex_bg sparse_super large_file huge_file uninit_bg dir_nlink extra_isize
+ Filesystem flags:         signed_directory_hash
+ Default mount options:    (none)
+ Filesystem state:         clean
+ Errors behavior:          Continue
+ Filesystem OS type:       Linux
+ .....sniped.......
+
 Programming
 ===========
 
@@ -548,6 +585,7 @@ A regular expression may be followed by one of several repetition operators:
 * \* means that the preceding item will be matched zero or more times.
 * \+ means the preceding item will be matched one or more times.
 * Matching with times
+
  * {n} means the preceding item is matched exactly n times, 
  * {n,} means the item is matched n or more times. 
  * {n,m} means that the preceding item is matched at least n times, but not more than m times. 
