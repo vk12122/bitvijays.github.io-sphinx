@@ -163,6 +163,17 @@ Use python
     >>> chr(ord('a') + 3)
     'd'
 
+
+* String formating of numbers in python (Print 0000 - 9999)
+
+ ::
+
+  >>> for i in xrange(10):
+  ...     '{0:04}'.format(i)
+  ... 
+  '0000'
+  '0001'
+
 * Insert a newline character every 64 characters using Python
 
  ::
@@ -301,8 +312,8 @@ If you have something like
 ::
 
  <form id="form_product_page" name="form_1362737440" action="/download/791055/164084/" method="get">
-<input id="nojssubmit" type="submit" value="Download" />
-</form>
+ <input id="nojssubmit" type="submit" value="Download" />
+ </form>
 
 and want action value we can
 
@@ -351,7 +362,11 @@ ctypes
 
 A foreign function library for Python. It provides C compatible data types, and allows calling functions in DLLs or shared libraries. It can be used to wrap these libraries in pure Python. ctypes exports the cdll, and on Windows windll and oledll objects, for loading dynamic link libraries.
 
+PHP
+===
 
+* mysqli_real_escape_string — Escapes special characters in a string for use in an SQL statement, taking into account the current charset of the connection.
+* filter_var — Filters a variable with a specified filter. There are multiple types of `filter <http://php.net/manual/en/filter.filters.php>`_ such as Validate, Sanitize etc.
 
 BurpSuite
 =========
