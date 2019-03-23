@@ -51,6 +51,16 @@ IDA
 
 * Search strings in IDA: Enter the "strings window" by either press shift+F12 or go to View > Open Subviews > Strings in the toolbar.
 
+* Want to convert Hex to ASCII?
+
+ ::
+ 
+  mov     [ebp+var_28], 46h
+  mov     [ebp+var_27], 4Ch
+  mov     [ebp+var_26], 41h
+
+ Select the hex and press the keyboard key "R"; If you are selecting multiple values together, a pop-up "Convert to Char en masse", select "Operand value range", Lower value "0x00" and Upper Value "0xFF" and convert.
+
 Appendix-I Assembly Basics
 ==========================
 
