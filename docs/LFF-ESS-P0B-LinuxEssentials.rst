@@ -467,6 +467,25 @@ Version Control System, really useful for tracking your changes.
 .. Todo :: 
       `try.github.com <https://try.github.com>`_ 15 mins tutorial.
 
+
+Command-line substitute for gitk
+
+::
+
+ git log --graph --abbrev-commit --pretty=oneline --decorate
+
+List all commits for a specific file
+
+::
+
+ git log --follow -- filename
+
+See the changes in a Git commit?
+
+::
+
+ git show <COMMIT>
+
 cc - GNU Compile Collection
 ---------------------------
 
@@ -1002,6 +1021,30 @@ Sample Output with ${interfaces}:
 
     eth0
     wlan0
+
+Virtualization?
+===============
+
+Docker
+------
+
+# Stop all containers
+
+::
+
+ docker stop $(docker ps -a -q)
+
+# Delete all containers
+
+::
+
+ docker rm $(docker ps -a -q)
+
+# Delete all images
+
+::
+
+ docker rmi $(docker images -q)
 
 Important Definitions
 =====================
