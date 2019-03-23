@@ -598,6 +598,43 @@ Now to check the content we can mount the resulting disk image:
 
  $ sudo mount disk_out  /mnt/img/
 
+Formats
+=======
+
+Boarding Pass Format
+--------------------
+
+Boarding pass issued at the airport from `What’s contained in a boarding pass barcode? <https://shaun.net/notes/whats-contained-in-a-boarding-pass-barcode/>`_
+
+::
+
+ M1EWING/SHAUN         E1AAAAA SYDBNEQF 0524 106Y023A0073 359>2180
+ B                29             0    QF 1245678             128
+
+There’s more information in this boarding pass barcode, which is as follows:
+
+* M1          : Format code ‘M’ and 1 leg on the boarding pass.
+* EWING/SHAUN : My name.
+* E1AAAAA     : Electronic ticket indicator and my booking reference.
+* SYDBNEQF    : Flying from SYD (Sydney) to BNE (Brisbane) on QF (Qantas).
+* 0524        : Flight number 524.
+* 106         : The Julian date. In this case 106 is April 16.
+* Y           : Cabin – Economy in this case. Others including F (First) and J (Business).
+* 23A         : My seat.
+* 0073        : My sequence number. In this case I was the 73rd person to check-in.
+* 3           : My “passenger status”.
+* 59          : There is a various size field. This is the size
+*  >          : Beginning of the version number
+*  2          : The version number.
+* 18          : Field size of another variable field.
+*  0          : My check-in source.
+*  B          : Airline designator of boarding pass issuer.
+*  2          : Another variable size field.
+*  9          : Airline code.
+*  0          : International document verification. ’0′ as I presume is not applicable.
+* QF          : The airline my frequent flyer account is with.
+* 1245678     : My frequent flyer number.
+* 128         : Airline specific data.
 
 Interesting Blog
 ----------------
@@ -717,6 +754,7 @@ Others
 
 * If you get an IP address on the challenge and probably no port is open and pinging, try to check the response time of the pings, it might different each time and maybe representing binary 0 (If response time is less than Xms) or 
   binary 1 (If the response time is greater than Xms).
+
 Changelog
 =========
 .. git_changelog::
