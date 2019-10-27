@@ -19,3 +19,4 @@ This post (Work in Progress) lists the tips and tricks while doing Cryptography 
 
 * Provided with RSA p,q,dp,dq and ciphertext utilize `https://raw.githubusercontent.com/LFlare/picoctf_2017_writeup/master/cryptography/weird-rsa/solve.py>`_
  
+* If you see multiple flags, which may mean something. Maybe have a look at `International Maritime Signal Flags <https://en.wikipedia.org/wiki/International_maritime_signal_flags>`_ 
