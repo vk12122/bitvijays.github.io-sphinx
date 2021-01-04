@@ -6,7 +6,7 @@ PS: This guide for compiling, configuring kernel for using in QEMU.
 
 ## Pre-req Packages
 
-```shell
+```text
 apt-get install git fakeroot build-essential ncurses-dev xz-utils libssl-dev bc flex libelf-dev bison
 ```
 
@@ -20,7 +20,7 @@ Make sure that `llvm/build/bin` is added to your path using export.
 
 We can also add that in the `.bash_profile`
 
-```shell
+```text
 export PATH="your-dir:$PATH
 ```
 
@@ -34,7 +34,7 @@ Follow the same step as LLVM.
 
 Make sure that clang version is correct and coming from what you build.
 
-```shell
+```text
 clang -v
 clang version 11.0.0 (https://github.com/CTSRD-CHERI/llvm-project.git b507d88d2aa61cec27adab60324a04b17911f5e4)
 Target: x86_64-unknown-linux-gnu
@@ -60,7 +60,7 @@ We can create a default config using `make defconfig` or `make x86_64_defconfig`
 
 #### Make Other
 
-```shell
+```text
 "make kvmconfig"   Enable additional options for kvm guest kernel support.
 "make xenconfig"   Enable additional options for xen dom0 guest kernel support.
 "make tinyconfig"  Configure the tiniest possible kernel.
@@ -72,13 +72,13 @@ Once the kernel is configured
 
 We can compile the kernel using
 
-```shell
+```text
 make
 ```
 
 We can provide other arguments to make such as
 
-```shell
+```text
 -j num For processors with multiple cores, make all the cores do the work. Add the option -j(<NUMBER_OF_CORES> + 1). For example, a dual core processor contains two logical cores plus one (2 + 1)
 ARCH
 CC=clang HOSTCC=clang : If we want to compile the kernel using clang
@@ -88,7 +88,7 @@ CC=clang HOSTCC=clang : If we want to compile the kernel using clang
 
 A sample output of the Kernel Compilation is mentioned below:
 
-```shell
+```text
 OBJCOPY arch/x86/boot/setup.bin
   BUILD   arch/x86/boot/bzImage
 Setup is 16124 bytes (padded to 16384 bytes).
@@ -101,13 +101,13 @@ Kernel: arch/x86/boot/bzImage is ready  (#5)
 
 ### Install the packages
 
-```shell
+```text
 apt install qemu qemu-system
 ```
 
 ### Running Kernel without RootFS
 
-```shell
+```text
 cd linux
 qemu-system-x86_64 -no-kvm -kernel arch/x86/boot/bzImage -hda /dev/zero -append "root=/dev/zero console=ttyS0" -serial stdio -display none
 ```
@@ -118,45 +118,45 @@ As above execution has no file system image which could be mounted in qemu virtu
 
 #### Creating RootFS
 
-##### Clone Repo
+**Clone Repo**
 
 We would be using [BuildRoot](https://buildroot.org/) to create the filesystem.
 
 Clone the Buildroot Github
 
-```shell
+```text
 git clone git://git.buildroot.net/buildroot
 cd buildroot
 ```
 
-##### Configure BuildRoot
+**Configure BuildRoot**
 
-```shell
+```text
 make menuconfig
 ```
 
 1. Select “Target Options” to define the Target Architecture.
 2. Select `Filesystem images` to define the format of the FileSystem.
 
-##### Make BuildRoot
+**Make BuildRoot**
 
-```shell
+```text
 make -j <Number of Cores>
 ```
 
 #### Running QEMU with rootFS
 
-```shell
+```text
 qemu-system-x86_64 -kernel arch/x86/boot/bzImage -boot c -m 4096M -hda ../buildroot/output/images/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none
 ```
 
-```shell
+```text
 -m is for the RAM memory to the virtual machine.
 ```
 
 IF you get an error, maybe try running with `-initrd` option
 
-```shell
+```text
 qemu-system-x86_64 -initrd <ramdisk.img> -kernel arch/x86/boot/bzImage -boot c -m 4096M -hda ../buildroot/output/images/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none
 ```
 
@@ -166,32 +166,32 @@ This is a interesting problem!
 
 First, we need to figure out
 
-- What do we mean by minimum kernel?
-- Any limitation on size?
-- Any limitation on functionalities?
+* What do we mean by minimum kernel?
+* Any limitation on size?
+* Any limitation on functionalities?
 
 So, let's say we want to create minimum kernel to work on `x86_64` architecture.
 
 #### Create the Minimum Config
 
-```shell
+```text
 cd linux
 rm .config
 make tinyconfig ARCH=x86_64
 make kvmconfig ARCH=x86_64
 ```
 
-The above would configure the tiniest possible kernel and enable additional options for kvm guest kernel support (If we are using KVM).
+The above would configure the tiniest possible kernel and enable additional options for kvm guest kernel support \(If we are using KVM\).
 
 Make a copy of this config
 
-```shell
+```text
 cp .config .config.tinykvm
 ```
 
-##### Run the kernel with minimum config in QEMU
+**Run the kernel with minimum config in QEMU**
 
-```shell
+```text
 qemu-system-x86_64 -initrd <ramdisk.img> -kernel arch/x86/boot/bzImage -boot c -m 4096M -hda ../buildroot/output/images/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none
 ```
 
@@ -199,14 +199,14 @@ Probably, the above won't run and won't produce any messages.
 
 #### Create the Default Working Config
 
-```shell
+```text
 make x86_64_defconfig
 make kvmconfig ARCH=x86_64
 ```
 
-##### Run the kernel with default config in QEMU
+**Run the kernel with default config in QEMU**
 
-```shell
+```text
 qemu-system-x86_64 -initrd <ramdisk.img> -kernel arch/x86/boot/bzImage -boot c -m 4096M -hda ../buildroot/output/images/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none
 ```
 
@@ -240,3 +240,4 @@ Here's the tricky part, based on your experience, we might want to copy the few 
 22. Kernel Hardening
 23. Kernel Hacking
 24. Printk and Dmesg options
+

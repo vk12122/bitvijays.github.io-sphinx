@@ -1,10 +1,10 @@
 # Puppet
 
-Puppet code is a declarative language, (describes the desired state for your systems, not the steps needed to get there). Once specified in code those aspects of a system you want Puppet to manage, an agent service running in the background makes any changes needed to bring the system into compliance with the desired state.
+Puppet code is a declarative language, \(describes the desired state for your systems, not the steps needed to get there\). Once specified in code those aspects of a system you want Puppet to manage, an agent service running in the background makes any changes needed to bring the system into compliance with the desired state.
 
 Puppet to describe a file resource:
 
-```shell
+```text
  puppet resource file /tmp/test
 ```
 
@@ -30,9 +30,9 @@ The body of a resource is a list of parameter value pairs that follow the patter
 
 ## The agent/master architecture
 
-Puppet is typically used in what's called an agent/master (client/server) architecture.
+Puppet is typically used in what's called an agent/master \(client/server\) architecture.
 
-In this architecture, each managed node in your infrastructure runs a Puppet agent service. One or more servers (depending on the size and complexity of your infrastructure) act as Puppet master(s) and run the Puppet server service to handle communication with your agents.
+In this architecture, each managed node in your infrastructure runs a Puppet agent service. One or more servers \(depending on the size and complexity of your infrastructure\) act as Puppet master\(s\) and run the Puppet server service to handle communication with your agents.
 
 By default, the Puppet agent service initiates a Puppet run every half-hour. This periodic run ensures that your system stays in the desired state you described in your Puppet code. Any configuration drift that occurs between runs is remediated the next time the agent runs.
 
@@ -44,29 +44,29 @@ By default, the Puppet agent service initiates a Puppet run every half-hour. Thi
 
 ## Certificates
 
-Puppet requires any system contacting the Puppet master to authenticate with a signed certificate. The first time a Puppet agent contacts the Puppet master, it will submit a certificate signing request (CSR). A Puppet administrator can then validate that the system sending the CSR should be allowed to request catalogs from the master before deciding to sign the certificate.
+Puppet requires any system contacting the Puppet master to authenticate with a signed certificate. The first time a Puppet agent contacts the Puppet master, it will submit a certificate signing request \(CSR\). A Puppet administrator can then validate that the system sending the CSR should be allowed to request catalogs from the master before deciding to sign the certificate.
 
 Use the puppetserver ca tool to list unsigned certificates:
 
-```shell
+```text
 puppetserver ca list
 ```
 
 Sign the cert for agent.puppet.vm:
 
-```shell
+```text
  puppetserver ca sign --certname agent.puppet.vm
 ```
 
-First time `puppet agent -t` is executed on the agent system; PluginSync takes place (you'll see a lot of text scroll by). During pluginsync, any extensions installed on the master (such as custom facts, resource types, or providers) are copied to the Puppet agent before the Puppet run continues. This ensures that the agent has all the tools it needs to correctly apply the catalog.
+First time `puppet agent -t` is executed on the agent system; PluginSync takes place \(you'll see a lot of text scroll by\). During pluginsync, any extensions installed on the master \(such as custom facts, resource types, or providers\) are copied to the Puppet agent before the Puppet run continues. This ensures that the agent has all the tools it needs to correctly apply the catalog.
 
-```shell
+```text
  Info: Loading facts
  Info: Caching catalog for agent.puppet.vm
  Info: Applying configuration version '1464919481'
 ```
 
-The above three lines inform that the agent has received a catalog because it tells you when it caches a copy of the new catalog. (The Puppet agent can be configured to fail over to this cached catalog if it is unable to connect to the master.) Finally, the Puppet agent applies the catalog. Normally after this step, you would see a list of all the changes made by the agent.
+The above three lines inform that the agent has received a catalog because it tells you when it caches a copy of the new catalog. \(The Puppet agent can be configured to fail over to this cached catalog if it is unable to connect to the master.\) Finally, the Puppet agent applies the catalog. Normally after this step, you would see a list of all the changes made by the agent.
 
 ## Classification
 
@@ -74,21 +74,21 @@ When the Puppet server service on the Puppet master receives a catalog request w
 
 There are three different ways to handle node classification.
 
-- The site.pp manifest is a special file on the master where you can write node definitions.
-- The PE console includes a GUI node classifier that makes it easy to manage node groups and classification without editing code directly.
-- Finally, if you want to customize node classification, you can create your own external node classifier. An external node classifier can be any executable that takes the name of a node as an argument and returns a YAML file describing the Puppet code to be applied to that node.
+* The site.pp manifest is a special file on the master where you can write node definitions.
+* The PE console includes a GUI node classifier that makes it easy to manage node groups and classification without editing code directly.
+* Finally, if you want to customize node classification, you can create your own external node classifier. An external node classifier can be any executable that takes the name of a node as an argument and returns a YAML file describing the Puppet code to be applied to that node.
 
 ### The site.pp manifest
 
 When a Puppet agent contacts the Puppet master, the master checks for any node definitions in the site.pp manifest that match the agent system's name. In the Puppet world, the term "node" is used to mean any system or device in your infrastructure, so a node definition defines how Puppet should manage a given system.
 
-```shell
+```text
  vim /etc/puppetlabs/code/environments/production/manifests/site.pp
 ```
 
 A class defines a group of related resources, allowing them to be declared as a single unit. Using classes in your node definitions keeps them simple and well organized and encourages the reuse of code.
 
-Puppet manifest is Puppet code saved to a file with the .pp extension. This code is written in the Puppet domain specific language (DSL).
+Puppet manifest is Puppet code saved to a file with the .pp extension. This code is written in the Puppet domain specific language \(DSL\).
 
 The Puppet DSL includes resource declarations, along with a set of other language features, that let you control which resources are applied on a system and what values are set for those resources' parameters.
 
@@ -100,14 +100,14 @@ A module is a directory structure that lets Puppet keep track of where to find t
 
 ### Configured modulepath
 
-```shell
+```text
  puppet config print modulepath
  /etc/puppetlabs/code/environments/production/modules:/etc/puppetlabs/code/modules:/opt/puppetlabs/puppet/modules
 ```
 
-- First directory listed in the modulepath includes modules specific to the production environment.
-- Second directory contains modules used across all environments,
-- Third is modules that PE uses to configure itself.
+* First directory listed in the modulepath includes modules specific to the production environment.
+* Second directory contains modules used across all environments,
+* Third is modules that PE uses to configure itself.
 
 ..Tip: :: In a real production environment, however, you would likely want to keep your Puppet code in a version control repository such as Git and use Puppet's code manager tool to deploy it to your master.
 
@@ -115,19 +115,19 @@ A module is a directory structure that lets Puppet keep track of where to find t
 
 Use `cd` to navigate to the modules directory.
 
-```shell
+```text
  cd /etc/puppetlabs/code/environments/production/modules
 ```
 
-Create a directory structure for a new module called cowsay. (The -p flag allows you to create the cowsay parent directory and manifests subdirectory at once.)
+Create a directory structure for a new module called cowsay. \(The -p flag allows you to create the cowsay parent directory and manifests subdirectory at once.\)
 
-```shell
+```text
  mkdir -p cowsay/manifests
 ```
 
 To include files, we need to have a folder named files inside the module folder like
 
-```shell
+```text
  mkdir -p pasture/{manifests,files}
 ```
 
@@ -135,13 +135,13 @@ With this directory structure in place, it's time to create the manifest where w
 
 Use vim to create an init.pp manifest in your module's manifests directory.
 
-```shell
+```text
  vim cowsay/manifests/init.pp
 ```
 
 If this manifest is going to contain the cowsay class, you might be wondering why we're calling it init.pp instead of cowsay.pp. Most modules contain a main class like this whose name corresponds with the name of the module itself. This main class is always kept in a manifest with the special name init.pp.
 
-Enter the following class definition, then save and exit (:wq):
+Enter the following class definition, then save and exit \(:wq\):
 
 ```ruby
  class cowsay {
@@ -154,7 +154,7 @@ Enter the following class definition, then save and exit (:wq):
 
 It's always good practice to validate your code before you try to apply it. Use the puppet parser tool to check the syntax of your new manifest.
 
-```shell
+```text
  puppet parser validate cowsay/manifests/init.pp
 ```
 
@@ -164,7 +164,7 @@ Now that the cowsay class is defined in your module's init.pp manifest, your Pup
 
 In the setup for this quest, the quest tool prepared a cowsay.puppet.vm node. Let's apply the cowsay class to this node. First, open your site.pp manifest.
 
-```shell
+```text
  vim /etc/puppetlabs/code/environments/production/manifests/site.pp
 ```
 
@@ -182,13 +182,13 @@ This include cowsay line tells the Puppet master to parse the contents of the co
 
 Before applying any changes to your system, it's always a good idea to use the `--noop` flag to do a practice run of the Puppet agent. This will compile the catalog and notify you of the changes that Puppet would have made without actually applying any of those changes to your system. It's a good way to catch issues the puppet parser validate command can't detect, and gives you a chance to validate that Puppet will be making the changes you expect.
 
-```shell
+```text
  sudo puppet agent -t --noop
 ```
 
 You should see an output like the following:
 
-```shell
+```text
  Notice: Compiled catalog for cowsay.puppet.vm in environment production in
  0.62 seconds
  Notice: /Stage[main]/Cowsay/Package[cowsay]/ensure: current_value
@@ -201,7 +201,7 @@ You should see an output like the following:
 
 If your dry run looks good, go ahead and run the Puppet agent again without the --noop flag.
 
-```shell
+```text
  sudo puppet agent -t
 ```
 
@@ -211,7 +211,7 @@ A module often includes multiple components that work together to serve a single
 
 Create a new manifest for your fortune class definition.
 
-```shell
+```text
  vim cowsay/manifests/fortune.pp
 ```
 
@@ -229,7 +229,7 @@ Note that unlike the main init.pp manifest, the filename of the manifest shows u
 
 In this case, use a class declaration to pull the cowsay::fortune class into our main cowsay class.
 
-```shell
+```text
  vim cowsay/manifests/init.pp
 ```
 
@@ -259,9 +259,9 @@ Packages you install with Puppet often have configuration files that let you cus
 
 You already created a files directory inside the pasture module directory. Just like placing manifests inside a module's manifests directory allows Puppet to find the classes they define, placing files in the module's files directory makes them available to Puppet.
 
-Create a pasture_config.yaml file in your module's files directory.
+Create a pasture\_config.yaml file in your module's files directory.
 
-```shell
+```text
  vim pasture/files/pasture_config.yaml
 ```
 
@@ -277,7 +277,7 @@ The file resource takes a source parameter, which allows you to specify a source
 
 Return to your `init.pp` manifest.
 
-```shell
+```text
  vim pasture/manifests/init.pp
 ```
 
@@ -295,13 +295,13 @@ While the cowsay command you installed in the previous quest runs once and exits
 
 First, create a file called pasture.service.
 
-```shell
+```text
  vim pasture/files/pasture.service
 ```
 
 Include the following contents:
 
-```vi
+```text
  [Unit]
  Description=Run the pasture service
 
@@ -317,7 +317,7 @@ If you're not familiar with the format of a systemd unit file, don't worry about
 
 Now open your init.pp manifest again.
 
-```shell
+```text
 vim pasture/manifests/init.pp
 ```
 
@@ -345,11 +345,11 @@ Though Puppet code will default to managing resources in the order they're writt
 
 For our class, we'll use two relationship metaparameters: before and notify. before tells Puppet that the current resource must come before the target resource. The notify metaparameter is like before, but if the target resource is a service, it has the additional effect of restarting the service whenever Puppet modifies the resource with the metaparameter set. This is useful when you need Puppet to restart a service to pick up changes in a configuration file.
 
-Relationship metaparameters take a resource reference as a value. This resource reference points to another resource in your Puppet code. The syntax for a resource reference is the capitalized resource type, followed by square brackets containing the resource title: Type['title'].
+Relationship metaparameters take a resource reference as a value. This resource reference points to another resource in your Puppet code. The syntax for a resource reference is the capitalized resource type, followed by square brackets containing the resource title: Type\['title'\].
 
 In your init.pp
 
-```shell
+```text
  vim pasture/manifests/init.pp
 ```
 
@@ -385,7 +385,7 @@ Add relationship metaparameters to define the dependencies among your package, f
 
 We introduce variables and templates. Once you assign a value to a variable in a Puppet manifest, you can use that variable throughout the manifest to yield the assigned value. Through templates, you can incorporate these variables into the content of any files your Puppet manifest manages.
 
-A variable name is prefixed with a $ (dollar sign), and a value is assigned with the = operator. Assigning a short string to a variable, for example, looks like this:
+A variable name is prefixed with a $ \(dollar sign\), and a value is assigned with the = operator. Assigning a short string to a variable, for example, looks like this:
 
 ```ruby
  $my_variable = 'look, a string!'
@@ -399,11 +399,11 @@ Technically, Puppet variables are actually constants from the perspective of the
 
 Many of the tasks involved in system configuration and administration come down to managing the content of text files. The most direct way to handle this is through a templating language. A template is similar to a text file but offers a syntax for inserting variables as well as some more advanced language features like conditionals and iteration. This flexibility lets you manage a wide variety of file formats with a single tool.
 
-The limitation of templates is that they're all-or-nothing. The template must define the entire file you want to manage. If you need to manage only a single line or value in a file because another process or Puppet module will manage a different part of the file, you may want to investigate Augeas, concat, or the file_line resource type.
+The limitation of templates is that they're all-or-nothing. The template must define the entire file you want to manage. If you need to manage only a single line or value in a file because another process or Puppet module will manage a different part of the file, you may want to investigate Augeas, concat, or the file\_line resource type.
 
-##### Embedded Puppet templating language
+**Embedded Puppet templating language**
 
-Puppet supports two templating languages, Embedded Puppet (EPP) and Embedded Ruby (ERB).
+Puppet supports two templating languages, Embedded Puppet \(EPP\) and Embedded Ruby \(ERB\).
 
 EPP templates were released in Puppet 4 to provide a Puppet-native templating language that would offer several improvements over the ERB templates that had been inherited from the Ruby world. Because EPP is now the preferred method, it's what we'll be using in this quest. Once you understand the basics of templating, however, you can easily use the ERB format by referring to the documentation.
 
@@ -411,13 +411,13 @@ An EPP template is a plain-text document interspersed with tags that allow you t
 
 First, you'll need to create a templates directory in your pasture module.
 
-```shell
+```text
  mkdir pasture/templates
 ```
 
-Next, create a pasture_config.yaml.epp template file.
+Next, create a pasture\_config.yaml.epp template file.
 
-``` shell
+```text
  vim pasture/templates/pasture_config.yaml.epp
 ```
 
@@ -456,23 +456,23 @@ The `<%= ... %>` tags we use to insert our variables into the file are called ex
 
 Now that this template is set up, let's return to our `init.pp` manifest and see how to use it to define the content of a file resource.
 
-```shell
+```text
  vim pasture/manifests/init.pp
 ```
 
 The file resource type has two different parameters that can be used to define the content of the managed file: source and content.
 
-- source takes the URI of a source file like the ones we've placed in our module's files directory.
-- content parameter takes a string as a value and sets the content of the managed file to that string.
+* source takes the URI of a source file like the ones we've placed in our module's files directory.
+* content parameter takes a string as a value and sets the content of the managed file to that string.
 
-To set a file's content with a template, we'll use Puppet's built-in epp() function to parse our EPP template file and use the resulting string as the value for the content parameter.
+To set a file's content with a template, we'll use Puppet's built-in epp\(\) function to parse our EPP template file and use the resulting string as the value for the content parameter.
 
-This epp() function takes two arguments:
+This epp\(\) function takes two arguments:
 
-- First, a file reference in the format `<MODULE>/<TEMPLATE_NAME>` that specifies the template file to use.
-- Second, a hash of variable names and values to pass to the template.
+* First, a file reference in the format `<MODULE>/<TEMPLATE_NAME>` that specifies the template file to use.
+* Second, a hash of variable names and values to pass to the template.
 
-To avoid cramming all our variables into the epp() function, we'll put them in a variable called $pasture_config_hash just before the file resource.
+To avoid cramming all our variables into the epp\(\) function, we'll put them in a variable called $pasture\_config\_hash just before the file resource.
 
 ```ruby
 class pasture {
@@ -508,7 +508,7 @@ class pasture {
 
 Now that that's set, we can repeat the process for the service unit file.
 
-```shell
+```text
  vim pasture/templates/pasture.service.epp
 ```
 
@@ -530,7 +530,7 @@ Add your parameters tag and comment to the beginning of the file. Set the `--con
 
 Now return to your init.pp manifest.
 
-```shell
+```text
  vim pasture/manifests/init.pp
 ```
 
@@ -579,7 +579,7 @@ A well-written module in Puppet should let you customize all its important varia
 
 ### Writing a parameterized class
 
-A class's parameters are defined as a comma-separated list of parameter name and default value pairs ($parameter_name = default_value,). These parameter value pairs are enclosed in parentheses ((...)) between the class name and the opening curly bracket ({) that begins the body of the class. For readability, multiple parameters should be listed one per line, for example:
+A class's parameters are defined as a comma-separated list of parameter name and default value pairs \($parameter\_name = default\_value,\). These parameter value pairs are enclosed in parentheses \(\(...\)\) between the class name and the opening curly bracket \({\) that begins the body of the class. For readability, multiple parameters should be listed one per line, for example:
 
 ```ruby
  class class_name (
@@ -613,7 +613,7 @@ Now that your class has parameters, let's see how these parameters are set.
 
 Until now, you've been using include to declare the class as part of your node classification in the site.pp manifest. This include function declares a class without explicitly setting any parameters, allowing any parameters in the class to use their default values. Any parameters without defaults take the special undef value.
 
-To declare a class with specific parameters, use the resource-like class declaration. As the name suggests, the syntax for a resource-like class declaration is very similar to a resource declaration. It consists of the keyword class followed by a set of curly braces ({...}) containing the class name with a colon (:) and a list of parameters and values. Any values left out in this declaration are set to the defaults defined within the class, or undef if no default is set.
+To declare a class with specific parameters, use the resource-like class declaration. As the name suggests, the syntax for a resource-like class declaration is very similar to a resource declaration. It consists of the keyword class followed by a set of curly braces \({...}\) containing the class name with a colon \(:\) and a list of parameters and values. Any values left out in this declaration are set to the defaults defined within the class, or undef if no default is set.
 
 ```ruby
  class { 'class_name':
@@ -630,11 +630,11 @@ Now let's go ahead and use a resource-like class declaration to customize the pa
 
 Open your site.pp manifest.
 
-```shell
+```text
  vim /etc/puppetlabs/code/environments/production/manifests/site.pp
 ```
 
-And modify your node definition for pasture.puppet.vm to include a resource-like class declaration. We'll set the default_character parameter to the string 'cow', and leave the other two parameters unset, letting them take their default values.
+And modify your node definition for pasture.puppet.vm to include a resource-like class declaration. We'll set the default\_character parameter to the string 'cow', and leave the other two parameters unset, letting them take their default values.
 
 ```ruby
  node 'pasture.puppet.vm' {
@@ -650,7 +650,7 @@ Notice that with your class parameters set up, all the necessary configuration f
 
 You can access a standard set of facts with the facter command. Adding the -p flag will include any custom facts that you may have installed on the Puppet master and synchronized with the agent during the pluginsync step of a Puppet run. We'll pass this facter -p command to less so you can scroll through the output in your terminal.
 
-```shell
+```text
 facter -p | less
 facter -p os
 facter -p os.family
@@ -675,7 +675,7 @@ All facts are automatically made available within your manifests. You can access
  }
 ```
 
-The `$facts` hash and top-level (unstructured) facts are automatically loaded as variables into any template.
+The `$facts` hash and top-level \(unstructured\) facts are automatically loaded as variables into any template.
 
 ### Conditional Statements
 
@@ -701,7 +701,7 @@ Simplified to show only the values we're concerned with, the conditional stateme
  }
 ```
 
-Here, the $apache_name variable is set to either httpd or apache2 depending on the value of the $::osfamily fact. Elsewhere in the module, you'll find a package resource that uses this $apache_name variable to set its name parameter.
+Here, the $apache\_name variable is set to either httpd or apache2 depending on the value of the $::osfamily fact. Elsewhere in the module, you'll find a package resource that uses this $apache\_name variable to set its name parameter.
 
 ```ruby
  package { 'httpd':
@@ -715,18 +715,16 @@ Conditional statements return different values or execute different blocks of co
 
 Puppet supports a few different ways of implementing conditional logic:
 
-- if statements,
-- unless statements,
-- case statements, and
-- selectors.
+* if statements,
+* unless statements,
+* case statements, and
+* selectors.
 
 Because the same concept underlies these different forms of conditional logic available in Puppet, we'll only cover the if statement in the tasks for this quest. Once you have a good understanding of how to implement if statements, we'll leave you with descriptions of the other forms and some notes on when you may find them useful.
 
 An if statement includes a condition followed by a block of Puppet code that will only be executed if that condition evaluates as true. Optionally, an if statement can also include any number of elsif clauses and an else clause.
 
-If the if condition fails, Puppet moves on to the elsif condition (if one exists).
-If both the if and elsif conditions fail, Puppet will execute the code in the else clause (if one exists).
-If all the conditions fail, and there is no else block, Puppet will do nothing and move on.
+If the if condition fails, Puppet moves on to the elsif condition \(if one exists\). If both the if and elsif conditions fail, Puppet will execute the code in the else clause \(if one exists\). If all the conditions fail, and there is no else block, Puppet will do nothing and move on.
 
 ```ruby
    if ($sinatra_server == 'thin') or ($sinatra_server == 'mongrel')  {
@@ -744,45 +742,36 @@ For those who put a high premium on vetted code and active maintenance, the Forg
 
 ## Puppet Master
 
-- Best way to learn puppet is to download [Puppet Learning VM](https://puppet.com/download-learning-vm) and perform the quests.
-
-- Enable the [Puppet platform on APT](https://puppet.com/docs/puppet/latest/puppet_platform.html#task-383)
-
-- Basically visit [Puppet Repo](https://apt.puppetlabs.com/) and choose latest puppet server release for your operating system. I currently run Debian 9 stretch, so for me it's [Xenial](https://apt.puppetlabs.com/puppet6-release-xenial.deb)
-
-- Setup the permanent IP address using /etc/network/interfaces
+* Best way to learn puppet is to download [Puppet Learning VM](https://puppet.com/download-learning-vm) and perform the quests.
+* Enable the [Puppet platform on APT](https://puppet.com/docs/puppet/latest/puppet_platform.html#task-383)
+* Basically visit [Puppet Repo](https://apt.puppetlabs.com/) and choose latest puppet server release for your operating system. I currently run Debian 9 stretch, so for me it's [Xenial](https://apt.puppetlabs.com/puppet6-release-xenial.deb)
+* Setup the permanent IP address using /etc/network/interfaces
 
 ## Install PuppetServer
 
-```shell
+```text
  cd /tmp; wget https://apt.puppetlabs.com/puppet6-release-xenial.deb --no-check-certificate; dpkg -i /tmp/puppet6-release-xenial.deb; apt-get update; apt-get install puppetserver; /opt/puppetlabs/bin/puppetserver ca setup; systemctl start puppetserver; apt-get install locate man vim
 ```
 
-We would utilise `razor <https://github.com/puppetlabs/razor-server>`_to do most of the automatic provision.
+We would utilise `razor <https://github.com/puppetlabs/razor-server>`\_to do most of the automatic provision.
 
-`Installation Step of razor-server <https://github.com/puppetlabs/razor-server/wiki/Installation>`_
+`Installation Step of razor-server <https://github.com/puppetlabs/razor-server/wiki/Installation>`\_
 
 1. Database setup : Install puppetlabs-postgresql
 
 ::
 
- class { 'postgresql::globals':
-   manage_package_repo => true,
-   version             => '9.2',
- }->
+class { 'postgresql::globals': manage\_package\_repo =&gt; true, version =&gt; '9.2', }-&gt;
 
- class { 'postgresql::server': }
+class { 'postgresql::server': }
 
- postgresql::server::db { 'razor':
-   user     => 'razor',
-   password => postgresql_password('razor', 'secret'),
- }
+postgresql::server::db { 'razor': user =&gt; 'razor', password =&gt; postgresql\_password\('razor', 'secret'\), }
 
 ## Bolt
 
 Bolt is an open-source remote task runner; connects directly to remote nodes with SSH or WinRM without any agent installation on the target box. Can be used to automate tasks that you need to perform on your infrastructure on an ad hoc basis, such as troubleshooting, deploying an application, stopping and starting services, and upgrading a database schema.
 
-```shell
+```text
  bolt --help | more
  Usage: bolt <subcommand> <action> [options]
 
@@ -803,3 +792,4 @@ Bolt is an open-source remote task runner; connects directly to remote nodes wit
  Display:
          --format FORMAT              Output format to use: human or json
 ```
+

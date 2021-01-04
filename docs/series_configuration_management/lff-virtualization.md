@@ -1,11 +1,12 @@
-# HomeLab-Notes
+# LFF-Virtualization
 
-## OpenWrt
+## HomeLab-Notes
+
+### OpenWrt
 
 Let's say that you have a router running OpenWrt, however it requires MAC Spoofing. One of the way to do it is by logging into it and performing
 
-```shell
-
+```text
  root@OpenWrt:~# ifconfig eth1 down
  root@OpenWrt:~# ifconfig eth1 hw ether XX:XX:XX:XX:XX:XX
  root@OpenWrt:~# ifconfig eth1 up
@@ -33,43 +34,40 @@ Edit `/etc/init.d/clonemac`
 
 Make the script executable, then we can change the MAC address simply by this:
 
-```shell
-
+```text
  root@OpenWrt:~# /etc/init.d/clonemac start
 ```
 
 To execute the script automatically on system boot, we need to enable it:
 
-```shell
+```text
  root@OpenWrt:~# /etc/init.d/clonemac enable
 ```
 
 This will create a symbolic link to the clonemac script in /etc/rc.d. Reboot the router and you will find the new MAC address be automatically used.
 
-## KVM Virtualisation
+### KVM Virtualisation
 
-- Install Debian Minimal : No GUI?
-- [Install KVM](https://wiki.debian.org/KVM#Installation)
-- [Set IPTables DROP everything on INPUT, allow SSH](https://upcloud.com/community/tutorials/configure-iptables-debian/)
+* Install Debian Minimal : No GUI?
+* [Install KVM](https://wiki.debian.org/KVM#Installation)
+* [Set IPTables DROP everything on INPUT, allow SSH](https://upcloud.com/community/tutorials/configure-iptables-debian/)
+* [Install OpenvSwitch](https://docs.openvswitch.org/en/latest/intro/install/distributions/#debian)
+* Setup a very basic network using [KVM OpenvSwitch](http://docs.openvswitch.org/en/latest/howto/kvm/). Here We are creating a bridge br0 and then adding the ethernet port to the bridge. Basically, the interface would get a DHCP ip ?? -- This would probably break your network as we would add eth0/ethernet interface to the br0 and routing has to be routed via br0. change default gw etc.
+* So, flush the IP of the ethernet device by
 
-- [Install OpenvSwitch](https://docs.openvswitch.org/en/latest/intro/install/distributions/#debian)
-
-- Setup a very basic network using [KVM OpenvSwitch](http://docs.openvswitch.org/en/latest/howto/kvm/). Here We are creating a bridge br0 and then adding the ethernet port to the bridge. Basically, the interface would get a DHCP ip ?? -- This would probably break your network as we would add eth0/ethernet interface to the br0 and routing has to be routed via br0. change default gw etc.
-- So, flush the IP of the ethernet device by
-
-  ```shell
+  ```text
   ip addr flush dev eth0
   ```
 
   And also flush all the routes
-  
-  ```shell
+
+  ```text
   ip route flush all ( it would remove all the routes) --!!
   ```
 
   Now, we can do
 
-  ```shell
+  ```text
   dhclient br0
   ```
 
@@ -77,11 +75,11 @@ This will create a symbolic link to the clonemac script in /etc/rc.d. Reboot the
 
 or we can do it like
 
-https://forum.netgate.com/topic/122148/installing-pfsense-on-kvm-with-openvswitch-a-somewhat-complete-guide
+[https://forum.netgate.com/topic/122148/installing-pfsense-on-kvm-with-openvswitch-a-somewhat-complete-guide](https://forum.netgate.com/topic/122148/installing-pfsense-on-kvm-with-openvswitch-a-somewhat-complete-guide)
 
 Edit /etc/network/interfaces
 
-```shell
+```text
  source /etc/network/interfaces.d/*
 
  # The loopback network interface
@@ -103,13 +101,13 @@ Edit /etc/network/interfaces
 
 and
 
-```shell
+```text
  sudo ovs-vsctl add-port OVSBridge <physical interface=""> tag=100 trunk=200 && sudo reboot now</physical>
 ```
 
 This will add the port to the OVS, and you will lose all connectivity. This will also reboot the server. After reboot, it should come back with the IP above. If it doesn't, grab a keyboard, plug it in the server and try to figure out why…
 
-### Virsh
+#### Virsh
 
 virt-install is a command line tool for creating new KVM , Xen, or Linux container guests using the "libvirt" hypervisor management library.
 
@@ -119,26 +117,27 @@ We can run VM using either non-root user or root user.
 
 If we are using non-root user and defining
 
-```
+```text
  --connect=CONNECT
 ```
 
 Connect to a non-default hypervisor. The default connection is chosen based on the following rules:
 
-If running on a host with the Xen kernel (checks against /proc/xen)
+If running on a host with the Xen kernel \(checks against /proc/xen\)
 
-```
+```text
  xen
 ```
 
-If running on a bare metal kernel as root (needed for KVM installs)
+If running on a bare metal kernel as root \(needed for KVM installs\)
 
-```
+```text
  qemu:///system
 ```
+
 If running on a bare metal kernel as non-root
 
-```
+```text
  qemu:///session
 ```
 
@@ -146,7 +145,7 @@ We first tried with running as non-root, however, having permission error while 
 
 We can also use virt-manager
 
-```shell
+```text
  virt-manager --connect 'qemu+ssh://username@hostname/system'
  system for root
  session for non-root
@@ -154,7 +153,7 @@ We can also use virt-manager
 
 Defining VirtualSwitch Network in XML format
 
-```shell
+```text
  vi /tmp/ovs-network.xml
  <network>
  <name>ovs-network</name>
@@ -164,7 +163,7 @@ Defining VirtualSwitch Network in XML format
  </network>
 ```
 
-```shell
+```text
  virsh net-define /tmp/ovs-network.xml
  Network ovs-network defined from /tmp/ovs-network.xml
 
@@ -175,7 +174,7 @@ Defining VirtualSwitch Network in XML format
  Network ovs-network marked as autostarted
 ```
 
-```shell
+```text
  virsh net-list
   Name                 State      Autostart     Persistent
  ----------------------------------------------------------
@@ -185,31 +184,31 @@ Defining VirtualSwitch Network in XML format
 
 [Follow libvirt](http://docs.openvswitch.org/en/latest/howto/libvirt/>)
 
-#### Creating VM
+**Creating VM**
 
 With Openvswitch serving as a bridge with default bridge named ovs-br0 VM can be created by either defining the network like above XML file above
 
-```shell
+```text
  virt-install --connect=qemu:///system --name PuppetServer --memory=4096 --vcpus=1 --cdrom=/media/bitvijays/ISO/debian-9.8.0-amd64-DVD-1.iso --os-variant=OS_VARIANT --disk size=50 --graphics vnc,password="password",listen=0.0.0.0 --network=network:ovs-network
 ```
 
-Log files for ovs (openvswitch) are kept under the folder `/var/log/openvswitch`
+Log files for ovs \(openvswitch\) are kept under the folder `/var/log/openvswitch`
 
-```shell
+```text
  virt-install --connect=qemu:///system --name PuppetServer --memory=4096 --vcpus=1 --cdrom=/media/bitvijays/ISO/debian-9.8.0-amd64-DVD-1.iso --os-variant=OS_VARIANT --disk size=50 --graphics vnc,password="password",listen=0.0.0.0 --network=bridge:ovs-br0,model=virtio,virtualport_type=openvswitch
 ```
 
 //Extra-args doesn't work with cdrom and location
 
-```shell
+```text
 virt-install --connect=qemu:///system --name PuppetServer4 --memory=4096 --vcpus=1 --location http://ftp.uk.debian.org/debian/dists/stable/main/installer-amd64/ --os-variant=OS_VARIANT --disk size=50 --graphics vnc,password="password",listen=0.0.0.0 --network=bridge:ovs-br0,model=virtio,virtualport_type=openvswitch --extra-args="auto=true locale=en_GB priority=critical hostname=puppet01 url=http://192.168.1.51:8001/debian_preseed.cfg"
 ```
 
 Hostname can't be full domain name, it has to with dot.
 
-OS_VARIANT can be found by using osinfo-query
+OS\_VARIANT can be found by using osinfo-query
 
-```shell
+```text
  apt-get install  libosinfo-bin
  # List all operating systems
   $ osinfo-query os
@@ -219,11 +218,11 @@ OS_VARIANT can be found by using osinfo-query
    centos-6.1           | CentOS 6.1 ...
 ```
 
-##### General Options
+**General Options**
 
 General configuration parameters that apply to all types of guest installs.
 
-```
+```text
  -n NAME , --name=NAME : Name of the new guest virtual machine instance. This must be unique amongst all guests known to the hypervisor on the connection, including those not currently active. To re-define an existing guest, use the virsh(1) tool to shut it down ('virsh shutdown') & delete ('virsh undefine') it prior to running "virt-install".
 -r MEMORY , --ram=MEMORY : Memory to allocate for guest instance in megabytes. If the hypervisor does not have enough free memory, it is usual for it to automatically take memory away from the host operating system to satisfy this allocation.
 --arch=ARCH : Request a non-native CPU architecture for the guest virtual machine. If omitted, the host CPU architecture will be used in the guest.
@@ -232,9 +231,9 @@ General configuration parameters that apply to all types of guest installs.
 --description : Human readable text description of the virtual machine. This will be stored in the guests XML configuration for access by other applications.
 ```
 
-##### Installation Method options
+**Installation Method options**
 
-```
+```text
  -c CDROM , --cdrom=CDROM : File or device use as a virtual CD-ROM device for fully virtualized guests. It can be path to an ISO image, or to a CDROM device. It can also be a URL from which to fetch/access a minimal boot ISO image. The URLs take the same format as described for the "--location" argument. If a cdrom has been specified via the "--disk" option, and neither "--cdrom" nor any other install option is specified, the "--disk" cdrom is used as the install media.
 
  -l LOCATION , --location=LOCATION : Distribution tree installtion source. virt-install can recognize certain distribution trees and fetches a bootable kernel/initrd pair to launch the install.
@@ -264,10 +263,9 @@ With libvirt 0.9.4 or later, network URL installs work for remote connections. v
  Use '--os-variant list' to see the full OS list
 ```
 
-##### Storage Configuration
+**Storage Configuration**
 
-```
-
+```text
  --disk=DISKOPTS : Specifies media to use as storage for the guest, with various options. The general format of a disk string is --disk opt1=val1,opt2=val2,...
  To specify media, the command can either be: --disk /some/storage/path,opt1=val1 or explicitly specify one of the following arguments:
  path A path to some storage media to use, existing or not. Existing media can be a file or block device. If installing on a remote host, the existing media must be shared as a libvirt storage volume.
@@ -279,17 +277,17 @@ With libvirt 0.9.4 or later, network URL installs work for remote connections. v
  --filesystem /source/on/host,/target/point/in/guest Which will work for recent QEMU and linux guest OS or LXC containers. For QEMU , the target point is just a mounting hint in sysfs, so will not be automatically mounted.
 
  --nodisks Request a virtual machine without any local disk storage, typically used for running 'Live CD ' images or installing to network storage (iSCSI or NFS root).
- ```
-
-##### Networking Configuration
-
 ```
+
+**Networking Configuration**
+
+```text
  -w NETWORK , --network=NETWORK,opt1=val1,opt2=val2 : Connect the guest to the host network. The value for "NETWORK" can take one of 3 formats:
- 
+
  bridge=BRIDGE : Connect to a bridge device in the host called "BRIDGE". Use this option if the host has static networking config & the guest requires full outbound and inbound connectivity to/from the LAN . Also use this if live migration will be used with this guest.
- 
+
  network=NAME : Connect to a virtual network in the host called "NAME". Virtual networks can be listed, created, deleted using the "virsh" command line tool. In an unmodified install of "libvirt" there is usually a virtual network with a name of "default". Use a virtual network if the host has dynamic networking (eg NetworkManager), or using wireless. The guest will be NATed to the LAN by whichever connection is active.
- 
+
  user : Connect to the LAN using SLIRP . Only use this if running a QEMU guest as an unprivileged user. This provides a very limited form of NAT. If this option is omitted a single NIC will be created in the guest. If there is a bridge device in the host with a physical interface enslaved, that will be used for connectivity. Failing that, the virtual network called "default" will be used. This option can be specified multiple times to setup more than one NIC .
 
  Other available options are:
@@ -303,11 +301,11 @@ With libvirt 0.9.4 or later, network URL installs work for remote connections. v
  Request a virtual machine without any network interfaces.
 ```
 
-##### Graphics Configuration
+**Graphics Configuration**
 
 If no graphics option is specified, "virt-install" will default to '--graphics vnc' if the DISPLAY environment variable is set, otherwise '--graphics none' is used.
 
-```
+```text
  --graphics TYPE ,opt1=arg1,opt2=arg2,... Specifies the graphical display configuration. This does not configure any virtual hardware, just how the guest's graphical display can be accessed. Typically the user does not need to specify this option, virt-install will try and choose a useful default, and launch a suitable connection.
 
  General format of a graphical string is
@@ -332,9 +330,9 @@ If no graphics option is specified, "virt-install" will default to '--graphics v
  --noautoconsole : Don't automatically try to connect to the guest console. The default behaviour is to launch a VNC client to display the graphical console, or to run the "virsh" "console" command to display the text console. Use of this parameter will disable this behaviour.
 ```
 
-##### Device Options
+**Device Options**
 
-```
+```text
 --host-device=HOSTDEV
 Attach a physical host device to the guest. Some example values for HOSTDEV:
 --host-device pci_0000_00_1b_0
@@ -347,9 +345,9 @@ USB by vendor, product (via lsusb).
 PCI device (via lspci).
 ```
 
-##### Miscellaneous Options
+**Miscellaneous Options**
 
-```
+```text
  --autostart
  Set the autostart flag for a domain. This causes the domain to be started on host boot up.
  --print-xml
@@ -372,9 +370,9 @@ PCI device (via lspci).
  Print debugging information to the terminal when running the install process. The debugging information is also stored in "$HOME/.virtinst/virt-install.log" even if this parameter is omitted.
 ```
 
-## VirtualBox
+### VirtualBox
 
-```shell
+```text
  VBoxManage.exe createvm --name Debian_Puppet --ostype Debian_64 --register
 
  VBoxManage.exe createmedium disk --filename "C:\Users\u_bitvijays\VirtualBox VMs\Debian_Puppet\Debian_Puppet.vdi" --size 40000
@@ -392,67 +390,56 @@ PCI device (via lspci).
  VBoxManage modifyvm "Debian_Puppet" --nic2 hostonly
 
  VBoxManage modifyvm "Debian_Puppet" --hostonlyadapter2 vboxnet0
- ```
+```
 
-In the Debian Preseed file ( C:\Program Files\Oracle\VirtualBox\UnattendedTemplates )
+In the Debian Preseed file \( C:\Program Files\Oracle\VirtualBox\UnattendedTemplates \)
 
 Add the below line
 
-```
+```text
  ##bitvijays
 
  d-i mirror/http/hostname string ftp.uk.debian.org
  d-i mirror/http/directory string /debian
 ```
 
-# Puppet Master
+## Puppet Master
 
-- Best way to learn puppet is to download [Puppet Learning VM](https://puppet.com/download-learning-vm) and perform the quests.
+* Best way to learn puppet is to download [Puppet Learning VM](https://puppet.com/download-learning-vm) and perform the quests.
+* Enable the [Puppet platform on APT](https://puppet.com/docs/puppet/latest/puppet_platform.html#task-383)
+* Basically visit [Puppet Repo](https://apt.puppetlabs.com/) and choose latest puppet server release for your operating system. I currently run Debian 9 stretch, so for me it's [Xenial](https://apt.puppetlabs.com/puppet6-release-xenial.deb)
+* Setup the permanent IP address using /etc/network/interfaces
 
-- Enable the [Puppet platform on APT](https://puppet.com/docs/puppet/latest/puppet_platform.html#task-383)
+### Install PuppetServer
 
-- Basically visit [Puppet Repo](https://apt.puppetlabs.com/) and choose latest puppet server release for your operating system. I currently run Debian 9 stretch, so for me it's [Xenial](https://apt.puppetlabs.com/puppet6-release-xenial.deb)
-
-- Setup the permanent IP address using /etc/network/interfaces
-
-## Install PuppetServer
-
-```shell
+```text
  cd /tmp; wget https://apt.puppetlabs.com/puppet6-release-xenial.deb --no-check-certificate; dpkg -i /tmp/puppet6-release-xenial.deb; apt-get update; apt-get install puppetserver; /opt/puppetlabs/bin/puppetserver ca setup; systemctl start puppetserver; apt-get install locate man vim
 ```
 
-We would utilise `razor <https://github.com/puppetlabs/razor-server>`_to do most of the automatic provision.
+We would utilise `razor <https://github.com/puppetlabs/razor-server>`\_to do most of the automatic provision.
 
-`Installation Step of razor-server <https://github.com/puppetlabs/razor-server/wiki/Installation>`_
+`Installation Step of razor-server <https://github.com/puppetlabs/razor-server/wiki/Installation>`\_
 
 1. Database setup : Install puppetlabs-postgresql
 
 ::
 
- class { 'postgresql::globals':
-   manage_package_repo => true,
-   version             => '9.2',
- }->
+class { 'postgresql::globals': manage\_package\_repo =&gt; true, version =&gt; '9.2', }-&gt;
 
- class { 'postgresql::server': }
+class { 'postgresql::server': }
 
- postgresql::server::db { 'razor':
-   user     => 'razor',
-   password => postgresql_password('razor', 'secret'),
- }
+postgresql::server::db { 'razor': user =&gt; 'razor', password =&gt; postgresql\_password\('razor', 'secret'\), }
 
-Puppet
-======
+## Puppet
 
-Bolt
-----
+### Bolt
 
 Bolt is an open-source remote task runner; connects directly to remote nodes with SSH or WinRM without any agent installation on the target box. Can be used to automate tasks that you need to perform on your infrastructure on an ad hoc basis, such as troubleshooting, deploying an application, stopping and starting services, and upgrading a database schema.
 
-```shell
+```text
  bolt --help | more
  Usage: bolt <subcommand> <action> [options]
- 
+
  Available subcommands:
   bolt command run <command>       Run a command remotely
   bolt file upload <src> <dest>    Upload a local file
@@ -470,3 +457,4 @@ Bolt is an open-source remote task runner; connects directly to remote nodes wit
  Display:
          --format FORMAT              Output format to use: human or json
 ```
+
